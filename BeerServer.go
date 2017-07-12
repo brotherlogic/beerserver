@@ -55,6 +55,6 @@ func main() {
 	server := Init()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
 	server.PrepServer()
-	server.RegisterServer("beer", false)
+	server.RegisterServer("beerserver", false)
 	server.Serve()
 }
