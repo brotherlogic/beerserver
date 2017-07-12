@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package beer;
+
+message Empty {}
+
+message Beer {
+  int64 id = 1;
+  int64 drink_date = 2;
+  string size = 3;
+}
+
+message Cellar {
+  string name = 1;
+  repeated Beer beers = 2;
+}
+
+message BeerCellar {
+  	string name = 1;
+  	int64 syncTime = 2;
+  	string untappdKey = 3;
+  	string untappdSecret = 4;
+    repeated Cellar cellars = 5;
+}
+
+service BeerCellarService {
+  rpc AddBeer(Beer) returns (Cellar) {};
+}
