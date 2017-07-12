@@ -20,8 +20,8 @@ func GetTotalFreeSlots(cellar *pb.BeerCellar) (int, int) {
 }
 
 // Sync syncs with untappd
-func Sync(cellar *pb.BeerCellar, fetcher httpResponseFetcher, converter responseConverter) {
-	drunk := GetRecentDrinks(fetcher, converter, cellar.SyncTime)
+func Sync(u *Untappd, cellar *pb.BeerCellar, fetcher httpResponseFetcher, converter responseConverter) {
+	drunk := u.GetRecentDrinks(fetcher, converter, cellar.SyncTime)
 	log.Printf("Found these: %v\n", drunk)
 	for _, val := range drunk {
 		log.Printf("Removing %v from cellar\n", val)

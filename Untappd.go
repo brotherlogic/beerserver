@@ -14,8 +14,11 @@ import "time"
 
 import pb "github.com/brotherlogic/beer/proto"
 
-var untappdKey string
-var untappdSecret string
+//Untappd holds the untappd details
+type Untappd struct {
+	untappdID     string
+	untappdSecret string
+}
 
 var beerMap map[int]string
 
@@ -47,11 +50,6 @@ func (converter mainConverter) Convert(response *http.Response) ([]byte, error) 
 
 type httpResponseFetcher interface {
 	Fetch(url string) (*http.Response, error)
-}
-type mainFetcher struct{}
-
-func (fetcher mainFetcher) Fetch(url string) (*http.Response, error) {
-	return http.Get(url)
 }
 
 // Search finds beers in the cache that match blah
@@ -110,11 +108,11 @@ func SaveCache(folder string) {
 	}
 }
 
-func getBeerPage(fetcher httpResponseFetcher, converter responseConverter, id int) string {
+func (u *Untappd) getBeerPage(fetcher httpResponseFetcher, converter responseConverter, id int) string {
 	url := "https://api.untappd.com/v4/beer/info/BID?client_id=CLIENTID&client_secret=CLIENTSECRET&compact=true"
 	url = strings.Replace(url, "BID", strconv.Itoa(id), 1)
-	url = strings.Replace(url, "CLIENTID", untappdKey, 1)
-	url = strings.Replace(url, "CLIENTSECRET", untappdSecret, 1)
+	url = strings.Replace(url, "CLIENTID", u.untappdID, 1)
+	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
 
 	response, err := fetcher.Fetch(url)
 
@@ -132,11 +130,11 @@ func getBeerPage(fetcher httpResponseFetcher, converter responseConverter, id in
 	return "Failed to retrieve " + strconv.Itoa(id)
 }
 
-func getVenuePage(fetcher httpResponseFetcher, converter responseConverter, id int) string {
+func (u *Untappd) getVenuePage(fetcher httpResponseFetcher, converter responseConverter, id int) string {
 	url := "https://api.untappd.com/v4/venue/info/VID?client_id=CLIENTID&client_secret=CLIENTSECRET"
 	url = strings.Replace(url, "VID", strconv.Itoa(id), 1)
-	url = strings.Replace(url, "CLIENTID", untappdKey, 1)
-	url = strings.Replace(url, "CLIENTSECRET", untappdSecret, 1)
+	url = strings.Replace(url, "CLIENTID", u.untappdID, 1)
+	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
 
 	response, err := fetcher.Fetch(url)
 
@@ -211,15 +209,16 @@ func convertPageToDrinks(page string, unmarshaller unmarshaller) ([]pb.Beer, err
 }
 
 // GetRecentDrinks Gets the most recent drinks from untappd
-func GetRecentDrinks(fetcher httpResponseFetcher, converter responseConverter, date int64) []int64 {
+func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter responseConverter, date int64) []int64 {
 	var unmarshaller unmarshaller = mainUnmarshaller{}
 
 	var ret []int64
 
-	text := getVenuePage(fetcher, converter, 2194560)
+	text := u.getVenuePage(fetcher, converter, 2194560)
 	drinks, _ := convertPageToDrinks(text, unmarshaller)
 
 	for _, k := range drinks {
+		log.Printf("READ %v", k)
 		if date < k.DrinkDate {
 			ret = append(ret, k.Id)
 		}
@@ -229,18 +228,14 @@ func GetRecentDrinks(fetcher httpResponseFetcher, converter responseConverter, d
 }
 
 // GetBeerName Determines the name of the beer from the id
-func GetBeerName(id int) string {
+func (u *Untappd) GetBeerName(id int, fetcher httpResponseFetcher, converter responseConverter, unmarshaller unmarshaller) string {
 
 	//Check the cache
 	if val, ok := beerMap[id]; ok {
 		return val
 	}
 
-	var fetcher httpResponseFetcher = mainFetcher{}
-	var converter responseConverter = mainConverter{}
-	var unmarshaller unmarshaller = mainUnmarshaller{}
-	text := getBeerPage(fetcher, converter, id)
-
+	text := u.getBeerPage(fetcher, converter, id)
 	name := convertPageToName(text, unmarshaller)
 	beerMap[id] = name
 	return name
