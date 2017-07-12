@@ -14,7 +14,7 @@ before_install:
   fi
 script:
 - fgt golint ./...
-- $HOME/gopath/bin/goveralls -service=travis-ci -ignore=BeerServer.go -package github.com/brotherlogic/beer
+- $HOME/gopath/bin/goveralls -service=travis-ci -ignore=BeerServer.go -package github.com/brotherlogic/beerserver
 env:
   global:
   - secure: OnKbz575AJPmjw3/p/m5D9P5TDXrbyKzC1WwOMjVxB6yzyCwnAN/aIJw0nf4Grbje8pq/ifuVYkN2kNo6r375ikGG7q+Av2fxE7+8sSRGrU18VPimkSWajMjVzhzhDW22N0pav9mtJxrgi/PHIMgZLU3HiQDH+2ipx85nCErwoEc2AQGfHa0Ib+TYNgTVdw4RjG0rWdBGAEl8Q4TuA/PFMQhL9fWIw1WVPKALwQ6relhsoZyFwmnzrtnCbN6jEW+OlbpD+MImEe5Hxi27vWeUeXONwrIv+O8yvmDEyz0WjttMWLUMhzK12xp30QZHqT0CNYczFG0ClxYQ6E+ZhnBuczCP0RfNFzE8ksJR7y5o3+IPbnFjDU96fYNwvXwRdTnQ+bTzPIL4WvWgcWh10wYThIeAJZ40wDw9dZcbuf7qECGNW/3d0VtZUyWN14akJWBcWozKqbe19pOh6VmRhGoB8GaLVjD3dvV/XXoQGmdE2Uk9eOo9pTgXMTPzMLRsDWEmyCiu9QU4Bp/l5RvyS5OW1B02IIi3u+p5IIhNXT5wWv+faIGgkFCW2nZs4z/FtqX9L1V9TV/6/WzUgtfcUKaAkoZUEo+KrN9P7UAlN1ieKtydOQeysToTcEE0iTY586aHrl/rjszcOg6TeOFmrBJ8rcj5iansg/WklRu15U2RSc=

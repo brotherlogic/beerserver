@@ -88,12 +88,13 @@ func TestAddToCellars(t *testing.T) {
 func TestSyncAndSave(t *testing.T) {
 	mine := NewBeerCellar("testsync", "")
 	AddBeer(mine, "1234", 12342, "bomber")
-	AddBeer(mine, "791939", 12343, "bomber")
+	//This one should be pulled from the venue list
+	AddBeer(mine, "1770600", 12343, "bomber")
 	AddBeer(mine, "1234", 12344, "bomber")
 	mine.SyncTime = 12345
 
-	Sync(mine, blankVenuePageFetcher{}, venuePageConverter{})
-
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	Sync(u, mine, fileFetcher{}, mainConverter{})
 	if Size(mine) != 2 {
 		t.Errorf("Sync remove has failed(%v): %v\n", Size(mine), mine)
 	}

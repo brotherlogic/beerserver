@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
@@ -14,6 +15,12 @@ import (
 type Server struct {
 	*goserver.GoServer
 	cellar *pb.BeerCellar
+}
+
+type mainFetcher struct{}
+
+func (fetcher mainFetcher) Fetch(url string) (*http.Response, error) {
+	return http.Get(url)
 }
 
 // DoRegister Registers this server
