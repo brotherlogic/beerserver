@@ -8,7 +8,7 @@ import (
 	"github.com/brotherlogic/keystore/client"
 	"google.golang.org/grpc"
 
-	pb "github.com/brotherlogic/beer/proto"
+	pb "github.com/brotherlogic/beerserver/proto"
 )
 
 //Server main server type
@@ -42,6 +42,26 @@ func (s *Server) Mote(master bool) error {
 func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error) {
 	cel := AddBuilt(s.cellar, beer)
 	return cel, nil
+}
+
+//GetBeer gets a beer from the cellar
+func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
+	var bestBeer *pb.Beer
+
+	for _, cellar := range s.cellar.GetCellars() {
+		b1 := cellar.GetBeers()[0]
+		if b1 != nil && b1.Size == beer.Size {
+			if bestBeer == nil {
+				bestBeer = b1
+			} else {
+				if bestBeer.DrinkDate > b1.DrinkDate {
+					bestBeer = b1
+				}
+			}
+		}
+	}
+
+	return bestBeer, nil
 }
 
 //Init builds a server

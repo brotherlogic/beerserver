@@ -5,7 +5,7 @@ import "strconv"
 import "strings"
 import "time"
 
-import pb "github.com/brotherlogic/beer/proto"
+import pb "github.com/brotherlogic/beerserver/proto"
 
 // ByDate used to sort beer
 type ByDate []*pb.Beer
