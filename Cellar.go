@@ -5,7 +5,7 @@ import (
 	"log"
 	"sort"
 
-	pb "github.com/brotherlogic/beer/proto"
+	pb "github.com/brotherlogic/beerserver/proto"
 )
 
 import "math"

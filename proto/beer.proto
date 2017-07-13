@@ -25,4 +25,5 @@ message BeerCellar {
 
 service BeerCellarService {
   rpc AddBeer(Beer) returns (Cellar) {};
+  rpc GetBeer(Beer) returns (Beer) {};
 }

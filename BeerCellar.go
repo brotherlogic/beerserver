@@ -6,7 +6,7 @@ import "strconv"
 
 import "time"
 
-import pb "github.com/brotherlogic/beer/proto"
+import pb "github.com/brotherlogic/beerserver/proto"
 
 // GetTotalFreeSlots Computes the number of free slots for each beer type
 func GetTotalFreeSlots(cellar *pb.BeerCellar) (int, int) {

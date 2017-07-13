@@ -12,7 +12,7 @@ import "strconv"
 import "strings"
 import "time"
 
-import pb "github.com/brotherlogic/beer/proto"
+import pb "github.com/brotherlogic/beerserver/proto"
 
 //Untappd holds the untappd details
 type Untappd struct {
