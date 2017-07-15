@@ -22,6 +22,11 @@ type Untappd struct {
 	c             responseConverter
 }
 
+//GetUntappd builds a untappd retriever
+func GetUntappd(id, secret string) *Untappd {
+	return &Untappd{untappdID: id, untappdSecret: secret, u: mainUnmarshaller{}, f: mainFetcher{}, c: mainConverter{}}
+}
+
 var beerMap map[int]string
 
 // Match a match when doing a search

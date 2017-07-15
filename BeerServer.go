@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"time"
@@ -24,6 +25,9 @@ type Server struct {
 const (
 	//TOKEN Where we store the cellar
 	TOKEN = "/github.com/brotherlogic/beerserver/cellar"
+
+	//UTTOKEN where we store the untapped token
+	UTTOKEN = "/github.com/brotherlogic/beerserver/untappd"
 )
 
 type mainFetcher struct{}
@@ -101,6 +105,24 @@ func main() {
 	server := Init()
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
+
+	var id = flag.String("token", "", "Untappd id")
+	var secret = flag.String("secret", "", "Untappd secret")
+	flag.Parse()
+
+	if len(*id) > 0 {
+		server.KSclient.Save(UTTOKEN, &pb.Token{Id: *id, Secret: *secret})
+	}
+
+	tType := &pb.Token{}
+	tResp, err := server.KSclient.Read(UTTOKEN, tType)
+
+	if err != nil {
+		log.Fatalf("Unable to read token: %v", err)
+	}
+
+	sToken := tResp.(*pb.Token)
+	server.ut = GetUntappd(sToken.Id, sToken.Secret)
 
 	bType := &pb.BeerCellar{}
 	bResp, err := server.KSclient.Read(TOKEN, bType)
