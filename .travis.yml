@@ -13,7 +13,7 @@ before_install:
 - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover;
   fi
 script:
-- fgt golint ./...
+- fgt golint $(find . | grep .go$ | grep -v beer.pb.go)
 - $HOME/gopath/bin/goveralls -service=travis-ci -ignore=BeerServer.go -package github.com/brotherlogic/beerserver
 env:
   global:

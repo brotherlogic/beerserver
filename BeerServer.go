@@ -1,11 +1,11 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -25,7 +25,7 @@ func (fetcher mainFetcher) Fetch(url string) (*http.Response, error) {
 
 // DoRegister Registers this server
 func (s *Server) DoRegister(server *grpc.Server) {
-	//Nothing to register
+	pb.RegisterBeerCellarServiceServer(server, s)
 }
 
 // ReportHealth Determines if the server is healthy

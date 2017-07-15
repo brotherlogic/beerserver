@@ -12,7 +12,7 @@ type ByDate []*pb.Beer
 
 func (a ByDate) Len() int           { return len(a) }
 func (a ByDate) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByDate) Less(i, j int) bool { return a[i].GetDrinkDate() < a[j].GetDrinkDate() }
+func (a ByDate) Less(i, j int) bool { return a[i].DrinkDate < a[j].DrinkDate }
 
 // NewBeer Builds a new beer
 func NewBeer(line string) (pb.Beer, error) {
