@@ -32,7 +32,7 @@ func Sync(u *Untappd, cellar *pb.BeerCellar, fetcher httpResponseFetcher, conver
 }
 
 // RemoveBeer removes a beer from the cellar
-func RemoveBeer(cellar *pb.BeerCellar, id int64) {
+func RemoveBeer(cellar *pb.BeerCellar, id int64) *pb.Beer {
 	cellarIndex := -1
 	cellarCost := -1
 	for i, c := range cellar.GetCellars() {
@@ -47,8 +47,10 @@ func RemoveBeer(cellar *pb.BeerCellar, id int64) {
 
 	if cellarIndex >= 0 {
 		log.Printf("Removing %v from %v\n", id, cellarIndex)
-		Remove(cellar.Cellars[cellarIndex], id)
+		return Remove(cellar.Cellars[cellarIndex], id)
 	}
+
+	return nil
 }
 
 // CountBeers returns the number of beers of a given id in the cellar

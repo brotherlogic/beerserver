@@ -19,6 +19,34 @@ func GetTestCellar() Server {
 	return s
 }
 
+func TestRemoveFromCellarTop(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
+	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 200})
+
+	beer, err := s.GetBeer(context.Background(), &pb.Beer{Size: "bomber"})
+	if err != nil {
+		t.Fatalf("Unable to get beer")
+	}
+	if beer.DrinkDate != 100 {
+		t.Errorf("Wrong beer returned: %v", beer)
+	}
+
+	_, err = s.RemoveBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber"})
+	if err != nil {
+		t.Fatalf("Error in removing beer: %v", err)
+	}
+
+	beer, err = s.GetBeer(context.Background(), &pb.Beer{Size: "bomber"})
+	if err != nil {
+		t.Fatalf("Unable to get beer second time around")
+	}
+	if beer.DrinkDate != 200 {
+		t.Errorf("Wrong beer returned second: %v", beer)
+	}
+
+}
+
 func TestGetCellar(t *testing.T) {
 	s := GetTestCellar()
 	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
