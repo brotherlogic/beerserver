@@ -10,6 +10,13 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+//RemoveBeer removes a beer from the cellar
+func (s *Server) RemoveBeer(ctx context.Context, in *pb.Beer) (*pb.Beer, error) {
+	beer := RemoveBeer(s.cellar, in.Id)
+	s.saveCellar()
+	return beer, nil
+}
+
 //GetCellar gets a single cellar
 func (s *Server) GetCellar(ctx context.Context, in *pb.Cellar) (*pb.Cellar, error) {
 	needWrite := false
