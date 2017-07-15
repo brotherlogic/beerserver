@@ -19,6 +19,21 @@ func GetTestCellar() Server {
 	return s
 }
 
+func TestGetName(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
+	s.CacheName(1, "madeupname")
+
+	beer, err := s.GetName(context.Background(), &pb.Beer{Id: 1})
+	if err != nil {
+		t.Fatalf("Error in getting name: %v", err)
+	}
+
+	if name.Name != "madeupname" {
+		t.Errorf("Wrong name returned: %v", beer)
+	}
+}
+
 func TestRemoveFromCellarTop(t *testing.T) {
 	s := GetTestCellar()
 	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
