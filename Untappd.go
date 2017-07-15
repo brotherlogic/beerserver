@@ -1,12 +1,11 @@
 package main
 
-import "bufio"
 import "encoding/json"
 import "errors"
-import "fmt"
+
 import "log"
 import "net/http"
-import "os"
+
 import "io/ioutil"
 import "strconv"
 import "strings"
@@ -18,6 +17,9 @@ import pb "github.com/brotherlogic/beerserver/proto"
 type Untappd struct {
 	untappdID     string
 	untappdSecret string
+	u             unmarshaller
+	f             httpResponseFetcher
+	c             responseConverter
 }
 
 var beerMap map[int]string
@@ -70,42 +72,6 @@ func cacheBeer(id int, name string) {
 
 func init() {
 	beerMap = make(map[int]string)
-}
-
-// LoadCache - loads the cache from a given file
-func LoadCache(folder string) {
-	fileName := folder + "/untappd.metadata"
-
-	file, err := os.Open(fileName)
-
-	if err != nil {
-		log.Printf("Error loading cache: %v - %v\n", fileName, err)
-	} else {
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			line := scanner.Text()
-			elems := strings.Split(line, "~")
-			val, _ := strconv.Atoi(elems[0])
-			beerMap[val] = elems[1]
-		}
-	}
-}
-
-// SaveCache - saves the cache to a given file
-func SaveCache(folder string) {
-	os.Mkdir(folder, 0777)
-	fileName := folder + "/untappd.metadata"
-	file, err := os.Create(fileName)
-
-	defer file.Close()
-
-	if err == nil {
-		for k, v := range beerMap {
-			fmt.Fprintf(file, "%v~%v\n", k, v)
-		}
-	} else {
-		log.Printf("Failed opening file %v - %v\n", fileName, err)
-	}
 }
 
 func (u *Untappd) getBeerPage(fetcher httpResponseFetcher, converter responseConverter, id int) string {
@@ -228,15 +194,8 @@ func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter respons
 }
 
 // GetBeerName Determines the name of the beer from the id
-func (u *Untappd) GetBeerName(id int, fetcher httpResponseFetcher, converter responseConverter, unmarshaller unmarshaller) string {
-
-	//Check the cache
-	if val, ok := beerMap[id]; ok {
-		return val
-	}
-
-	text := u.getBeerPage(fetcher, converter, id)
-	name := convertPageToName(text, unmarshaller)
-	beerMap[id] = name
+func (u *Untappd) GetBeerName(id int64) string {
+	text := u.getBeerPage(u.f, u.c, int(id))
+	name := convertPageToName(text, u.u)
 	return name
 }

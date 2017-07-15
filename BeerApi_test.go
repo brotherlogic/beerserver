@@ -16,7 +16,38 @@ func GetTestCellar() Server {
 	s.GoServer.KSclient = *keystoreclient.GetTestClient("testcellar")
 	s.SkipLog = true
 
+	s.ut = GetTestUntappd()
+
 	return s
+}
+
+func TestGetName(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
+	s.cacheName(1, "madeupname")
+
+	beer, err := s.GetName(context.Background(), &pb.Beer{Id: 1})
+	if err != nil {
+		t.Fatalf("Error in getting name: %v", err)
+	}
+
+	if beer.Name != "madeupname" {
+		t.Errorf("Wrong name returned: %v", beer)
+	}
+}
+
+func TestGetNameOutOfCache(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100})
+
+	beer, err := s.GetName(context.Background(), &pb.Beer{Id: 7936})
+	if err != nil {
+		t.Fatalf("Error in getting name: %v", err)
+	}
+
+	if beer.Name != "Firestone Walker Brewing Company - Parabola" {
+		t.Errorf("Wrong name returned: %v", beer)
+	}
 }
 
 func TestRemoveFromCellarTop(t *testing.T) {

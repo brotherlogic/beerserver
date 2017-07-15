@@ -16,7 +16,9 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	cellar *pb.BeerCellar
+	cellar    *pb.BeerCellar
+	nameCache map[int64]string
+	ut        *Untappd
 }
 
 const (
@@ -28,6 +30,10 @@ type mainFetcher struct{}
 
 func (fetcher mainFetcher) Fetch(url string) (*http.Response, error) {
 	return http.Get(url)
+}
+
+func (s *Server) cacheName(id int64, name string) {
+	s.nameCache[id] = name
 }
 
 // DoRegister Registers this server
@@ -87,7 +93,7 @@ func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
 
 //Init builds a server
 func Init() Server {
-	s := Server{&goserver.GoServer{}, &pb.BeerCellar{}}
+	s := Server{&goserver.GoServer{}, &pb.BeerCellar{}, make(map[int64]string), &Untappd{}}
 	return s
 }
 
