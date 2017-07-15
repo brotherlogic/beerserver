@@ -1,10 +1,11 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"log"
 	"strconv"
+
+	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 )
