@@ -108,7 +108,7 @@ func GetEmptyCellarCount(cellar *pb.BeerCellar) int {
 }
 
 // NewBeerCellar creates new beer cellar
-func NewBeerCellar(name string, dirname string) *pb.BeerCellar {
+func NewBeerCellar(name string) *pb.BeerCellar {
 	bc := &pb.BeerCellar{
 		Name:     name,
 		SyncTime: time.Now().Unix(),

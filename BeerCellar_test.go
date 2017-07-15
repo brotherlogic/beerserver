@@ -1,9 +1,14 @@
 package main
 
-import "testing"
+import (
+	"log"
+	"testing"
+
+	pb "github.com/brotherlogic/beerserver/proto"
+)
 
 func TestCountBeers(t *testing.T) {
-	mine := NewBeerCellar("testaddbydays", "")
+	mine := NewBeerCellar("testaddbydays")
 	AddBeerByDays(mine, "1234", "01/01/16", "bomber", "14", "5")
 	AddBeerByDays(mine, "2234", "01/01/16", "small", "14", "7")
 
@@ -16,8 +21,17 @@ func TestCountBeers(t *testing.T) {
 	}
 }
 
+func TestAddToEmpty(t *testing.T) {
+	mine := NewBeerCellar("testempty")
+	log.Printf("Built new cellar")
+	c := AddBuilt(mine, &pb.Beer{Id: 234, Size: "bomber"})
+	if c == nil {
+		t.Errorf("Error adding beer to empty cellar")
+	}
+}
+
 func TestCountFreeSlots(t *testing.T) {
-	mine := NewBeerCellar("testfreeslots", "")
+	mine := NewBeerCellar("testfreeslots")
 	AddBeerByDays(mine, "1234", "01/01/06", "bomber", "14", "5")
 
 	largeFree, smallFree := GetTotalFreeSlots(mine)
@@ -30,7 +44,7 @@ func TestCountFreeSlots(t *testing.T) {
 }
 
 func TestAddByDate(t *testing.T) {
-	mine := NewBeerCellar("testaddbydays", "")
+	mine := NewBeerCellar("testaddbydays")
 	AddBeerByDays(mine, "1234", "01/01/16", "bomber", "14", "5")
 
 	if Size(mine) != 5 {
@@ -47,7 +61,7 @@ func TestAddByDate(t *testing.T) {
 }
 
 func TestListBeers(t *testing.T) {
-	mine := NewBeerCellar("testlistbeers", "")
+	mine := NewBeerCellar("testlistbeers")
 	AddBeer(mine, "1234", 7254, "bomber")
 	AddBeer(mine, "1234", 7256, "bomber")
 
@@ -58,7 +72,7 @@ func TestListBeers(t *testing.T) {
 }
 
 func TestAddByYear(t *testing.T) {
-	mine := NewBeerCellar("testaddbydays", "")
+	mine := NewBeerCellar("testaddbydays")
 	AddBeerByYears(mine, "1234", "01/01/16", "bomber", "1", "5")
 
 	if Size(mine) != 5 {
@@ -76,7 +90,7 @@ func TestAddByYear(t *testing.T) {
 }
 
 func TestAddToCellars(t *testing.T) {
-	mine1 := NewBeerCellar("testaddcellar", "")
+	mine1 := NewBeerCellar("testaddcellar")
 	AddBeer(mine1, "1234", 1233, "bomber")
 	AddBeer(mine1, "1234", 1234, "bomber")
 
@@ -86,7 +100,7 @@ func TestAddToCellars(t *testing.T) {
 }
 
 func TestSyncAndSave(t *testing.T) {
-	mine := NewBeerCellar("testsync", "")
+	mine := NewBeerCellar("testsync")
 	AddBeer(mine, "1234", 12342, "bomber")
 	//This one should be pulled from the venue list
 	AddBeer(mine, "1770600", 12343, "bomber")
@@ -105,7 +119,7 @@ func TestSyncAndSave(t *testing.T) {
 }
 
 func TestRemoveFromCellar(t *testing.T) {
-	mine := NewBeerCellar("testremovefromcellar", "")
+	mine := NewBeerCellar("testremovefromcellar")
 	AddBeer(mine, "1234", 1234, "bomber")
 	AddBeer(mine, "1235", 1235, "bomber")
 	AddBeer(mine, "1234", 1236, "bomber")
@@ -118,7 +132,7 @@ func TestRemoveFromCellar(t *testing.T) {
 }
 
 func TestAddNoBeer(t *testing.T) {
-	mine := NewBeerCellar("test", "")
+	mine := NewBeerCellar("test")
 	AddBeer(mine, "-1", 1234, "bomber")
 
 	if Size(mine) != 0 {
@@ -133,14 +147,14 @@ func TestMin(t *testing.T) {
 }
 
 func TestGetNumberOfCellars(t *testing.T) {
-	bc := NewBeerCellar("test", "")
+	bc := NewBeerCellar("test")
 	if GetNumberOfCellars(bc) != 8 {
 		t.Errorf("Wrong number of cellars: %d\n", GetNumberOfCellars(bc))
 	}
 }
 
 func TestAddToCellar(t *testing.T) {
-	cellar := NewBeerCellar("test", "")
+	cellar := NewBeerCellar("test")
 	beer1, _ := NewBeer("1234~01/01/16~bomber")
 	beer2, _ := NewBeer("1234~01/02/16~bomber")
 	beer3, _ := NewBeer("1234~01/03/16~bomber")
