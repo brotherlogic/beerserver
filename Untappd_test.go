@@ -56,10 +56,15 @@ func (fetcher blankVenuePageFetcher) Fetch(url string) (*http.Response, error) {
 	return &http.Response{}, nil
 }
 
+func GetTestUntappd() *Untappd {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret", f: fileFetcher{}, c: mainConverter{}, u: mainUnmarshaller{}}
+	return u
+}
+
 func TestGetBeerName(t *testing.T) {
 	log.Printf("Running TESTGETBEERNAME maybe")
-	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
-	beerName := u.GetBeerName(7936, fileFetcher{}, mainConverter{}, mainUnmarshaller{})
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret", f: fileFetcher{}, c: mainConverter{}, u: mainUnmarshaller{}}
+	beerName := u.GetBeerName(7936)
 	if beerName != "Firestone Walker Brewing Company - Parabola" {
 		t.Errorf("Beer name %q is not firestone, parabola\n", beerName)
 	}
@@ -119,6 +124,17 @@ func TestGetBeerName200Fail(t *testing.T) {
 	}
 }
 
+func TestGetBeerNameBadUnmarshal(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	var fetcher = fileFetcher{}
+	var converter = mainConverter{}
+	beerPage := u.getBeerPage(fetcher, converter, 0)
+	name := convertPageToName(beerPage, stubFailUnmarshaller{})
+	if strings.Contains(name, "Firestone") {
+		t.Errorf("Get name worked: %v", name)
+	}
+}
+
 func TestGetVenuePage(t *testing.T) {
 	var fetcher = fileFetcher{}
 	var converter = mainConverter{}
@@ -148,43 +164,6 @@ func TestGetRecentDrinks(t *testing.T) {
 
 	if !found {
 		t.Errorf("Beer drunk was not found: %v\n", drinks)
-	}
-}
-
-func TestGetBeerFromCache(t *testing.T) {
-	beerMap = make(map[int]string)
-	u := &Untappd{untappdID: "blah", untappdSecret: "blah"}
-	beerName := u.GetBeerName(7936, fileFetcher{}, mainConverter{}, mainUnmarshaller{})
-	if strings.Contains(beerName, "Firestone") {
-		t.Errorf("Beer has been retrieved despite no caching / credentials\n")
-	}
-
-	//Insert the beer into the cache
-	cacheBeer(7936, "Firestone Walker Brewing Company - Parabola")
-
-	beerName = u.GetBeerName(7936, fileFetcher{}, mainConverter{}, mainUnmarshaller{})
-	if !strings.Contains(beerName, "Firestone") {
-		t.Errorf("Beer name cannot be retrieved despite caching")
-	}
-}
-
-func TestCacheFail(t *testing.T) {
-	cacheBeer(7936, "Firestone Walker Brewing Company - Parabola")
-	SaveCache("madeup_folder/makeup_folder2")
-	LoadCache("madeup_folder/makeup_folder2")
-}
-
-func TestGetBeerFromSavedCache(t *testing.T) {
-	cacheBeer(7936, "Firestone Walker Brewing Company - Parabola")
-	SaveCache("testing_cache")
-
-	beerMap = make(map[int]string)
-	LoadCache("testing_cache")
-
-	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
-	beerName := u.GetBeerName(7936, fileFetcher{}, mainConverter{}, mainUnmarshaller{})
-	if !strings.Contains(beerName, "Firestone") {
-		t.Errorf("Cache reload failed\n")
 	}
 }
 

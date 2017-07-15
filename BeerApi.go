@@ -17,6 +17,20 @@ func (s *Server) RemoveBeer(ctx context.Context, in *pb.Beer) (*pb.Beer, error) 
 	return beer, nil
 }
 
+//GetName gets the name of the beer
+func (s *Server) GetName(ctx context.Context, in *pb.Beer) (*pb.Beer, error) {
+	if val, ok := s.nameCache[in.Id]; ok {
+		in.Name = val
+		return in, nil
+	}
+
+	name := s.ut.GetBeerName(in.Id)
+	s.nameCache[in.Id] = name
+
+	in.Name = name
+	return in, nil
+}
+
 //GetCellar gets a single cellar
 func (s *Server) GetCellar(ctx context.Context, in *pb.Cellar) (*pb.Cellar, error) {
 	needWrite := false
