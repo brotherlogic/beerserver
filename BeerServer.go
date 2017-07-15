@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/brotherlogic/goserver"
@@ -106,12 +107,13 @@ func main() {
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
 
-	var id = flag.String("token", "", "Untappd id")
+	var id = flag.String("id", "", "Untappd id")
 	var secret = flag.String("secret", "", "Untappd secret")
 	flag.Parse()
 
 	if len(*id) > 0 {
 		server.KSclient.Save(UTTOKEN, &pb.Token{Id: *id, Secret: *secret})
+		os.Exit(1)
 	}
 
 	tType := &pb.Token{}
