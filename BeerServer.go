@@ -71,29 +71,9 @@ func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error)
 	return cel, nil
 }
 
-//GetBeer gets a beer from the cellar
-func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
-	var bestBeer *pb.Beer
-
-	log.Printf("HERE %v", s.cellar)
-
-	for _, cellar := range s.cellar.GetCellars() {
-		log.Printf("CELLAR: %v", cellar)
-		if len(cellar.GetBeers()) > 0 {
-			b1 := cellar.GetBeers()[0]
-			if b1 != nil && b1.Size == beer.Size {
-				if bestBeer == nil {
-					bestBeer = b1
-				} else {
-					if bestBeer.DrinkDate > b1.DrinkDate {
-						bestBeer = b1
-					}
-				}
-			}
-		}
-	}
-
-	return bestBeer, nil
+//GetUntappd builds a untappd retriever
+func GetUntappd(id, secret string) *Untappd {
+	return &Untappd{untappdID: id, untappdSecret: secret, u: mainUnmarshaller{}, f: mainFetcher{}, c: mainConverter{}}
 }
 
 //Init builds a server
