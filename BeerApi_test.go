@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 	"testing"
 
@@ -47,6 +48,26 @@ func TestGetNameOutOfCache(t *testing.T) {
 
 	if beer.Name != "Firestone Walker Brewing Company - Parabola" {
 		t.Errorf("Wrong name returned: %v", beer)
+	}
+}
+
+func TestGetBeerBeRandom(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
+	s.AddBeer(context.Background(), &pb.Beer{Id: 2, Size: "bomber", DrinkDate: 200})
+
+	idSum := int64(0)
+	for i := 0; i < 10; i++ {
+		beer, err := s.GetBeer(context.Background(), &pb.Beer{Size: "bomber"})
+		if err != nil {
+			t.Fatalf("Error getting beer: %v", err)
+		}
+		log.Printf("Got beer: %v", beer)
+		idSum += beer.Id
+	}
+
+	if idSum == 10 || idSum == 20 {
+		t.Errorf("All the beers have the same id!")
 	}
 }
 
