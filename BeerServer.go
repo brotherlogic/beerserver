@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -103,13 +104,19 @@ func Init() Server {
 }
 
 func main() {
+	var id = flag.String("id", "", "Untappd id")
+	var secret = flag.String("secret", "", "Untappd secret")
+	var quiet = flag.Bool("quiet", true, "Show all output")
+	flag.Parse()
+
+	if *quiet {
+		log.SetFlags(0)
+		log.SetOutput(ioutil.Discard)
+	}
+
 	server := Init()
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
-
-	var id = flag.String("id", "", "Untappd id")
-	var secret = flag.String("secret", "", "Untappd secret")
-	flag.Parse()
 
 	if len(*id) > 0 {
 		server.KSclient.Save(UTTOKEN, &pb.Token{Id: *id, Secret: *secret})
