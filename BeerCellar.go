@@ -156,6 +156,11 @@ func AddBeer(cellar *pb.BeerCellar, id string, date int64, size string) {
 	}
 }
 
+func (s *Server) recacheBeer(b *pb.Beer) {
+	b.Name = s.ut.GetBeerName(b.Id)
+	s.saveCellar()
+}
+
 // Min returns the min of the parameters
 func Min(a int, b int) int {
 	if a > b {
