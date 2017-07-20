@@ -30,6 +30,29 @@ func TestAddToEmpty(t *testing.T) {
 	}
 }
 
+func TestRemoveFromFull(t *testing.T) {
+	mine := NewBeerCellar("testremovefromfull")
+
+	for i := 0; i < 20; i++ {
+		AddBuilt(mine, &pb.Beer{Size: "bomber", Id: int64(i + 2), DrinkDate: int64(i + 3)})
+	}
+
+	if len(mine.Cellars[0].Beers) != 20 {
+		t.Fatalf("Error in adding beers: %v", mine)
+	}
+
+	log.Printf("CELLAR: %v", mine)
+
+	IDToRemove := mine.Cellars[0].Beers[0].Id
+	RemoveBeer(mine, IDToRemove)
+
+	if len(mine.Cellars[0].Beers) != 19 {
+		t.Errorf("beer has not been removed: %v", mine)
+	}
+
+	log.Printf("NOWCELLAR: %v", mine)
+}
+
 func TestCountFreeSlots(t *testing.T) {
 	mine := NewBeerCellar("testfreeslots")
 	AddBeerByDays(mine, "1234", "01/01/06", "bomber", "14", "5")
