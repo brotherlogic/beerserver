@@ -41,12 +41,16 @@ func TestRemoveFromFull(t *testing.T) {
 		t.Fatalf("Error in adding beers: %v", mine)
 	}
 
+	log.Printf("CELLAR: %v", mine)
+
 	IDToRemove := mine.Cellars[0].Beers[0].Id
 	RemoveBeer(mine, IDToRemove)
 
 	if len(mine.Cellars[0].Beers) != 19 {
 		t.Errorf("beer has not been removed: %v", mine)
 	}
+
+	log.Printf("NOWCELLAR: %v", mine)
 }
 
 func TestCountFreeSlots(t *testing.T) {
