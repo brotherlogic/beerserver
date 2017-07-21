@@ -33,6 +33,21 @@ func TestGetNameOutOfCache(t *testing.T) {
 	}
 }
 
+func TestGetCellarWithNames(t *testing.T) {
+	s := GetTestCellar()
+	s.cellar.Cellars = append(s.cellar.Cellars, &pb.Cellar{Beers: make([]*pb.Beer, 0), Name: "cellar1"})
+	s.cellar.Cellars[0].Beers = append(s.cellar.Cellars[0].Beers, &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100})
+
+	cellar, err := s.GetCellar(context.Background(), &pb.Cellar{Name: "cellar1"})
+	if err != nil {
+		t.Errorf("Unable to pull cellar: %v", cellar)
+	}
+
+	if cellar.Beers[0].Name != "Firestone Walker Brewing Company - Parabola" {
+		t.Errorf("Cellar pull hasn't refreshed anemes: %v", cellar.Beers[0])
+	}
+}
+
 func TestRefreshBeerName(t *testing.T) {
 	s := GetTestCellar()
 	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100, Name: "This API key has reached their API limit for the hour. Please wait before making another call."})
