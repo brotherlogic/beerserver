@@ -63,6 +63,14 @@ func (s *Server) GetCellar(ctx context.Context, in *pb.Cellar) (*pb.Cellar, erro
 				s.saveCellar()
 				needWrite = false
 			}
+
+			//Ensure the beers are named
+			for _, beer := range cellar.Beers {
+				if beer.Name == "" {
+					s.recacheBeer(beer)
+				}
+			}
+
 			return cellar, nil
 		}
 	}

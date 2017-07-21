@@ -1,12 +1,14 @@
 package main
 
-import "log"
+import (
+	"log"
+	"strconv"
+	"strings"
 
-import "strconv"
+	pb "github.com/brotherlogic/beerserver/proto"
+)
 
 import "time"
-
-import pb "github.com/brotherlogic/beerserver/proto"
 
 // GetTotalFreeSlots Computes the number of free slots for each beer type
 func GetTotalFreeSlots(cellar *pb.BeerCellar) (int, int) {
@@ -157,8 +159,10 @@ func AddBeer(cellar *pb.BeerCellar, id string, date int64, size string) {
 }
 
 func (s *Server) recacheBeer(b *pb.Beer) {
-	b.Name = s.ut.GetBeerName(b.Id)
-	s.saveCellar()
+	if b.Name == "" || strings.Contains(b.Name, "their API limit") {
+		b.Name = s.ut.GetBeerName(b.Id)
+		s.saveCellar()
+	}
 }
 
 // Min returns the min of the parameters
