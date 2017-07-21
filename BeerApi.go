@@ -12,11 +12,20 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+//AddBeer adds a beer to the cellar
+func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error) {
+	log.Printf("CELLAR HERE = %v", s.cellar)
+	if beer.Name == "" {
+		beer.Name = s.ut.GetBeerName(beer.Id)
+	}
+	cel := AddBuilt(s.cellar, beer)
+	s.saveCellar()
+	return cel, nil
+}
+
 //GetBeer gets a beer from the cellar
 func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
-
 	var beers []*pb.Beer
-
 	for _, cellar := range s.cellar.GetCellars() {
 		log.Printf("CELLAR: %v", cellar)
 		for _, b := range cellar.GetBeers() {
@@ -26,7 +35,9 @@ func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
 		}
 	}
 
-	return beers[rand.Intn(len(beers))], nil
+	rBeer := beers[rand.Intn(len(beers))]
+	s.recacheBeer(rBeer)
+	return rBeer, nil
 }
 
 //RemoveBeer removes a beer from the cellar
@@ -34,20 +45,6 @@ func (s *Server) RemoveBeer(ctx context.Context, in *pb.Beer) (*pb.Beer, error) 
 	beer := RemoveBeer(s.cellar, in.Id)
 	s.saveCellar()
 	return beer, nil
-}
-
-//GetName gets the name of the beer
-func (s *Server) GetName(ctx context.Context, in *pb.Beer) (*pb.Beer, error) {
-	if val, ok := s.nameCache[in.Id]; ok {
-		in.Name = val
-		return in, nil
-	}
-
-	name := s.ut.GetBeerName(in.Id)
-	s.nameCache[in.Id] = name
-
-	in.Name = name
-	return in, nil
 }
 
 //GetCellar gets a single cellar

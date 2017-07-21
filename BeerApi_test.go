@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -22,32 +23,28 @@ func GetTestCellar() Server {
 	return s
 }
 
-func TestGetName(t *testing.T) {
+func TestGetNameOutOfCache(t *testing.T) {
 	s := GetTestCellar()
-	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
-	s.cacheName(1, "madeupname")
+	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100})
+	beer := s.cellar.Cellars[0].Beers[0]
 
-	beer, err := s.GetName(context.Background(), &pb.Beer{Id: 1})
-	if err != nil {
-		t.Fatalf("Error in getting name: %v", err)
-	}
-
-	if beer.Name != "madeupname" {
+	if beer.Name != "Firestone Walker Brewing Company - Parabola" {
 		t.Errorf("Wrong name returned: %v", beer)
 	}
 }
 
-func TestGetNameOutOfCache(t *testing.T) {
+func TestRefreshBeerName(t *testing.T) {
 	s := GetTestCellar()
-	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100})
+	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100, Name: "This API key has reached their API limit for the hour. Please wait before making another call."})
 
-	beer, err := s.GetName(context.Background(), &pb.Beer{Id: 7936})
+	beer, err := s.GetBeer(context.Background(), &pb.Beer{Size: "bomber"})
+
 	if err != nil {
-		t.Fatalf("Error in getting name: %v", err)
+		t.Fatalf("Error in Get beer: %v", err)
 	}
 
-	if beer.Name != "Firestone Walker Brewing Company - Parabola" {
-		t.Errorf("Wrong name returned: %v", beer)
+	if strings.Contains(beer.Name, "API") {
+		t.Errorf("Beer has not been renamed: %v", beer)
 	}
 }
 
@@ -74,17 +71,16 @@ func TestGetBeerBeRandom(t *testing.T) {
 func TestRemoveFromCellarTop(t *testing.T) {
 	s := GetTestCellar()
 	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
-	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 200})
+	s.AddBeer(context.Background(), &pb.Beer{Id: 2, Size: "bomber", DrinkDate: 200})
 
 	beer, err := s.GetBeer(context.Background(), &pb.Beer{Size: "bomber"})
 	if err != nil {
 		t.Fatalf("Unable to get beer")
 	}
-	if beer.DrinkDate != 100 {
-		t.Errorf("Wrong beer returned: %v", beer)
-	}
 
-	_, err = s.RemoveBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber"})
+	bID := beer.Id
+
+	_, err = s.RemoveBeer(context.Background(), &pb.Beer{Id: bID, Size: "bomber"})
 	if err != nil {
 		t.Fatalf("Error in removing beer: %v", err)
 	}
@@ -93,10 +89,9 @@ func TestRemoveFromCellarTop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to get beer second time around")
 	}
-	if beer.DrinkDate != 200 {
+	if beer.Id == bID {
 		t.Errorf("Wrong beer returned second: %v", beer)
 	}
-
 }
 
 func TestGetCellar(t *testing.T) {

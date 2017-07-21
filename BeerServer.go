@@ -10,7 +10,6 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -19,9 +18,8 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	cellar    *pb.BeerCellar
-	nameCache map[int64]string
-	ut        *Untappd
+	cellar *pb.BeerCellar
+	ut     *Untappd
 }
 
 const (
@@ -36,10 +34,6 @@ type mainFetcher struct{}
 
 func (fetcher mainFetcher) Fetch(url string) (*http.Response, error) {
 	return http.Get(url)
-}
-
-func (s *Server) cacheName(id int64, name string) {
-	s.nameCache[id] = name
 }
 
 // DoRegister Registers this server
@@ -64,14 +58,6 @@ func (s *Server) saveCellar() {
 	s.LogFunction("saveCellar", int32(time.Now().Sub(t).Nanoseconds()/1000000))
 }
 
-//AddBeer adds a beer to the cellar
-func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error) {
-	log.Printf("CELLAR HERE = %v", s.cellar)
-	cel := AddBuilt(s.cellar, beer)
-	s.saveCellar()
-	return cel, nil
-}
-
 //GetUntappd builds a untappd retriever
 func GetUntappd(id, secret string) *Untappd {
 	return &Untappd{untappdID: id, untappdSecret: secret, u: mainUnmarshaller{}, f: mainFetcher{}, c: mainConverter{}}
@@ -79,7 +65,7 @@ func GetUntappd(id, secret string) *Untappd {
 
 //Init builds a server
 func Init() Server {
-	s := Server{&goserver.GoServer{}, &pb.BeerCellar{}, make(map[int64]string), &Untappd{}}
+	s := Server{&goserver.GoServer{}, &pb.BeerCellar{}, &Untappd{}}
 	return s
 }
 
