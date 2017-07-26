@@ -69,6 +69,15 @@ func Init() Server {
 	return s
 }
 
+func (s *Server) runSync() {
+	for true {
+		time.Sleep(time.Hour)
+		if time.Now().Unix()-s.cellar.SyncTime > 12*60*60 {
+			Sync(s.ut, s.cellar)
+		}
+	}
+}
+
 func main() {
 	var id = flag.String("id", "", "Untappd id")
 	var secret = flag.String("secret", "", "Untappd secret")
@@ -115,5 +124,6 @@ func main() {
 	log.Printf("INIT CELLAR 1 %v", server.cellar)
 	server.Register = &server
 	server.RegisterServer("beerserver", false)
+	server.RegisterServingTask(server.runSync)
 	server.Serve()
 }
