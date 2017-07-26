@@ -184,7 +184,7 @@ func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter respons
 	drinks, _ := convertPageToDrinks(text, unmarshaller)
 
 	for _, k := range drinks {
-		log.Printf("READ %v", k)
+		log.Printf("READ %v (given %v)", k, date)
 		if date < k.DrinkDate {
 			ret = append(ret, k.Id)
 		}

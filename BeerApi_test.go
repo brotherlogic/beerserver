@@ -23,6 +23,23 @@ func GetTestCellar() Server {
 	return s
 }
 
+func TestGetDrunks(t *testing.T) {
+	s := GetTestCellar()
+
+	s.AddBeer(context.Background(), &pb.Beer{Id: 1770600, Size: "bomber", DrinkDate: 100})
+	s.cellar.SyncTime = 0
+	Sync(s.ut, s.cellar)
+
+	drunk, err := s.GetDrunk(context.Background(), &pb.Empty{})
+	if err != nil {
+		t.Fatalf("Error getting drunks: %v", err)
+	}
+
+	if len(drunk.Beers) != 1 {
+		t.Errorf("Beer list has come back empty: %v", drunk)
+	}
+}
+
 func TestGetNameOutOfCache(t *testing.T) {
 	s := GetTestCellar()
 	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100})

@@ -16,6 +16,10 @@ message Beer {
   string name = 4;
 }
 
+message BeerList {
+  repeated Beer beers = 1;
+}
+
 message Cellar {
   string name = 1;
   repeated Beer beers = 2;
@@ -36,4 +40,5 @@ service BeerCellarService {
   rpc GetBeer(Beer) returns (Beer) {};
   rpc GetCellar(Cellar) returns (Cellar) {};
   rpc RemoveBeer(Beer) returns (Beer) {};
+  rpc GetDrunk(Empty) returns (BeerList) {};
 }

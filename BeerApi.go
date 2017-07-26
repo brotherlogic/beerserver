@@ -23,6 +23,12 @@ func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error)
 	return cel, nil
 }
 
+//GetDrunk gets a list of beers drunk
+func (s *Server) GetDrunk(ctx context.Context, in *pb.Empty) (*pb.BeerList, error) {
+	list := &pb.BeerList{Beers: s.cellar.Drunk}
+	return list, nil
+}
+
 //GetBeer gets a beer from the cellar
 func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
 	var beers []*pb.Beer
