@@ -73,7 +73,9 @@ func (s *Server) runSync() {
 	for true {
 		time.Sleep(time.Hour)
 		if time.Now().Unix()-s.cellar.SyncTime > 12*60*60 {
+			t := time.Now()
 			Sync(s.ut, s.cellar)
+			s.LogFunction("Sync", int32(time.Now().Sub(t).Nanoseconds()/1000000))
 		}
 	}
 }
