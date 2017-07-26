@@ -27,7 +27,13 @@ func Sync(u *Untappd, cellar *pb.BeerCellar, fetcher httpResponseFetcher, conver
 	log.Printf("Found these: %v\n", drunk)
 	for _, val := range drunk {
 		log.Printf("Removing %v from cellar\n", val)
-		RemoveBeer(cellar, val)
+		rb := RemoveBeer(cellar, val)
+
+		if rb != nil {
+			log.Printf("Removed: %v", rb)
+			rb.DrinkDate = time.Now().Unix()
+			cellar.Drunk = append(cellar.Drunk, rb)
+		}
 	}
 
 	cellar.SyncTime = time.Now().Unix()
@@ -124,6 +130,8 @@ func NewBeerCellar(name string) *pb.BeerCellar {
 			Beers: make([]*pb.Beer, 0),
 		}
 	}
+
+	bc.Drunk = make([]*pb.Beer, 0)
 
 	return bc
 }
