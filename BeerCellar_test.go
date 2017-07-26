@@ -139,6 +139,14 @@ func TestSyncAndSave(t *testing.T) {
 	if mine.SyncTime == 12345 {
 		t.Errorf("Sync time was not updated")
 	}
+
+	if len(mine.Drunk) != 1 {
+		t.Fatalf("Drunk list was not updated")
+	}
+
+	if mine.Drunk[0].DrinkDate == 12343 {
+		t.Errorf("Drunk date is wrong: %v", mine.Drunk)
+	}
 }
 
 func TestRemoveFromCellar(t *testing.T) {

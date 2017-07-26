@@ -27,6 +27,7 @@ message BeerCellar {
   	string untappdKey = 3;
   	string untappdSecret = 4;
     repeated Cellar cellars = 5;
+    repeated Beer drunk = 6;
 }
 
 
@@ -34,5 +35,5 @@ service BeerCellarService {
   rpc AddBeer(Beer) returns (Cellar) {};
   rpc GetBeer(Beer) returns (Beer) {};
   rpc GetCellar(Cellar) returns (Cellar) {};
-    rpc RemoveBeer(Beer) returns (Beer) {};
+  rpc RemoveBeer(Beer) returns (Beer) {};
 }
