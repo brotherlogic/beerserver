@@ -130,8 +130,8 @@ func TestSyncAndSave(t *testing.T) {
 	AddBeer(mine, "1234", 12344, "bomber")
 	mine.SyncTime = 12345
 
-	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
-	Sync(u, mine, fileFetcher{}, mainConverter{})
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret", f: fileFetcher{}, c: mainConverter{}}
+	Sync(u, mine)
 	if Size(mine) != 2 {
 		t.Errorf("Sync remove has failed(%v): %v\n", Size(mine), mine)
 	}
