@@ -80,6 +80,20 @@ func TestRefreshBeerName(t *testing.T) {
 	}
 }
 
+func TestRefreshBeerNameFromCellar(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100, Name: "This API key has reached their API limit for the hour. Please wait before making another call."})
+
+	cellar, err := s.GetCellar(context.Background(), &pb.Cellar{Name: "cellar1"})
+	if err != nil {
+		log.Fatalf("Error in cellar pull: %v", err)
+	}
+
+	if strings.Contains(cellar.GetBeers()[0].Name, "API") {
+		t.Errorf("Error in pulling cellar: %v", cellar)
+	}
+}
+
 func TestGetBeerBeRandom(t *testing.T) {
 	s := GetTestCellar()
 	s.AddBeer(context.Background(), &pb.Beer{Id: 1, Size: "bomber", DrinkDate: 100})
