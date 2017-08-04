@@ -71,11 +71,14 @@ func Init() Server {
 
 func (s *Server) runSync() {
 	for true {
+		log.Printf("SLEEPING for 5 seconds")
 		time.Sleep(time.Hour)
-		if time.Now().Unix()-s.cellar.SyncTime > 12*60*60 {
+		if time.Now().Unix()-s.cellar.SyncTime > 12*6060 {
+			log.Printf("RUNNING SYNC")
 			t := time.Now()
 			Sync(s.ut, s.cellar)
 			s.LogFunction("Sync", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+			s.saveCellar()
 		}
 	}
 }
