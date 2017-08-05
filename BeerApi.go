@@ -35,6 +35,10 @@ func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
 	for _, cellar := range s.cellar.GetCellars() {
 		log.Printf("CELLAR: %v", cellar)
 		for _, b := range cellar.GetBeers() {
+			if b.Size == beer.Size && b.Staged {
+				return b, nil
+			}
+
 			if b.DrinkDate < time.Now().Unix() && b.Size == beer.Size {
 				beers = append(beers, b)
 			}
@@ -43,6 +47,8 @@ func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
 
 	rBeer := beers[rand.Intn(len(beers))]
 	s.recacheBeer(rBeer)
+	rBeer.Staged = true
+	s.saveCellar()
 	return rBeer, nil
 }
 
