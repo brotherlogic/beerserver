@@ -76,8 +76,12 @@ func (s *Server) runSync() {
 		if time.Now().Unix()-s.cellar.SyncTime > 12*6060 {
 			log.Printf("RUNNING SYNC")
 			t := time.Now()
-			Sync(s.ut, s.cellar)
-			s.LogFunction("Sync", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+			count := Sync(s.ut, s.cellar)
+			if count == 0 {
+				s.LogFunction("Sync-Nil", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+			} else {
+				s.LogFunction("Sync", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+			}
 			s.saveCellar()
 		}
 	}
