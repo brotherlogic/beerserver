@@ -25,6 +25,11 @@ func GetTotalFreeSlots(cellar *pb.BeerCellar) (int, int) {
 func Sync(u *Untappd, cellar *pb.BeerCellar) int {
 	drunk := u.GetRecentDrinks(u.f, u.c, cellar.SyncTime)
 	log.Printf("Found these: %v\n", drunk)
+
+	if len(drunk) == 0 {
+		return 0
+	}
+
 	for _, val := range drunk {
 		log.Printf("Removing %v from cellar\n", val)
 		rb := RemoveBeer(cellar, val)

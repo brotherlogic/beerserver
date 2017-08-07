@@ -122,6 +122,15 @@ func TestAddToCellars(t *testing.T) {
 	}
 }
 
+func TestSyncFail(t *testing.T) {
+	mine := NewBeerCellar("testsync")
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret", f: stubFailFetcher{}, c: mainConverter{}}
+	l := Sync(u, mine)
+	if l != 0 {
+		t.Errorf("Sync has not failed: %v", l)
+	}
+}
+
 func TestSyncAndSave(t *testing.T) {
 	mine := NewBeerCellar("testsync")
 	AddBeer(mine, "1234", 12342, "bomber")
