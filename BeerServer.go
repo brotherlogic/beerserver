@@ -48,6 +48,17 @@ func (s *Server) ReportHealth() bool {
 
 // Mote promotes this server
 func (s *Server) Mote(master bool) error {
+	if master {
+		bType := &pb.BeerCellar{}
+		bResp, err := s.KSclient.Read(TOKEN, bType)
+
+		if err != nil {
+			return err
+		}
+
+		s.cellar = bResp.(*pb.BeerCellar)
+	}
+
 	return nil
 }
 
@@ -122,7 +133,7 @@ func main() {
 	bResp, err := server.KSclient.Read(TOKEN, bType)
 
 	if err != nil {
-		log.Fatalf("Unable to read token: %v", err)
+		log.Fatalf("Unable to read cellar: %v", err)
 	}
 
 	nCellar := bResp.(*pb.BeerCellar)
