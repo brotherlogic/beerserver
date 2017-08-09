@@ -49,6 +49,7 @@ func (s *Server) ReportHealth() bool {
 // Mote promotes this server
 func (s *Server) Mote(master bool) error {
 	if master {
+		t := time.Now()
 		bType := &pb.BeerCellar{}
 		bResp, err := s.KSclient.Read(TOKEN, bType)
 
@@ -57,6 +58,7 @@ func (s *Server) Mote(master bool) error {
 		}
 
 		s.cellar = bResp.(*pb.BeerCellar)
+		s.LogFunction("Mote", int32(time.Now().Sub(t).Nanoseconds()/1000000))
 	}
 
 	return nil
