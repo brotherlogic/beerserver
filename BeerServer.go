@@ -87,7 +87,7 @@ func (s *Server) runSync() {
 		log.Printf("SLEEPING for 5 seconds")
 		time.Sleep(time.Minute)
 		log.Printf("LAST SYNC = %v -> %v vs %v", s.cellar.SyncTime, time.Now().Unix()-s.cellar.SyncTime, 12*60*60)
-		if time.Now().Unix()-s.cellar.SyncTime > 5*60 {
+		if time.Now().Unix()-s.cellar.SyncTime > 5*60 && s.Registry.GetMaster() {
 			log.Printf("RUNNING SYNC")
 			t := time.Now()
 			count := Sync(s.ut, s.cellar)
