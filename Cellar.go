@@ -46,9 +46,12 @@ func GetFreeSlots(cellar *pb.Cellar) (int, int) {
 func Remove(cellar *pb.Cellar, id int64) *pb.Beer {
 	removeIndex := -1
 	for i, v := range cellar.Beers {
-		if v.Id == id {
+		if v.Id == id && removeIndex < 0 {
 			removeIndex = i
-			break
+		}
+
+		if v.Id == id && v.Staged {
+			removeIndex = i
 		}
 	}
 
@@ -59,9 +62,15 @@ func Remove(cellar *pb.Cellar, id int64) *pb.Beer {
 
 // GetRemoveCost computes the cost of removing a beer from the cellar
 func GetRemoveCost(cellar *pb.Cellar, id int64) int {
+	for _, beer := range cellar.Beers {
+		if beer.Id == id && beer.Staged {
+			return 0
+		}
+	}
+
 	for i, beer := range cellar.Beers {
 		if beer.Id == id {
-			return i
+			return i + 1
 		}
 	}
 

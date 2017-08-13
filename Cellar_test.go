@@ -71,14 +71,14 @@ func TestRemoveCost(t *testing.T) {
 		t.Errorf("Removing non cellared beer is not less than zero: %v\n", GetRemoveCost(&mine, 1237))
 	}
 
-	if GetRemoveCost(&mine, 1234) != 0 {
+	if GetRemoveCost(&mine, 1234) != 1 {
 		t.Errorf("Remove cost is wrong (0): %v\n", GetRemoveCost(&mine, 1234))
 	}
-	if GetRemoveCost(&mine, 1235) != 1 {
-		t.Errorf("Remove cost is wrong (1): %v\n", GetRemoveCost(&mine, 1234))
+	if GetRemoveCost(&mine, 1235) != 2 {
+		t.Errorf("Remove cost is wrong (1): %v\n", GetRemoveCost(&mine, 1235))
 	}
-	if GetRemoveCost(&mine, 1236) != 2 {
-		t.Errorf("Remove cost is wrong (2): %v\n", GetRemoveCost(&mine, 1234))
+	if GetRemoveCost(&mine, 1236) != 3 {
+		t.Errorf("Remove cost is wrong (2): %v\n", GetRemoveCost(&mine, 1236))
 	}
 
 }
