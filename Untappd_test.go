@@ -61,12 +61,12 @@ func GetTestUntappd() *Untappd {
 	return u
 }
 
-func TestGetBeerName(t *testing.T) {
+func TestGetBeerDetails(t *testing.T) {
 	log.Printf("Running TESTGETBEERNAME maybe")
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret", f: fileFetcher{}, c: mainConverter{}, u: mainUnmarshaller{}}
-	beerName := u.GetBeerName(7936)
-	if beerName != "Firestone Walker Brewing Company - Parabola" {
-		t.Errorf("Beer name %q is not firestone, parabola\n", beerName)
+	beerName, abv := u.GetBeerDetails(7936)
+	if beerName != "Firestone Walker Brewing Company - Parabola" || abv != 14 {
+		t.Errorf("Beer name %q is not firestone, parabola\n or has the wrong abv (%v)", beerName, abv)
 	}
 }
 

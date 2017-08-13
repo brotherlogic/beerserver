@@ -15,8 +15,8 @@ import (
 //AddBeer adds a beer to the cellar
 func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error) {
 	log.Printf("CELLAR HERE = %v", s.cellar)
-	if beer.Name == "" {
-		beer.Name = s.ut.GetBeerName(beer.Id)
+	if beer.Name == "" || beer.GetAbv() == 0 {
+		beer.Name, beer.Abv = s.ut.GetBeerDetails(beer.Id)
 	}
 	cel := AddBuilt(s.cellar, beer)
 	s.saveCellar()
