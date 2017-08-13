@@ -45,7 +45,7 @@ func TestGetNameOutOfCache(t *testing.T) {
 	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100})
 	beer := s.cellar.Cellars[0].Beers[0]
 
-	if beer.Name != "Firestone Walker Brewing Company - Parabola" {
+	if beer.Name != "Firestone Walker Brewing Company - Parabola" || beer.Abv != 14 {
 		t.Errorf("Wrong name returned: %v", beer)
 	}
 }
@@ -60,7 +60,7 @@ func TestGetCellarWithNames(t *testing.T) {
 		t.Errorf("Unable to pull cellar: %v", cellar)
 	}
 
-	if cellar.Beers[0].Name != "Firestone Walker Brewing Company - Parabola" {
+	if cellar.Beers[0].Name != "Firestone Walker Brewing Company - Parabola" || cellar.Beers[0].Abv != 14 {
 		t.Errorf("Cellar pull hasn't refreshed anemes: %v", cellar.Beers[0])
 	}
 }

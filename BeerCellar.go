@@ -174,8 +174,8 @@ func AddBeer(cellar *pb.BeerCellar, id string, date int64, size string) {
 }
 
 func (s *Server) recacheBeer(b *pb.Beer) {
-	if b.Name == "" || strings.Contains(b.Name, "their API limit") {
-		b.Name = s.ut.GetBeerName(b.Id)
+	if b.Name == "" || strings.Contains(b.Name, "their API limit") || b.Abv == 0 {
+		b.Name, b.Abv = s.ut.GetBeerDetails(b.Id)
 		s.saveCellar()
 	}
 }

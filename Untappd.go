@@ -140,6 +140,30 @@ func convertPageToName(page string, unmarshaller unmarshaller) string {
 	return brewery["brewery_name"].(string) + " - " + beer["beer_name"].(string)
 }
 
+func convertPageToABV(page string, unmarshaller unmarshaller) float32 {
+	var mapper map[string]interface{}
+	err := unmarshaller.Unmarshal([]byte(page), &mapper)
+	if err != nil {
+		log.Printf("%q\n", err)
+		return -1
+	}
+
+	meta := mapper["meta"].(map[string]interface{})
+	metaCode := int(meta["code"].(float64))
+	if metaCode != 200 {
+		return -1
+	}
+
+	response := mapper["response"].(map[string]interface{})
+	beer := response["beer"].(map[string]interface{})
+	abv := beer["beer_abv"].(float64)
+	if err != nil {
+		log.Printf("Error converting abv: %v", err)
+		return -1
+	}
+	return float32(abv)
+}
+
 func convertPageToDrinks(page string, unmarshaller unmarshaller) ([]pb.Beer, error) {
 	log.Printf("RUNNING\n")
 
@@ -193,9 +217,10 @@ func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter respons
 	return ret
 }
 
-// GetBeerName Determines the name of the beer from the id
-func (u *Untappd) GetBeerName(id int64) string {
+// GetBeerDetails Determines the name of the beer from the id
+func (u *Untappd) GetBeerDetails(id int64) (string, float32) {
 	text := u.getBeerPage(u.f, u.c, int(id))
 	name := convertPageToName(text, u.u)
-	return name
+	abv := convertPageToABV(text, u.u)
+	return name, abv
 }
