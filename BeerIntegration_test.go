@@ -7,6 +7,32 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+func TestRemoveStagingBeer(t *testing.T) {
+	s := GetTestCellar()
+
+	for i := 0; i < 10; i++ {
+		s.AddBeer(context.Background(), &pb.Beer{Id: 1770600, Size: "bomber", DrinkDate: 100})
+	}
+	//Get and remove each - they should all be staged for removal
+	for i := 0; i < 10; i++ {
+		beer, err := s.GetBeer(context.Background(), &pb.Beer{Size: "bomber"})
+		if err != nil {
+			t.Fatalf("Error in getting beer: %v", err)
+		}
+		if beer.Id != 1770600 || !beer.Staged {
+			t.Fatalf("Got beer is incorrect: %v", beer)
+		}
+
+		beer, err = s.RemoveBeer(context.Background(), &pb.Beer{Id: 1770600, Staged: true})
+		if err != nil {
+			t.Fatalf("Error in removing beer: %v", err)
+		}
+		if beer.Id != 1770600 || !beer.Staged {
+			t.Fatalf("Removed beer is incorrect: %v", beer)
+		}
+	}
+}
+
 func TestStagingThing(t *testing.T) {
 	s := GetTestCellar()
 
