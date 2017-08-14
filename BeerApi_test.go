@@ -6,10 +6,38 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 	"github.com/brotherlogic/keystore/client"
 )
+
+func TestBanGetBad(t *testing.T) {
+	tn := time.Now()
+	ty := tn.Add(time.Hour * -24)
+
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 123, DrinkDate: 1, Size: "small"})
+	s.cellar.Drunk = append(s.cellar.Drunk, &pb.Beer{Id: 12345, DrinkDate: ty.Unix()})
+
+	beer, err := s.GetBeer(context.Background(), &pb.Beer{Size: "small"})
+	if err == nil {
+		t.Errorf("Get with previous beer should fail: %v", beer)
+	}
+}
+
+func TestBanGetGood(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 123, DrinkDate: 1, Size: "small"})
+
+	beer, err := s.GetBeer(context.Background(), &pb.Beer{Size: "small"})
+	if err != nil {
+		t.Errorf("Get with no history has failed: %v", err)
+	}
+	if beer.Id != 123 {
+		t.Errorf("Wrong beer returned: %v", beer)
+	}
+}
 
 func GetTestCellar() Server {
 	s := Init()
