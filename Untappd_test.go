@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -33,7 +32,6 @@ type fileFetcher struct{}
 func (fetcher fileFetcher) Fetch(url string) (*http.Response, error) {
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	data, err := os.Open("testdata/" + strippedURL)
-	log.Printf("Loading %v", "testdata/"+strippedURL)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +60,6 @@ func GetTestUntappd() *Untappd {
 }
 
 func TestGetBeerDetails(t *testing.T) {
-	log.Printf("Running TESTGETBEERNAME maybe")
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret", f: fileFetcher{}, c: mainConverter{}, u: mainUnmarshaller{}}
 	beerName, abv := u.GetBeerDetails(7936)
 	if beerName != "Firestone Walker Brewing Company - Parabola" || abv != 14 {
@@ -121,6 +118,17 @@ func TestGetBeerName200Fail(t *testing.T) {
 	name := convertPageToName(beerPage, mainUnmarshaller{})
 	if strings.Contains(name, "Firestone") {
 		t.Errorf("Get name worked: %v", name)
+	}
+}
+
+func TestGetBeerAbv200Fail(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	var fetcher = fileFetcher{}
+	var converter = mainConverter{}
+	beerPage := u.getBeerPage(fetcher, converter, 0)
+	abv := convertPageToABV(beerPage, mainUnmarshaller{})
+	if abv != -1 {
+		t.Errorf("Get name worked: %v", abv)
 	}
 }
 

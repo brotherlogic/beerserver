@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"testing"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -23,7 +22,6 @@ func TestCountBeers(t *testing.T) {
 
 func TestAddToEmpty(t *testing.T) {
 	mine := NewBeerCellar("testempty")
-	log.Printf("Built new cellar")
 	c := AddBuilt(mine, &pb.Beer{Id: 234, Size: "bomber"})
 	if c == nil {
 		t.Errorf("Error adding beer to empty cellar")
@@ -41,8 +39,6 @@ func TestRemoveFromFull(t *testing.T) {
 		t.Fatalf("Error in adding beers: %v", mine)
 	}
 
-	log.Printf("CELLAR: %v", mine)
-
 	IDToRemove := mine.Cellars[0].Beers[0].Id
 	RemoveBeer(mine, IDToRemove)
 
@@ -50,7 +46,6 @@ func TestRemoveFromFull(t *testing.T) {
 		t.Errorf("beer has not been removed: %v", mine)
 	}
 
-	log.Printf("NOWCELLAR: %v", mine)
 }
 
 func TestCountFreeSlots(t *testing.T) {
@@ -149,7 +144,7 @@ func TestSyncAndSave(t *testing.T) {
 		t.Errorf("Sync time was not updated")
 	}
 
-	if len(mine.Drunk) != 1 {
+	if len(mine.Drunk) != 15 {
 		t.Fatalf("Drunk list was not updated")
 	}
 

@@ -66,7 +66,6 @@ func (s *Server) Mote(master bool) error {
 
 func (s *Server) saveCellar() {
 	t := time.Now()
-	log.Printf("Writing cellar")
 	s.KSclient.Save(TOKEN, s.cellar)
 	s.LogFunction("saveCellar", int32(time.Now().Sub(t).Nanoseconds()/1000000))
 }
@@ -84,11 +83,8 @@ func Init() Server {
 
 func (s *Server) runSync() {
 	for true {
-		log.Printf("SLEEPING for 5 seconds")
 		time.Sleep(time.Hour * 2)
-		log.Printf("LAST SYNC = %v -> %v vs %v", s.cellar.SyncTime, time.Now().Unix()-s.cellar.SyncTime, 12*60*60)
 		if time.Now().Unix()-s.cellar.SyncTime > 5*60 && s.Registry.GetMaster() {
-			log.Printf("RUNNING SYNC")
 			t := time.Now()
 			count := Sync(s.ut, s.cellar)
 			if count == 0 {
@@ -144,7 +140,6 @@ func main() {
 	}
 	server.cellar = nCellar
 
-	log.Printf("INIT CELLAR 1 %v", server.cellar)
 	server.Register = &server
 	server.RegisterServer("beerserver", false)
 	server.RegisterServingTask(server.runSync)

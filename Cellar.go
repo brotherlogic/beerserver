@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -136,21 +135,14 @@ func ComputeInsertCost(cellar *pb.Cellar, beer *pb.Beer) int {
 
 // AddBeerToCellar adds a beer to the cellar
 func AddBeerToCellar(cellar *pb.Cellar, beer *pb.Beer) {
-	log.Printf("Adding %v to %v", beer, len(cellar.Beers))
 
 	insertPoint := getInsertPoint(cellar, beer)
 
-	log.Printf("Found insert point: %v", insertPoint)
-	log.Printf("WAS %v", cellar.Beers)
 	nb := make([]*pb.Beer, 0)
 	nb = append(nb, cellar.Beers[0:insertPoint]...)
-	log.Printf("NB %v", nb)
 	nb = append(nb, beer)
-	log.Printf("MB %v", nb)
 	nb = append(nb, cellar.Beers[insertPoint:]...)
-	log.Printf("OB %v", cellar.Beers)
 	cellar.Beers = nb
-	log.Printf("NOW %v", cellar.Beers)
 }
 
 // MergeCellars combines N cellars into a list of beers
