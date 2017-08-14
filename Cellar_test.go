@@ -1,6 +1,5 @@
 package main
 
-import "log"
 import "math"
 import "testing"
 
@@ -94,11 +93,7 @@ func TestMidInsert(t *testing.T) {
 	AddBeerToCellar(&mine, &beer2)
 	AddBeerToCellar(&mine, &beer4)
 
-	log.Printf("1. %v\n", mine)
-
 	AddBeerToCellar(&mine, &beer3)
-
-	log.Printf("2. %v\n", mine)
 
 	if CountBeersInCellar(&mine, 1237) != 1 {
 		t.Errorf("Problem with cellar: %v (%v)\n", mine, CountBeersInCellar(&mine, 1237))
@@ -109,40 +104,32 @@ func TestProblemsOfClobbering(t *testing.T) {
 	mine1 := NewCellar("testprobcellar")
 	beer1, _ := NewBeer("938229~01/03/18~small")
 	AddBeerToCellar(&mine1, &beer1)
-	log.Printf("%v\n", mine1)
 	if CountBeersInCellar(&mine1, 938229) != 1 {
 		t.Errorf("Problem with cellar 1. (%v) %v\n", CountBeersInCellar(&mine1, 938229), mine1)
 	}
 	beer2, _ := NewBeer("938229~01/03/17~small")
 	AddBeerToCellar(&mine1, &beer2)
-	log.Printf("%v\n", mine1)
 	if CountBeersInCellar(&mine1, 938229) != 2 {
 		t.Errorf("Problem with cellar 2. (%v) %v\n", CountBeersInCellar(&mine1, 938229), mine1)
 	}
 	beer3, _ := NewBeer("938229~01/03/16~small")
 	AddBeerToCellar(&mine1, &beer3)
-	log.Printf("%v\n", mine1)
 	if CountBeersInCellar(&mine1, 938229) != 3 {
 		t.Errorf("Problem with cellar 3. (%v) %v\n", CountBeersInCellar(&mine1, 938229), mine1)
 	}
 	beer4, _ := NewBeer("768356~01/09/18~small")
 	AddBeerToCellar(&mine1, &beer4)
-	log.Printf("%v\n", mine1)
 	beer5, _ := NewBeer("768356~01/09/18~small")
 	AddBeerToCellar(&mine1, &beer5)
-	log.Printf("%v\n", mine1)
 	beer6, _ := NewBeer("768356~01/09/17~small")
 	AddBeerToCellar(&mine1, &beer6)
-	log.Printf("%v\n", mine1)
 	beer7, _ := NewBeer("938229~01/03/17~small")
 	AddBeerToCellar(&mine1, &beer7)
-	log.Printf("%v\n", mine1)
 	if CountBeersInCellar(&mine1, 938229) != 4 {
 		t.Errorf("Problem with cellar 4. (%v) %v\n", CountBeersInCellar(&mine1, 938229), mine1)
 	}
 	beer8, _ := NewBeer("552346~01/03/17~small")
 	AddBeerToCellar(&mine1, &beer8)
-	log.Printf("%v\n", mine1)
 
 	if len(mine1.Beers) != 8 {
 		t.Errorf("Not the right number of beers, 8 but %v\n", len(mine1.Beers))
@@ -163,9 +150,6 @@ func TestMergeCellar(t *testing.T) {
 
 	merged := MergeCellars("bomber", &cellar1, &cellar2, &cellar3)
 	merged2 := MergeCellars("small", &cellar1, &cellar2, &cellar3)
-
-	log.Printf("GOT MERGED: %v", merged)
-	log.Printf("GOT MERGED2: %v", merged2)
 
 	if merged[0].Id != 1235 {
 		t.Errorf("Merged list is ordered incorrectly %v\n", merged[0])

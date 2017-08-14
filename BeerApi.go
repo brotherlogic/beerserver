@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -14,7 +13,6 @@ import (
 
 //AddBeer adds a beer to the cellar
 func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error) {
-	log.Printf("CELLAR HERE = %v", s.cellar)
 	if beer.Name == "" || beer.GetAbv() == 0 {
 		beer.Name, beer.Abv = s.ut.GetBeerDetails(beer.Id)
 	}
@@ -33,7 +31,6 @@ func (s *Server) GetDrunk(ctx context.Context, in *pb.Empty) (*pb.BeerList, erro
 func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
 	var beers []*pb.Beer
 	for _, cellar := range s.cellar.GetCellars() {
-		log.Printf("CELLAR: %v", cellar)
 		for _, b := range cellar.GetBeers() {
 			if b.Size == beer.Size && b.Staged {
 				return b, nil
@@ -63,7 +60,6 @@ func (s *Server) RemoveBeer(ctx context.Context, in *pb.Beer) (*pb.Beer, error) 
 func (s *Server) GetCellar(ctx context.Context, in *pb.Cellar) (*pb.Cellar, error) {
 	needWrite := false
 	for i, cellar := range s.cellar.Cellars {
-		log.Printf("CELLAR NAME = %v", cellar.Name)
 
 		if len(cellar.Name) == 0 {
 			cellar.Name = "cellar" + strconv.Itoa(i+1)

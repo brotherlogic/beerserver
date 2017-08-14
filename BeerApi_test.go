@@ -35,8 +35,8 @@ func TestGetDrunks(t *testing.T) {
 		t.Fatalf("Error getting drunks: %v", err)
 	}
 
-	if len(drunk.Beers) != 1 {
-		t.Errorf("Beer list has come back empty: %v", drunk)
+	if len(drunk.Beers) != 15 {
+		t.Errorf("Beer list has come back empty(%v): %v", len(drunk.Beers), drunk)
 	}
 }
 

@@ -3,7 +3,6 @@ package main
 import "encoding/json"
 import "errors"
 
-import "log"
 import "net/http"
 
 import "io/ioutil"
@@ -82,13 +81,9 @@ func (u *Untappd) getBeerPage(fetcher httpResponseFetcher, converter responseCon
 
 	response, err := fetcher.Fetch(url)
 
-	if err != nil {
-		log.Printf("Failed on getBeerPage: %q\n", err)
-	} else {
+	if err == nil {
 		contents, err := converter.Convert(response)
-		if err != nil {
-			log.Printf("%q\n", err)
-		} else {
+		if err == nil {
 			return string(contents)
 		}
 	}
@@ -104,15 +99,9 @@ func (u *Untappd) getVenuePage(fetcher httpResponseFetcher, converter responseCo
 
 	response, err := fetcher.Fetch(url)
 
-	log.Printf("Getting venue page: %v\n", url)
-
-	if err != nil {
-		log.Printf("Failed on getVenuePage: %q\n", err)
-	} else {
+	if err == nil {
 		contents, err := converter.Convert(response)
-		if err != nil {
-			log.Printf("%q\n", err)
-		} else {
+		if err == nil {
 			return string(contents)
 		}
 	}
@@ -124,7 +113,6 @@ func convertPageToName(page string, unmarshaller unmarshaller) string {
 	var mapper map[string]interface{}
 	err := unmarshaller.Unmarshal([]byte(page), &mapper)
 	if err != nil {
-		log.Printf("%q\n", err)
 		return "Failed to unmarshal"
 	}
 
@@ -144,7 +132,6 @@ func convertPageToABV(page string, unmarshaller unmarshaller) float32 {
 	var mapper map[string]interface{}
 	err := unmarshaller.Unmarshal([]byte(page), &mapper)
 	if err != nil {
-		log.Printf("%q\n", err)
 		return -1
 	}
 
@@ -157,21 +144,15 @@ func convertPageToABV(page string, unmarshaller unmarshaller) float32 {
 	response := mapper["response"].(map[string]interface{})
 	beer := response["beer"].(map[string]interface{})
 	abv := beer["beer_abv"].(float64)
-	if err != nil {
-		log.Printf("Error converting abv: %v", err)
-		return -1
-	}
+
 	return float32(abv)
 }
 
 func convertPageToDrinks(page string, unmarshaller unmarshaller) ([]pb.Beer, error) {
-	log.Printf("RUNNING\n")
-
 	var mapper map[string]interface{}
 	var values []pb.Beer
 	err := unmarshaller.Unmarshal([]byte(page), &mapper)
 	if err != nil {
-		log.Printf("ERROR: %q\n", err)
 		return values, err
 	}
 
@@ -208,7 +189,6 @@ func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter respons
 	drinks, _ := convertPageToDrinks(text, unmarshaller)
 
 	for _, k := range drinks {
-		log.Printf("READ %v (given %v)", k, date)
 		if date < k.DrinkDate {
 			ret = append(ret, k.Id)
 		}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strconv"
 	"strings"
 
@@ -24,20 +23,19 @@ func GetTotalFreeSlots(cellar *pb.BeerCellar) (int, int) {
 // Sync syncs with untappd
 func Sync(u *Untappd, cellar *pb.BeerCellar) int {
 	drunk := u.GetRecentDrinks(u.f, u.c, cellar.SyncTime)
-	log.Printf("Found these: %v\n", drunk)
 
 	if len(drunk) == 0 {
 		return 0
 	}
 
 	for _, val := range drunk {
-		log.Printf("Removing %v from cellar\n", val)
 		rb := RemoveBeer(cellar, val)
 
 		if rb != nil {
-			log.Printf("Removed: %v", rb)
 			rb.DrinkDate = time.Now().Unix()
 			cellar.Drunk = append(cellar.Drunk, rb)
+		} else {
+			cellar.Drunk = append(cellar.Drunk, &pb.Beer{Id: val, Size: "Out"})
 		}
 	}
 
@@ -61,7 +59,6 @@ func RemoveBeer(cellar *pb.BeerCellar, id int64) *pb.Beer {
 	}
 
 	if cellarIndex >= 0 {
-		log.Printf("Removing %v from %v\n", id, cellarIndex)
 		return Remove(cellar.Cellars[cellarIndex], id)
 	}
 
@@ -99,17 +96,13 @@ func AddBuilt(cellar *pb.BeerCellar, beer *pb.Beer) *pb.Cellar {
 	for i, v := range cellar.GetCellars() {
 		insertCount := ComputeInsertCost(v, beer)
 
-		log.Printf("Adding beer to cellar %v: %v\n", i, insertCount)
-
 		if insertCount >= 0 && (insertCount < bestScore || bestScore < 0) {
 			bestScore = insertCount
 			bestCellar = i
 		}
 	}
 
-	log.Printf("Adding to %v given %v", bestCellar, cellar.Cellars)
 	AddBeerToCellar(cellar.Cellars[bestCellar], beer)
-	log.Printf("DONE Adding to %v given %v", bestCellar, cellar.Cellars)
 	return cellar.Cellars[bestCellar]
 }
 
@@ -191,18 +184,14 @@ func Min(a int, b int) int {
 
 // ListBeers lists the cellared beers of a given type
 func ListBeers(cellar *pb.BeerCellar, num int, btype string, date int64) []*pb.Beer {
-	log.Printf("Cellar looks like %v\n", cellar.Cellars)
 	retList := MergeCellars(btype, cellar.Cellars...)
 
 	pointer := -1
 	for i, v := range retList {
 		if i < num && v.DrinkDate < date {
 			pointer = i
-		} else {
-			log.Printf("%v, %v and %v %v\n", i, num, v.DrinkDate, date)
 		}
 	}
 
-	log.Printf("RETURNING %v", retList)
 	return retList[:pointer+1]
 }
