@@ -27,8 +27,18 @@ func (s *Server) GetDrunk(ctx context.Context, in *pb.Empty) (*pb.BeerList, erro
 	return list, nil
 }
 
+func authGet(ld *pb.Beer) bool {
+	t := time.Now().Add(time.Hour * -24)
+	return ld.GetDrinkDate()-t.Unix() < 0
+}
+
 //GetBeer gets a beer from the cellar
 func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
+
+	if len(s.cellar.Drunk) > 0 && !authGet(s.cellar.Drunk[len(s.cellar.Drunk)-1]) {
+		return nil, errors.New("Unauthorized get")
+	}
+
 	var beers []*pb.Beer
 	for _, cellar := range s.cellar.GetCellars() {
 		for _, b := range cellar.GetBeers() {
