@@ -58,7 +58,7 @@ func (s *Server) Mote(master bool) error {
 		}
 
 		s.cellar = bResp.(*pb.BeerCellar)
-		s.LogFunction("Mote", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+		s.LogFunction("Mote", t)
 	}
 
 	return nil
@@ -67,7 +67,7 @@ func (s *Server) Mote(master bool) error {
 func (s *Server) saveCellar() {
 	t := time.Now()
 	s.KSclient.Save(TOKEN, s.cellar)
-	s.LogFunction("saveCellar", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+	s.LogFunction("saveCellar", t)
 }
 
 //GetUntappd builds a untappd retriever
@@ -88,9 +88,9 @@ func (s *Server) runSync() {
 			t := time.Now()
 			count := Sync(s.ut, s.cellar)
 			if count == 0 {
-				s.LogFunction("Sync-Nil", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+				s.LogFunction("Sync-Nil", t)
 			} else {
-				s.LogFunction("Sync", int32(time.Now().Sub(t).Nanoseconds()/1000000))
+				s.LogFunction("Sync", t)
 			}
 			s.saveCellar()
 		}
