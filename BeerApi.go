@@ -36,7 +36,7 @@ func authGet(ld *pb.Beer, r *pb.Beer) bool {
 func (s *Server) GetBeer(ctx context.Context, beer *pb.Beer) (*pb.Beer, error) {
 
 	if len(s.cellar.Drunk) > 0 && !authGet(s.cellar.Drunk[len(s.cellar.Drunk)-1], beer) {
-		return nil, errors.New("Unauthorized get")
+		return nil, errors.New("Unauthorized get for " + beer.Size)
 	}
 
 	var beers []*pb.Beer
