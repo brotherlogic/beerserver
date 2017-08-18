@@ -29,7 +29,7 @@ func (s *Server) GetDrunk(ctx context.Context, in *pb.Empty) (*pb.BeerList, erro
 
 func authGet(ld *pb.Beer) bool {
 	t := time.Now().Add(time.Hour * -24)
-	return ld.GetDrinkDate()-t.Unix() < 0
+	return ld.GetDrinkDate()-t.Unix() < 0 || ld.Size == "bomber"
 }
 
 //GetBeer gets a beer from the cellar
