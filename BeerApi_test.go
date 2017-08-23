@@ -82,6 +82,20 @@ func TestGetDrunks(t *testing.T) {
 	}
 }
 
+func TestGetDrunkRecaches(t *testing.T) {
+	s := GetTestCellar()
+	s.cellar.Drunk = append(s.cellar.Drunk, &pb.Beer{Id: 7936})
+
+	drunk, err := s.GetDrunk(context.Background(), &pb.Empty{})
+	if err != nil {
+		t.Fatalf("Error getting drunks: %v", err)
+	}
+
+	if len(drunk.Beers) != 1 || drunk.Beers[0].GetName() != "Firestone Walker Brewing Company - Parabola" {
+		t.Errorf("Drunks not right: %v", drunk)
+	}
+}
+
 func TestGetNameOutOfCache(t *testing.T) {
 	s := GetTestCellar()
 	s.AddBeer(context.Background(), &pb.Beer{Id: 7936, Size: "bomber", DrinkDate: 100})
