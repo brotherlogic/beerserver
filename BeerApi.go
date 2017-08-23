@@ -23,7 +23,15 @@ func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error)
 
 //GetDrunk gets a list of beers drunk
 func (s *Server) GetDrunk(ctx context.Context, in *pb.Empty) (*pb.BeerList, error) {
+	t := time.Now()
 	list := &pb.BeerList{Beers: s.cellar.Drunk}
+
+	for _, beer := range list.GetBeers() {
+		s.recacheBeer(beer)
+	}
+	s.saveCellar()
+
+	s.LogFunction("GetDrunk", t)
 	return list, nil
 }
 
