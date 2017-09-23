@@ -143,5 +143,6 @@ func main() {
 	server.Register = &server
 	server.RegisterServer("beerserver", false)
 	server.RegisterServingTask(server.runSync)
+	server.Log("Beerserver has started!")
 	server.Serve()
 }
