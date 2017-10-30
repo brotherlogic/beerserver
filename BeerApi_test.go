@@ -53,6 +53,20 @@ func TestBanGetGood(t *testing.T) {
 	}
 }
 
+func TestGetState(t *testing.T) {
+	s := GetTestCellar()
+
+	state, err := s.GetState(context.Background(), &pb.Empty{})
+
+	if err != nil {
+		t.Fatalf("Error in getting state: %v", err)
+	}
+
+	if state.GetFreeBombers() != 160 || state.GetFreeSmall() != 240 {
+		t.Errorf("Error in bombers and smalls: %v and %v", state.GetFreeBombers(), state.GetFreeSmall())
+	}
+}
+
 func GetTestCellar() Server {
 	s := Init()
 	s.cellar = NewBeerCellar("testcellar")

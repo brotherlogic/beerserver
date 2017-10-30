@@ -74,6 +74,18 @@ func (s *Server) RemoveBeer(ctx context.Context, in *pb.Beer) (*pb.Beer, error) 
 	return beer, nil
 }
 
+//GetState gets the state of the system
+func (s *Server) GetState(ctx context.Context, in *pb.Empty) (*pb.ServerState, error) {
+	t := time.Now()
+	r := &pb.ServerState{}
+	fb, fs := GetTotalFreeSlots(s.cellar)
+	r.FreeSmall = int32(fs)
+	r.FreeBombers = int32(fb)
+
+	s.LogFunction("GetState", t)
+	return r, nil
+}
+
 //GetCellar gets a single cellar
 func (s *Server) GetCellar(ctx context.Context, in *pb.Cellar) (*pb.Cellar, error) {
 	needWrite := false

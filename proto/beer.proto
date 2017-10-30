@@ -9,6 +9,11 @@ message Token {
   string secret = 2;
 }
 
+message ServerState {
+  int32 free_small = 1;
+  int32 free_bombers = 2;
+}
+
 message Beer {
   int64 id = 1;
   int64 drink_date = 2;
@@ -43,4 +48,5 @@ service BeerCellarService {
   rpc GetCellar(Cellar) returns (Cellar) {};
   rpc RemoveBeer(Beer) returns (Beer) {};
   rpc GetDrunk(Empty) returns (BeerList) {};
+  rpc GetState(Empty) returns (ServerState) {};
 }
