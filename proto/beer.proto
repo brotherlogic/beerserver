@@ -48,5 +48,5 @@ service BeerCellarService {
   rpc GetCellar(Cellar) returns (Cellar) {};
   rpc RemoveBeer(Beer) returns (Beer) {};
   rpc GetDrunk(Empty) returns (BeerList) {};
-  rpc GetState(Empty) returns (ServerState) {};
+  rpc GetServerState(Empty) returns (ServerState) {};
 }

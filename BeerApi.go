@@ -75,7 +75,7 @@ func (s *Server) RemoveBeer(ctx context.Context, in *pb.Beer) (*pb.Beer, error) 
 }
 
 //GetState gets the state of the system
-func (s *Server) GetState(ctx context.Context, in *pb.Empty) (*pb.ServerState, error) {
+func (s *Server) GetServerState(ctx context.Context, in *pb.Empty) (*pb.ServerState, error) {
 	t := time.Now()
 	r := &pb.ServerState{}
 	fb, fs := GetTotalFreeSlots(s.cellar)

@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
+	pbgs "github.com/brotherlogic/goserver/proto"
 )
 
 //Server main server type
@@ -51,7 +52,7 @@ func (s *Server) Mote(master bool) error {
 	if master {
 		t := time.Now()
 		bType := &pb.BeerCellar{}
-		bResp, err := s.KSclient.Read(TOKEN, bType)
+		bResp, _, err := s.KSclient.Read(TOKEN, bType)
 
 		if err != nil {
 			return err
@@ -62,6 +63,10 @@ func (s *Server) Mote(master bool) error {
 	}
 
 	return nil
+}
+
+func (s *Server) GetState() []*pbgs.State {
+	return []*pbgs.State{}
 }
 
 func (s *Server) saveCellar() {
@@ -118,7 +123,7 @@ func main() {
 	}
 
 	tType := &pb.Token{}
-	tResp, err := server.KSclient.Read(UTTOKEN, tType)
+	tResp, _, err := server.KSclient.Read(UTTOKEN, tType)
 
 	if err != nil {
 		log.Fatalf("Unable to read token: %v", err)
@@ -128,7 +133,7 @@ func main() {
 	server.ut = GetUntappd(sToken.Id, sToken.Secret)
 
 	bType := &pb.BeerCellar{}
-	bResp, err := server.KSclient.Read(TOKEN, bType)
+	bResp, _, err := server.KSclient.Read(TOKEN, bType)
 
 	if err != nil {
 		log.Fatalf("Unable to read cellar: %v", err)

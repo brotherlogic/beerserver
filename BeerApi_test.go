@@ -56,7 +56,7 @@ func TestBanGetGood(t *testing.T) {
 func TestGetState(t *testing.T) {
 	s := GetTestCellar()
 
-	state, err := s.GetState(context.Background(), &pb.Empty{})
+	state, err := s.GetServerState(context.Background(), &pb.Empty{})
 
 	if err != nil {
 		t.Fatalf("Error in getting state: %v", err)
