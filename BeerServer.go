@@ -90,13 +90,7 @@ func (s *Server) runSync() {
 	for true {
 		time.Sleep(time.Hour * 2)
 		if time.Now().Unix()-s.cellar.SyncTime > 5*60 && s.Registry.GetMaster() {
-			t := time.Now()
-			count := Sync(s.ut, s.cellar)
-			if count == 0 {
-				s.LogFunction("Sync-Nil", t)
-			} else {
-				s.LogFunction("Sync", t)
-			}
+			Sync(s.ut, s.cellar)
 			s.saveCellar()
 		}
 	}
