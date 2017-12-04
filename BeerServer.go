@@ -70,9 +70,7 @@ func (s *Server) GetState() []*pbgs.State {
 }
 
 func (s *Server) saveCellar() {
-	t := time.Now()
 	s.KSclient.Save(TOKEN, s.cellar)
-	s.LogFunction("saveCellar", t)
 }
 
 //GetUntappd builds a untappd retriever
