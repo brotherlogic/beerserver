@@ -53,10 +53,10 @@ func TestCountFreeSlots(t *testing.T) {
 	AddBeerByDays(mine, "1234", "01/01/06", "bomber", "14", "5")
 
 	largeFree, smallFree := GetTotalFreeSlots(mine)
-	if smallFree != 7*30 {
+	if smallFree != (NumCellars-1)*30 {
 		t.Errorf("Wrong count of small free: %v (expeceted %v)", smallFree, 7*30)
 	}
-	if largeFree != 7*20+20-5 {
+	if largeFree != (NumCellars-1)*20+20-5 {
 		t.Errorf("Wrong count of large free: %v (expeceted %v)", largeFree, 7*20+20-5)
 	}
 }
@@ -112,7 +112,7 @@ func TestAddToCellars(t *testing.T) {
 	AddBeer(mine1, "1234", 1233, "bomber")
 	AddBeer(mine1, "1234", 1234, "bomber")
 
-	if GetEmptyCellarCount(mine1) != 7 {
+	if GetEmptyCellarCount(mine1) != NumCellars-1 {
 		t.Errorf("Cellar is not balanced: %v\n", mine1)
 	}
 }
@@ -183,7 +183,7 @@ func TestMin(t *testing.T) {
 
 func TestGetNumberOfCellars(t *testing.T) {
 	bc := NewBeerCellar("test")
-	if GetNumberOfCellars(bc) != 8 {
+	if GetNumberOfCellars(bc) != NumCellars {
 		t.Errorf("Wrong number of cellars: %d\n", GetNumberOfCellars(bc))
 	}
 }
@@ -198,7 +198,7 @@ func TestAddToCellar(t *testing.T) {
 	AddBuilt(cellar, &beer2)
 	AddBuilt(cellar, &beer3)
 
-	if GetEmptyCellarCount(cellar) != 7 {
+	if GetEmptyCellarCount(cellar) != NumCellars-1 {
 		t.Errorf("Too many cellars are not empty %d\n", GetEmptyCellarCount(cellar))
 	}
 }

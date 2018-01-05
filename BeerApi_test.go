@@ -62,7 +62,7 @@ func TestGetState(t *testing.T) {
 		t.Fatalf("Error in getting state: %v", err)
 	}
 
-	if state.GetFreeBombers() != 160 || state.GetFreeSmall() != 240 {
+	if state.GetFreeBombers() != 20*NumCellars || state.GetFreeSmall() != 30*NumCellars {
 		t.Errorf("Error in bombers and smalls: %v and %v", state.GetFreeBombers(), state.GetFreeSmall())
 	}
 }

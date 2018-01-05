@@ -9,6 +9,11 @@ import (
 
 import "time"
 
+const (
+	// NumCellars the number of cellars
+	NumCellars = 4
+)
+
 // GetTotalFreeSlots Computes the number of free slots for each beer type
 func GetTotalFreeSlots(cellar *pb.BeerCellar) (int, int) {
 	sumLarge, sumSmall := 0, 0
@@ -122,7 +127,7 @@ func NewBeerCellar(name string) *pb.BeerCellar {
 	bc := &pb.BeerCellar{
 		Name:     name,
 		SyncTime: time.Now().Unix(),
-		Cellars:  make([]*pb.Cellar, 8),
+		Cellars:  make([]*pb.Cellar, NumCellars),
 	}
 
 	for i := range bc.Cellars {
