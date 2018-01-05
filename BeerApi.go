@@ -74,7 +74,7 @@ func (s *Server) RemoveBeer(ctx context.Context, in *pb.Beer) (*pb.Beer, error) 
 	return beer, nil
 }
 
-//GetState gets the state of the system
+//GetServerState gets the state of the system
 func (s *Server) GetServerState(ctx context.Context, in *pb.Empty) (*pb.ServerState, error) {
 	t := time.Now()
 	r := &pb.ServerState{}

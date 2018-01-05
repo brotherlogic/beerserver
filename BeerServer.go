@@ -65,6 +65,7 @@ func (s *Server) Mote(master bool) error {
 	return nil
 }
 
+//GetState gets the state of the server
 func (s *Server) GetState() []*pbgs.State {
 	return []*pbgs.State{}
 }
@@ -98,6 +99,7 @@ func main() {
 	var id = flag.String("id", "", "Untappd id")
 	var secret = flag.String("secret", "", "Untappd secret")
 	var quiet = flag.Bool("quiet", true, "Show all output")
+	var force = flag.Bool("force", false, "Force a new beer cellar")
 	flag.Parse()
 
 	if *quiet {
@@ -132,10 +134,15 @@ func main() {
 	}
 
 	nCellar := bResp.(*pb.BeerCellar)
-	if nCellar == nil || nCellar.Cellars == nil {
+	if *force || nCellar == nil || nCellar.Cellars == nil {
 		nCellar = NewBeerCellar("mycellar")
 	}
 	server.cellar = nCellar
+
+	// Save out if we're forcing
+	if *force {
+		server.saveCellar()
+	}
 
 	server.Register = &server
 	server.RegisterServer("beerserver", false)
