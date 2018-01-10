@@ -32,6 +32,10 @@ message Cellar {
   repeated Beer beers = 2;
 }
 
+message ToDrink {
+  repeated Beer beers = 1;
+}
+
 message BeerCellar {
   	string name = 1;
   	int64 syncTime = 2;
@@ -39,6 +43,7 @@ message BeerCellar {
   	string untappdSecret = 4;
     repeated Cellar cellars = 5;
     repeated Beer drunk = 6;
+    ToDrink todrink = 7;
 }
 
 
