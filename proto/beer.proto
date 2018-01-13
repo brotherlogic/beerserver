@@ -46,6 +46,11 @@ message BeerCellar {
     ToDrink todrink = 7;
 }
 
+message GetToDrinkRequest{}
+message GetToDrinkResponse{
+  repeated Beer beers = 1;
+}
+
 
 service BeerCellarService {
   rpc AddBeer(Beer) returns (Cellar) {};
@@ -54,4 +59,5 @@ service BeerCellarService {
   rpc RemoveBeer(Beer) returns (Beer) {};
   rpc GetDrunk(Empty) returns (BeerList) {};
   rpc GetServerState(Empty) returns (ServerState) {};
+  rpc GetToDrink(GetToDrinkRequest) returns (GetToDrinkResponse) {};
 }
