@@ -137,9 +137,15 @@ func main() {
 	}
 	server.cellar = nCellar
 
+	//Add the to drink list if we need that
+	if server.cellar.GetTodrink() == nil {
+		server.cellar.Todrink = &pb.ToDrink{Beers: make([]*pb.Beer, 0)}
+	}
+
 	// Save out if we're forcing
 	if *force {
 		server.saveCellar()
+		return
 	}
 
 	server.Register = &server

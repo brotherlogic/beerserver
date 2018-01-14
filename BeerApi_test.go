@@ -26,6 +26,20 @@ func TestBanGetBad(t *testing.T) {
 	}
 }
 
+func TestAddStaged(t *testing.T) {
+	s := GetTestCellar()
+	s.AddBeer(context.Background(), &pb.Beer{Id: 123, DrinkDate: 1, Size: "small", Staged: true})
+
+	beers, err := s.GetToDrink(context.Background(), &pb.GetToDrinkRequest{})
+	if err != nil {
+		t.Fatalf("Get with previous beer should fail: %v", beers)
+	}
+
+	if len(beers.GetBeers()) != 1 {
+		t.Errorf("Not enough beers: %v", beers)
+	}
+}
+
 func TestBanGetBadButBomber(t *testing.T) {
 	tn := time.Now()
 	ty := tn.Add(time.Hour * -24)
@@ -70,6 +84,10 @@ func TestGetState(t *testing.T) {
 func GetTestCellar() Server {
 	s := Init()
 	s.cellar = NewBeerCellar("testcellar")
+	//Add the to drink list if we need that
+	if s.cellar.GetTodrink() == nil {
+		s.cellar.Todrink = &pb.ToDrink{Beers: make([]*pb.Beer, 0)}
+	}
 	os.RemoveAll("testcellar")
 	s.GoServer.KSclient = *keystoreclient.GetTestClient("testcellar")
 	s.SkipLog = true

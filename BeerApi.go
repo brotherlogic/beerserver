@@ -11,12 +11,22 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+//GetToDrink gets beers in the to drink list
+func (s *Server) GetToDrink(ctx context.Context, req *pb.GetToDrinkRequest) (*pb.GetToDrinkResponse, error) {
+	return &pb.GetToDrinkResponse{Beers: s.cellar.GetTodrink().GetBeers()}, nil
+}
+
 //AddBeer adds a beer to the cellar
 func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error) {
 	if beer.Name == "" || beer.GetAbv() == 0 {
 		beer.Name, beer.Abv = s.ut.GetBeerDetails(beer.Id)
 	}
-	cel := AddBuilt(s.cellar, beer)
+	var cel *pb.Cellar
+	if beer.Staged {
+		s.cellar.GetTodrink().Beers = append(s.cellar.GetTodrink().GetBeers(), beer)
+	} else {
+		cel = AddBuilt(s.cellar, beer)
+	}
 	s.saveCellar()
 	return cel, nil
 }
