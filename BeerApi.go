@@ -24,6 +24,7 @@ func (s *Server) AddBeer(ctx context.Context, beer *pb.Beer) (*pb.Cellar, error)
 	var cel *pb.Cellar
 	if beer.Staged {
 		s.cellar.GetTodrink().Beers = append(s.cellar.GetTodrink().GetBeers(), beer)
+		cel = &pb.Cellar{}
 	} else {
 		cel = AddBuilt(s.cellar, beer)
 	}
