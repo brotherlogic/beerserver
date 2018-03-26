@@ -27,6 +27,16 @@ message BeerList {
   repeated Beer beers = 1;
 }
 
+message CellarSlot {
+  string accepts = 1;
+  int32 slots = 2;
+  repeated Beer beers = 3;
+}
+
+message Stash {
+  repeated CellarSlot slots = 1;
+}
+
 message Cellar {
   string name = 1;
   repeated Beer beers = 2;
@@ -51,6 +61,26 @@ message GetToDrinkResponse{
   repeated Beer beers = 1;
 }
 
+message AddBeerRequest {
+  Beer beer = 1;
+  int32 quantity = 2;
+  bool age = 3;
+}
+
+message AddBeerResponse {
+  repeated Beer beers = 1;
+}
+
+message ListRequest{}
+
+message ListResponse {
+  repeated CellarSlot slots = 1;
+}
+
+service BeerStashService {
+  rpc AddBeerToStash(AddBeerRequest) returns (AddBeerResponse) {};
+  rpc ListBeers(ListRequest) returns (ListResponse) {};
+}
 
 service BeerCellarService {
   rpc AddBeer(Beer) returns (Cellar) {};
