@@ -42,6 +42,20 @@ message Cellar {
   repeated Beer beers = 2;
 }
 
+message NewCellar {
+  string accepts = 1;
+  int32 slots = 2;
+  repeated Beer beers = 3;
+}
+
+message NewBeerCellar {
+  int64 syncTime = 1;
+  string untappdKey = 2;
+  string untappdSecret = 3;
+  repeated NewCellar cellars = 4;
+  repeated Beer out = 5;
+}
+
 message ToDrink {
   repeated Beer beers = 1;
 }
@@ -80,6 +94,23 @@ message ListResponse {
 service BeerStashService {
   rpc AddBeerToStash(AddBeerRequest) returns (AddBeerResponse) {};
   rpc ListBeers(ListRequest) returns (ListResponse) {};
+}
+
+message NewAddBeerRequest {
+  Beer beer = 1;
+}
+
+message NewAddBeerResponse {}
+
+message ListBeerRequest {}
+
+message ListBeerResponse {
+  repeated Beer beer = 1;
+}
+
+service NewBeerCellarService {
+  rpc AddBeer(NewAddBeerRequest) returns (NewAddBeerResponse) {};
+  rpc ListBeersInCellar(ListBeerRequest) returns (ListBeerResponse) {};
 }
 
 service BeerCellarService {
