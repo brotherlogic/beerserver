@@ -1,0 +1,1 @@
+{"meta":{"code":500,"error_detail":"Please pass via GET using the parameter 'client_secret' and 'client_id'","error_type":"invalid_param","developer_friendly":"v4\/beer\/info\/7936","response_time":{"time":0.004,"measure":"seconds"}},"response":[]}

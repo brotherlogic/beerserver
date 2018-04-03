@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
@@ -19,7 +17,7 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	cellar *pb.BeerCellar
+	config *pb.Config
 	ut     *Untappd
 }
 
@@ -50,14 +48,15 @@ func (s *Server) ReportHealth() bool {
 // Mote promotes this server
 func (s *Server) Mote(master bool) error {
 	if master {
-		bType := &pb.BeerCellar{}
+		// Read the cellar
+		bType := &pb.Config{}
 		bResp, _, err := s.KSclient.Read(TOKEN, bType)
 
 		if err != nil {
 			return err
 		}
 
-		s.cellar = bResp.(*pb.BeerCellar)
+		s.config = bResp.(*pb.Config)
 	}
 
 	return nil
@@ -68,8 +67,8 @@ func (s *Server) GetState() []*pbgs.State {
 	return []*pbgs.State{}
 }
 
-func (s *Server) saveCellar() {
-	s.KSclient.Save(TOKEN, s.cellar)
+func (s *Server) save() {
+	s.KSclient.Save(TOKEN, s.config)
 }
 
 //GetUntappd builds a untappd retriever
@@ -78,26 +77,13 @@ func GetUntappd(id, secret string) *Untappd {
 }
 
 //Init builds a server
-func Init() Server {
-	s := Server{&goserver.GoServer{}, &pb.BeerCellar{}, &Untappd{}}
+func Init() *Server {
+	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}}
 	return s
 }
 
-func (s *Server) runSync() {
-	for true {
-		time.Sleep(time.Hour * 2)
-		if time.Now().Unix()-s.cellar.SyncTime > 5*60 && s.Registry.GetMaster() {
-			Sync(s.ut, s.cellar)
-			s.saveCellar()
-		}
-	}
-}
-
 func main() {
-	var id = flag.String("id", "", "Untappd id")
-	var secret = flag.String("secret", "", "Untappd secret")
-	var quiet = flag.Bool("quiet", true, "Show all output")
-	var force = flag.Bool("force", false, "Force a new beer cellar")
+	var quiet = flag.Bool("quiet", false, "Show all output")
 	flag.Parse()
 
 	if *quiet {
@@ -109,48 +95,7 @@ func main() {
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
 
-	if len(*id) > 0 {
-		server.KSclient.Save(UTTOKEN, &pb.Token{Id: *id, Secret: *secret})
-		os.Exit(1)
-	}
-
-	tType := &pb.Token{}
-	tResp, _, err := server.KSclient.Read(UTTOKEN, tType)
-
-	if err != nil {
-		log.Fatalf("Unable to read token: %v", err)
-	}
-
-	sToken := tResp.(*pb.Token)
-	server.ut = GetUntappd(sToken.Id, sToken.Secret)
-
-	bType := &pb.BeerCellar{}
-	bResp, _, err := server.KSclient.Read(TOKEN, bType)
-
-	if err != nil {
-		log.Fatalf("Unable to read cellar: %v", err)
-	}
-
-	nCellar := bResp.(*pb.BeerCellar)
-	if *force || nCellar == nil || nCellar.Cellars == nil {
-		nCellar = NewBeerCellar("mycellar")
-	}
-	server.cellar = nCellar
-
-	//Add the to drink list if we need that
-	if server.cellar.GetTodrink() == nil {
-		server.cellar.Todrink = &pb.ToDrink{Beers: make([]*pb.Beer, 0)}
-	}
-
-	// Save out if we're forcing
-	if *force {
-		server.saveCellar()
-		return
-	}
-
-	server.Register = &server
+	server.Register = server
 	server.RegisterServer("beerserver", false)
-	server.RegisterServingTask(server.runSync)
-	server.Log("Beerserver has started!")
 	server.Serve()
 }

@@ -10,24 +10,12 @@ It is generated from these files:
 It has these top-level messages:
 	Empty
 	Token
-	ServerState
+	Config
 	Beer
-	BeerList
 	CellarSlot
-	Stash
 	Cellar
-	NewCellar
-	NewBeerCellar
-	ToDrink
-	BeerCellar
-	GetToDrinkRequest
-	GetToDrinkResponse
 	AddBeerRequest
 	AddBeerResponse
-	ListRequest
-	ListResponse
-	NewAddBeerRequest
-	NewAddBeerResponse
 	ListBeerRequest
 	ListBeerResponse
 */
@@ -64,6 +52,7 @@ func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 type Token struct {
 	Id     string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
 	Secret string `protobuf:"bytes,2,opt,name=secret" json:"secret,omitempty"`
+	Rtoken string `protobuf:"bytes,3,opt,name=rtoken" json:"rtoken,omitempty"`
 }
 
 func (m *Token) Reset()                    { *m = Token{} }
@@ -85,28 +74,43 @@ func (m *Token) GetSecret() string {
 	return ""
 }
 
-type ServerState struct {
-	FreeSmall   int32 `protobuf:"varint,1,opt,name=free_small,json=freeSmall" json:"free_small,omitempty"`
-	FreeBombers int32 `protobuf:"varint,2,opt,name=free_bombers,json=freeBombers" json:"free_bombers,omitempty"`
+func (m *Token) GetRtoken() string {
+	if m != nil {
+		return m.Rtoken
+	}
+	return ""
 }
 
-func (m *ServerState) Reset()                    { *m = ServerState{} }
-func (m *ServerState) String() string            { return proto.CompactTextString(m) }
-func (*ServerState) ProtoMessage()               {}
-func (*ServerState) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
-
-func (m *ServerState) GetFreeSmall() int32 {
-	if m != nil {
-		return m.FreeSmall
-	}
-	return 0
+type Config struct {
+	Token  *Token  `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	Drunk  []*Beer `protobuf:"bytes,2,rep,name=drunk" json:"drunk,omitempty"`
+	Cellar *Cellar `protobuf:"bytes,3,opt,name=cellar" json:"cellar,omitempty"`
 }
 
-func (m *ServerState) GetFreeBombers() int32 {
+func (m *Config) Reset()                    { *m = Config{} }
+func (m *Config) String() string            { return proto.CompactTextString(m) }
+func (*Config) ProtoMessage()               {}
+func (*Config) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *Config) GetToken() *Token {
 	if m != nil {
-		return m.FreeBombers
+		return m.Token
 	}
-	return 0
+	return nil
+}
+
+func (m *Config) GetDrunk() []*Beer {
+	if m != nil {
+		return m.Drunk
+	}
+	return nil
+}
+
+func (m *Config) GetCellar() *Cellar {
+	if m != nil {
+		return m.Cellar
+	}
+	return nil
 }
 
 type Beer struct {
@@ -116,6 +120,7 @@ type Beer struct {
 	Name      string  `protobuf:"bytes,4,opt,name=name" json:"name,omitempty"`
 	Staged    bool    `protobuf:"varint,5,opt,name=staged" json:"staged,omitempty"`
 	Abv       float32 `protobuf:"fixed32,6,opt,name=abv" json:"abv,omitempty"`
+	Index     int32   `protobuf:"varint,7,opt,name=index" json:"index,omitempty"`
 }
 
 func (m *Beer) Reset()                    { *m = Beer{} }
@@ -165,32 +170,23 @@ func (m *Beer) GetAbv() float32 {
 	return 0
 }
 
-type BeerList struct {
-	Beers []*Beer `protobuf:"bytes,1,rep,name=beers" json:"beers,omitempty"`
-}
-
-func (m *BeerList) Reset()                    { *m = BeerList{} }
-func (m *BeerList) String() string            { return proto.CompactTextString(m) }
-func (*BeerList) ProtoMessage()               {}
-func (*BeerList) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
-
-func (m *BeerList) GetBeers() []*Beer {
+func (m *Beer) GetIndex() int32 {
 	if m != nil {
-		return m.Beers
+		return m.Index
 	}
-	return nil
+	return 0
 }
 
 type CellarSlot struct {
-	Accepts string  `protobuf:"bytes,1,opt,name=accepts" json:"accepts,omitempty"`
-	Slots   int32   `protobuf:"varint,2,opt,name=slots" json:"slots,omitempty"`
-	Beers   []*Beer `protobuf:"bytes,3,rep,name=beers" json:"beers,omitempty"`
+	Accepts  string  `protobuf:"bytes,1,opt,name=accepts" json:"accepts,omitempty"`
+	NumSlots int32   `protobuf:"varint,2,opt,name=num_slots,json=numSlots" json:"num_slots,omitempty"`
+	Beers    []*Beer `protobuf:"bytes,3,rep,name=beers" json:"beers,omitempty"`
 }
 
 func (m *CellarSlot) Reset()                    { *m = CellarSlot{} }
 func (m *CellarSlot) String() string            { return proto.CompactTextString(m) }
 func (*CellarSlot) ProtoMessage()               {}
-func (*CellarSlot) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*CellarSlot) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *CellarSlot) GetAccepts() string {
 	if m != nil {
@@ -199,9 +195,9 @@ func (m *CellarSlot) GetAccepts() string {
 	return ""
 }
 
-func (m *CellarSlot) GetSlots() int32 {
+func (m *CellarSlot) GetNumSlots() int32 {
 	if m != nil {
-		return m.Slots
+		return m.NumSlots
 	}
 	return 0
 }
@@ -213,226 +209,18 @@ func (m *CellarSlot) GetBeers() []*Beer {
 	return nil
 }
 
-type Stash struct {
-	Slots []*CellarSlot `protobuf:"bytes,1,rep,name=slots" json:"slots,omitempty"`
-}
-
-func (m *Stash) Reset()                    { *m = Stash{} }
-func (m *Stash) String() string            { return proto.CompactTextString(m) }
-func (*Stash) ProtoMessage()               {}
-func (*Stash) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
-
-func (m *Stash) GetSlots() []*CellarSlot {
-	if m != nil {
-		return m.Slots
-	}
-	return nil
-}
-
 type Cellar struct {
-	Name  string  `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Beers []*Beer `protobuf:"bytes,2,rep,name=beers" json:"beers,omitempty"`
+	Slots []*CellarSlot `protobuf:"bytes,1,rep,name=slots" json:"slots,omitempty"`
 }
 
 func (m *Cellar) Reset()                    { *m = Cellar{} }
 func (m *Cellar) String() string            { return proto.CompactTextString(m) }
 func (*Cellar) ProtoMessage()               {}
-func (*Cellar) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*Cellar) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
-func (m *Cellar) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *Cellar) GetBeers() []*Beer {
-	if m != nil {
-		return m.Beers
-	}
-	return nil
-}
-
-type NewCellar struct {
-	Accepts string  `protobuf:"bytes,1,opt,name=accepts" json:"accepts,omitempty"`
-	Slots   int32   `protobuf:"varint,2,opt,name=slots" json:"slots,omitempty"`
-	Beers   []*Beer `protobuf:"bytes,3,rep,name=beers" json:"beers,omitempty"`
-}
-
-func (m *NewCellar) Reset()                    { *m = NewCellar{} }
-func (m *NewCellar) String() string            { return proto.CompactTextString(m) }
-func (*NewCellar) ProtoMessage()               {}
-func (*NewCellar) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
-
-func (m *NewCellar) GetAccepts() string {
-	if m != nil {
-		return m.Accepts
-	}
-	return ""
-}
-
-func (m *NewCellar) GetSlots() int32 {
+func (m *Cellar) GetSlots() []*CellarSlot {
 	if m != nil {
 		return m.Slots
-	}
-	return 0
-}
-
-func (m *NewCellar) GetBeers() []*Beer {
-	if m != nil {
-		return m.Beers
-	}
-	return nil
-}
-
-type NewBeerCellar struct {
-	SyncTime      int64        `protobuf:"varint,1,opt,name=syncTime" json:"syncTime,omitempty"`
-	UntappdKey    string       `protobuf:"bytes,2,opt,name=untappdKey" json:"untappdKey,omitempty"`
-	UntappdSecret string       `protobuf:"bytes,3,opt,name=untappdSecret" json:"untappdSecret,omitempty"`
-	Cellars       []*NewCellar `protobuf:"bytes,4,rep,name=cellars" json:"cellars,omitempty"`
-	Out           []*Beer      `protobuf:"bytes,5,rep,name=out" json:"out,omitempty"`
-}
-
-func (m *NewBeerCellar) Reset()                    { *m = NewBeerCellar{} }
-func (m *NewBeerCellar) String() string            { return proto.CompactTextString(m) }
-func (*NewBeerCellar) ProtoMessage()               {}
-func (*NewBeerCellar) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
-
-func (m *NewBeerCellar) GetSyncTime() int64 {
-	if m != nil {
-		return m.SyncTime
-	}
-	return 0
-}
-
-func (m *NewBeerCellar) GetUntappdKey() string {
-	if m != nil {
-		return m.UntappdKey
-	}
-	return ""
-}
-
-func (m *NewBeerCellar) GetUntappdSecret() string {
-	if m != nil {
-		return m.UntappdSecret
-	}
-	return ""
-}
-
-func (m *NewBeerCellar) GetCellars() []*NewCellar {
-	if m != nil {
-		return m.Cellars
-	}
-	return nil
-}
-
-func (m *NewBeerCellar) GetOut() []*Beer {
-	if m != nil {
-		return m.Out
-	}
-	return nil
-}
-
-type ToDrink struct {
-	Beers []*Beer `protobuf:"bytes,1,rep,name=beers" json:"beers,omitempty"`
-}
-
-func (m *ToDrink) Reset()                    { *m = ToDrink{} }
-func (m *ToDrink) String() string            { return proto.CompactTextString(m) }
-func (*ToDrink) ProtoMessage()               {}
-func (*ToDrink) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
-
-func (m *ToDrink) GetBeers() []*Beer {
-	if m != nil {
-		return m.Beers
-	}
-	return nil
-}
-
-type BeerCellar struct {
-	Name          string    `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	SyncTime      int64     `protobuf:"varint,2,opt,name=syncTime" json:"syncTime,omitempty"`
-	UntappdKey    string    `protobuf:"bytes,3,opt,name=untappdKey" json:"untappdKey,omitempty"`
-	UntappdSecret string    `protobuf:"bytes,4,opt,name=untappdSecret" json:"untappdSecret,omitempty"`
-	Cellars       []*Cellar `protobuf:"bytes,5,rep,name=cellars" json:"cellars,omitempty"`
-	Drunk         []*Beer   `protobuf:"bytes,6,rep,name=drunk" json:"drunk,omitempty"`
-	Todrink       *ToDrink  `protobuf:"bytes,7,opt,name=todrink" json:"todrink,omitempty"`
-}
-
-func (m *BeerCellar) Reset()                    { *m = BeerCellar{} }
-func (m *BeerCellar) String() string            { return proto.CompactTextString(m) }
-func (*BeerCellar) ProtoMessage()               {}
-func (*BeerCellar) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
-
-func (m *BeerCellar) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *BeerCellar) GetSyncTime() int64 {
-	if m != nil {
-		return m.SyncTime
-	}
-	return 0
-}
-
-func (m *BeerCellar) GetUntappdKey() string {
-	if m != nil {
-		return m.UntappdKey
-	}
-	return ""
-}
-
-func (m *BeerCellar) GetUntappdSecret() string {
-	if m != nil {
-		return m.UntappdSecret
-	}
-	return ""
-}
-
-func (m *BeerCellar) GetCellars() []*Cellar {
-	if m != nil {
-		return m.Cellars
-	}
-	return nil
-}
-
-func (m *BeerCellar) GetDrunk() []*Beer {
-	if m != nil {
-		return m.Drunk
-	}
-	return nil
-}
-
-func (m *BeerCellar) GetTodrink() *ToDrink {
-	if m != nil {
-		return m.Todrink
-	}
-	return nil
-}
-
-type GetToDrinkRequest struct {
-}
-
-func (m *GetToDrinkRequest) Reset()                    { *m = GetToDrinkRequest{} }
-func (m *GetToDrinkRequest) String() string            { return proto.CompactTextString(m) }
-func (*GetToDrinkRequest) ProtoMessage()               {}
-func (*GetToDrinkRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
-
-type GetToDrinkResponse struct {
-	Beers []*Beer `protobuf:"bytes,1,rep,name=beers" json:"beers,omitempty"`
-}
-
-func (m *GetToDrinkResponse) Reset()                    { *m = GetToDrinkResponse{} }
-func (m *GetToDrinkResponse) String() string            { return proto.CompactTextString(m) }
-func (*GetToDrinkResponse) ProtoMessage()               {}
-func (*GetToDrinkResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
-
-func (m *GetToDrinkResponse) GetBeers() []*Beer {
-	if m != nil {
-		return m.Beers
 	}
 	return nil
 }
@@ -440,13 +228,12 @@ func (m *GetToDrinkResponse) GetBeers() []*Beer {
 type AddBeerRequest struct {
 	Beer     *Beer `protobuf:"bytes,1,opt,name=beer" json:"beer,omitempty"`
 	Quantity int32 `protobuf:"varint,2,opt,name=quantity" json:"quantity,omitempty"`
-	Age      bool  `protobuf:"varint,3,opt,name=age" json:"age,omitempty"`
 }
 
 func (m *AddBeerRequest) Reset()                    { *m = AddBeerRequest{} }
 func (m *AddBeerRequest) String() string            { return proto.CompactTextString(m) }
 func (*AddBeerRequest) ProtoMessage()               {}
-func (*AddBeerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+func (*AddBeerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *AddBeerRequest) GetBeer() *Beer {
 	if m != nil {
@@ -462,76 +249,13 @@ func (m *AddBeerRequest) GetQuantity() int32 {
 	return 0
 }
 
-func (m *AddBeerRequest) GetAge() bool {
-	if m != nil {
-		return m.Age
-	}
-	return false
-}
-
 type AddBeerResponse struct {
-	Beers []*Beer `protobuf:"bytes,1,rep,name=beers" json:"beers,omitempty"`
 }
 
 func (m *AddBeerResponse) Reset()                    { *m = AddBeerResponse{} }
 func (m *AddBeerResponse) String() string            { return proto.CompactTextString(m) }
 func (*AddBeerResponse) ProtoMessage()               {}
-func (*AddBeerResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
-
-func (m *AddBeerResponse) GetBeers() []*Beer {
-	if m != nil {
-		return m.Beers
-	}
-	return nil
-}
-
-type ListRequest struct {
-}
-
-func (m *ListRequest) Reset()                    { *m = ListRequest{} }
-func (m *ListRequest) String() string            { return proto.CompactTextString(m) }
-func (*ListRequest) ProtoMessage()               {}
-func (*ListRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
-
-type ListResponse struct {
-	Slots []*CellarSlot `protobuf:"bytes,1,rep,name=slots" json:"slots,omitempty"`
-}
-
-func (m *ListResponse) Reset()                    { *m = ListResponse{} }
-func (m *ListResponse) String() string            { return proto.CompactTextString(m) }
-func (*ListResponse) ProtoMessage()               {}
-func (*ListResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
-
-func (m *ListResponse) GetSlots() []*CellarSlot {
-	if m != nil {
-		return m.Slots
-	}
-	return nil
-}
-
-type NewAddBeerRequest struct {
-	Beer *Beer `protobuf:"bytes,1,opt,name=beer" json:"beer,omitempty"`
-}
-
-func (m *NewAddBeerRequest) Reset()                    { *m = NewAddBeerRequest{} }
-func (m *NewAddBeerRequest) String() string            { return proto.CompactTextString(m) }
-func (*NewAddBeerRequest) ProtoMessage()               {}
-func (*NewAddBeerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
-
-func (m *NewAddBeerRequest) GetBeer() *Beer {
-	if m != nil {
-		return m.Beer
-	}
-	return nil
-}
-
-type NewAddBeerResponse struct {
-}
-
-func (m *NewAddBeerResponse) Reset()                    { *m = NewAddBeerResponse{} }
-func (m *NewAddBeerResponse) String() string            { return proto.CompactTextString(m) }
-func (*NewAddBeerResponse) ProtoMessage()               {}
-func (*NewAddBeerResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
+func (*AddBeerResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 type ListBeerRequest struct {
 }
@@ -539,20 +263,20 @@ type ListBeerRequest struct {
 func (m *ListBeerRequest) Reset()                    { *m = ListBeerRequest{} }
 func (m *ListBeerRequest) String() string            { return proto.CompactTextString(m) }
 func (*ListBeerRequest) ProtoMessage()               {}
-func (*ListBeerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+func (*ListBeerRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 type ListBeerResponse struct {
-	Beer []*Beer `protobuf:"bytes,1,rep,name=beer" json:"beer,omitempty"`
+	Beers []*Beer `protobuf:"bytes,1,rep,name=beers" json:"beers,omitempty"`
 }
 
 func (m *ListBeerResponse) Reset()                    { *m = ListBeerResponse{} }
 func (m *ListBeerResponse) String() string            { return proto.CompactTextString(m) }
 func (*ListBeerResponse) ProtoMessage()               {}
-func (*ListBeerResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
+func (*ListBeerResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
-func (m *ListBeerResponse) GetBeer() []*Beer {
+func (m *ListBeerResponse) GetBeers() []*Beer {
 	if m != nil {
-		return m.Beer
+		return m.Beers
 	}
 	return nil
 }
@@ -560,24 +284,12 @@ func (m *ListBeerResponse) GetBeer() []*Beer {
 func init() {
 	proto.RegisterType((*Empty)(nil), "beer.Empty")
 	proto.RegisterType((*Token)(nil), "beer.Token")
-	proto.RegisterType((*ServerState)(nil), "beer.ServerState")
+	proto.RegisterType((*Config)(nil), "beer.Config")
 	proto.RegisterType((*Beer)(nil), "beer.Beer")
-	proto.RegisterType((*BeerList)(nil), "beer.BeerList")
 	proto.RegisterType((*CellarSlot)(nil), "beer.CellarSlot")
-	proto.RegisterType((*Stash)(nil), "beer.Stash")
 	proto.RegisterType((*Cellar)(nil), "beer.Cellar")
-	proto.RegisterType((*NewCellar)(nil), "beer.NewCellar")
-	proto.RegisterType((*NewBeerCellar)(nil), "beer.NewBeerCellar")
-	proto.RegisterType((*ToDrink)(nil), "beer.ToDrink")
-	proto.RegisterType((*BeerCellar)(nil), "beer.BeerCellar")
-	proto.RegisterType((*GetToDrinkRequest)(nil), "beer.GetToDrinkRequest")
-	proto.RegisterType((*GetToDrinkResponse)(nil), "beer.GetToDrinkResponse")
 	proto.RegisterType((*AddBeerRequest)(nil), "beer.AddBeerRequest")
 	proto.RegisterType((*AddBeerResponse)(nil), "beer.AddBeerResponse")
-	proto.RegisterType((*ListRequest)(nil), "beer.ListRequest")
-	proto.RegisterType((*ListResponse)(nil), "beer.ListResponse")
-	proto.RegisterType((*NewAddBeerRequest)(nil), "beer.NewAddBeerRequest")
-	proto.RegisterType((*NewAddBeerResponse)(nil), "beer.NewAddBeerResponse")
 	proto.RegisterType((*ListBeerRequest)(nil), "beer.ListBeerRequest")
 	proto.RegisterType((*ListBeerResponse)(nil), "beer.ListBeerResponse")
 }
@@ -590,210 +302,11 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for BeerStashService service
-
-type BeerStashServiceClient interface {
-	AddBeerToStash(ctx context.Context, in *AddBeerRequest, opts ...grpc.CallOption) (*AddBeerResponse, error)
-	ListBeers(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
-}
-
-type beerStashServiceClient struct {
-	cc *grpc.ClientConn
-}
-
-func NewBeerStashServiceClient(cc *grpc.ClientConn) BeerStashServiceClient {
-	return &beerStashServiceClient{cc}
-}
-
-func (c *beerStashServiceClient) AddBeerToStash(ctx context.Context, in *AddBeerRequest, opts ...grpc.CallOption) (*AddBeerResponse, error) {
-	out := new(AddBeerResponse)
-	err := grpc.Invoke(ctx, "/beer.BeerStashService/AddBeerToStash", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *beerStashServiceClient) ListBeers(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
-	out := new(ListResponse)
-	err := grpc.Invoke(ctx, "/beer.BeerStashService/ListBeers", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Server API for BeerStashService service
-
-type BeerStashServiceServer interface {
-	AddBeerToStash(context.Context, *AddBeerRequest) (*AddBeerResponse, error)
-	ListBeers(context.Context, *ListRequest) (*ListResponse, error)
-}
-
-func RegisterBeerStashServiceServer(s *grpc.Server, srv BeerStashServiceServer) {
-	s.RegisterService(&_BeerStashService_serviceDesc, srv)
-}
-
-func _BeerStashService_AddBeerToStash_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddBeerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BeerStashServiceServer).AddBeerToStash(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.BeerStashService/AddBeerToStash",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerStashServiceServer).AddBeerToStash(ctx, req.(*AddBeerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BeerStashService_ListBeers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BeerStashServiceServer).ListBeers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.BeerStashService/ListBeers",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerStashServiceServer).ListBeers(ctx, req.(*ListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _BeerStashService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "beer.BeerStashService",
-	HandlerType: (*BeerStashServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "AddBeerToStash",
-			Handler:    _BeerStashService_AddBeerToStash_Handler,
-		},
-		{
-			MethodName: "ListBeers",
-			Handler:    _BeerStashService_ListBeers_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "beer.proto",
-}
-
-// Client API for NewBeerCellarService service
-
-type NewBeerCellarServiceClient interface {
-	AddBeer(ctx context.Context, in *NewAddBeerRequest, opts ...grpc.CallOption) (*NewAddBeerResponse, error)
-	ListBeersInCellar(ctx context.Context, in *ListBeerRequest, opts ...grpc.CallOption) (*ListBeerResponse, error)
-}
-
-type newBeerCellarServiceClient struct {
-	cc *grpc.ClientConn
-}
-
-func NewNewBeerCellarServiceClient(cc *grpc.ClientConn) NewBeerCellarServiceClient {
-	return &newBeerCellarServiceClient{cc}
-}
-
-func (c *newBeerCellarServiceClient) AddBeer(ctx context.Context, in *NewAddBeerRequest, opts ...grpc.CallOption) (*NewAddBeerResponse, error) {
-	out := new(NewAddBeerResponse)
-	err := grpc.Invoke(ctx, "/beer.NewBeerCellarService/AddBeer", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *newBeerCellarServiceClient) ListBeersInCellar(ctx context.Context, in *ListBeerRequest, opts ...grpc.CallOption) (*ListBeerResponse, error) {
-	out := new(ListBeerResponse)
-	err := grpc.Invoke(ctx, "/beer.NewBeerCellarService/ListBeersInCellar", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Server API for NewBeerCellarService service
-
-type NewBeerCellarServiceServer interface {
-	AddBeer(context.Context, *NewAddBeerRequest) (*NewAddBeerResponse, error)
-	ListBeersInCellar(context.Context, *ListBeerRequest) (*ListBeerResponse, error)
-}
-
-func RegisterNewBeerCellarServiceServer(s *grpc.Server, srv NewBeerCellarServiceServer) {
-	s.RegisterService(&_NewBeerCellarService_serviceDesc, srv)
-}
-
-func _NewBeerCellarService_AddBeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewAddBeerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NewBeerCellarServiceServer).AddBeer(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.NewBeerCellarService/AddBeer",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NewBeerCellarServiceServer).AddBeer(ctx, req.(*NewAddBeerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _NewBeerCellarService_ListBeersInCellar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListBeerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NewBeerCellarServiceServer).ListBeersInCellar(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.NewBeerCellarService/ListBeersInCellar",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NewBeerCellarServiceServer).ListBeersInCellar(ctx, req.(*ListBeerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _NewBeerCellarService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "beer.NewBeerCellarService",
-	HandlerType: (*NewBeerCellarServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "AddBeer",
-			Handler:    _NewBeerCellarService_AddBeer_Handler,
-		},
-		{
-			MethodName: "ListBeersInCellar",
-			Handler:    _NewBeerCellarService_ListBeersInCellar_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "beer.proto",
-}
-
 // Client API for BeerCellarService service
 
 type BeerCellarServiceClient interface {
-	AddBeer(ctx context.Context, in *Beer, opts ...grpc.CallOption) (*Cellar, error)
-	GetBeer(ctx context.Context, in *Beer, opts ...grpc.CallOption) (*Beer, error)
-	GetCellar(ctx context.Context, in *Cellar, opts ...grpc.CallOption) (*Cellar, error)
-	RemoveBeer(ctx context.Context, in *Beer, opts ...grpc.CallOption) (*Beer, error)
-	GetDrunk(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BeerList, error)
-	GetServerState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ServerState, error)
-	GetToDrink(ctx context.Context, in *GetToDrinkRequest, opts ...grpc.CallOption) (*GetToDrinkResponse, error)
+	AddBeer(ctx context.Context, in *AddBeerRequest, opts ...grpc.CallOption) (*AddBeerResponse, error)
+	ListBeers(ctx context.Context, in *ListBeerRequest, opts ...grpc.CallOption) (*ListBeerResponse, error)
 }
 
 type beerCellarServiceClient struct {
@@ -804,8 +317,8 @@ func NewBeerCellarServiceClient(cc *grpc.ClientConn) BeerCellarServiceClient {
 	return &beerCellarServiceClient{cc}
 }
 
-func (c *beerCellarServiceClient) AddBeer(ctx context.Context, in *Beer, opts ...grpc.CallOption) (*Cellar, error) {
-	out := new(Cellar)
+func (c *beerCellarServiceClient) AddBeer(ctx context.Context, in *AddBeerRequest, opts ...grpc.CallOption) (*AddBeerResponse, error) {
+	out := new(AddBeerResponse)
 	err := grpc.Invoke(ctx, "/beer.BeerCellarService/AddBeer", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -813,54 +326,9 @@ func (c *beerCellarServiceClient) AddBeer(ctx context.Context, in *Beer, opts ..
 	return out, nil
 }
 
-func (c *beerCellarServiceClient) GetBeer(ctx context.Context, in *Beer, opts ...grpc.CallOption) (*Beer, error) {
-	out := new(Beer)
-	err := grpc.Invoke(ctx, "/beer.BeerCellarService/GetBeer", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *beerCellarServiceClient) GetCellar(ctx context.Context, in *Cellar, opts ...grpc.CallOption) (*Cellar, error) {
-	out := new(Cellar)
-	err := grpc.Invoke(ctx, "/beer.BeerCellarService/GetCellar", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *beerCellarServiceClient) RemoveBeer(ctx context.Context, in *Beer, opts ...grpc.CallOption) (*Beer, error) {
-	out := new(Beer)
-	err := grpc.Invoke(ctx, "/beer.BeerCellarService/RemoveBeer", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *beerCellarServiceClient) GetDrunk(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BeerList, error) {
-	out := new(BeerList)
-	err := grpc.Invoke(ctx, "/beer.BeerCellarService/GetDrunk", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *beerCellarServiceClient) GetServerState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ServerState, error) {
-	out := new(ServerState)
-	err := grpc.Invoke(ctx, "/beer.BeerCellarService/GetServerState", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *beerCellarServiceClient) GetToDrink(ctx context.Context, in *GetToDrinkRequest, opts ...grpc.CallOption) (*GetToDrinkResponse, error) {
-	out := new(GetToDrinkResponse)
-	err := grpc.Invoke(ctx, "/beer.BeerCellarService/GetToDrink", in, out, c.cc, opts...)
+func (c *beerCellarServiceClient) ListBeers(ctx context.Context, in *ListBeerRequest, opts ...grpc.CallOption) (*ListBeerResponse, error) {
+	out := new(ListBeerResponse)
+	err := grpc.Invoke(ctx, "/beer.BeerCellarService/ListBeers", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -870,13 +338,8 @@ func (c *beerCellarServiceClient) GetToDrink(ctx context.Context, in *GetToDrink
 // Server API for BeerCellarService service
 
 type BeerCellarServiceServer interface {
-	AddBeer(context.Context, *Beer) (*Cellar, error)
-	GetBeer(context.Context, *Beer) (*Beer, error)
-	GetCellar(context.Context, *Cellar) (*Cellar, error)
-	RemoveBeer(context.Context, *Beer) (*Beer, error)
-	GetDrunk(context.Context, *Empty) (*BeerList, error)
-	GetServerState(context.Context, *Empty) (*ServerState, error)
-	GetToDrink(context.Context, *GetToDrinkRequest) (*GetToDrinkResponse, error)
+	AddBeer(context.Context, *AddBeerRequest) (*AddBeerResponse, error)
+	ListBeers(context.Context, *ListBeerRequest) (*ListBeerResponse, error)
 }
 
 func RegisterBeerCellarServiceServer(s *grpc.Server, srv BeerCellarServiceServer) {
@@ -884,7 +347,7 @@ func RegisterBeerCellarServiceServer(s *grpc.Server, srv BeerCellarServiceServer
 }
 
 func _BeerCellarService_AddBeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Beer)
+	in := new(AddBeerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -896,115 +359,25 @@ func _BeerCellarService_AddBeer_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/beer.BeerCellarService/AddBeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerCellarServiceServer).AddBeer(ctx, req.(*Beer))
+		return srv.(BeerCellarServiceServer).AddBeer(ctx, req.(*AddBeerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BeerCellarService_GetBeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Beer)
+func _BeerCellarService_ListBeers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBeerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BeerCellarServiceServer).GetBeer(ctx, in)
+		return srv.(BeerCellarServiceServer).ListBeers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/beer.BeerCellarService/GetBeer",
+		FullMethod: "/beer.BeerCellarService/ListBeers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerCellarServiceServer).GetBeer(ctx, req.(*Beer))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BeerCellarService_GetCellar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Cellar)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BeerCellarServiceServer).GetCellar(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.BeerCellarService/GetCellar",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerCellarServiceServer).GetCellar(ctx, req.(*Cellar))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BeerCellarService_RemoveBeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Beer)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BeerCellarServiceServer).RemoveBeer(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.BeerCellarService/RemoveBeer",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerCellarServiceServer).RemoveBeer(ctx, req.(*Beer))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BeerCellarService_GetDrunk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BeerCellarServiceServer).GetDrunk(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.BeerCellarService/GetDrunk",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerCellarServiceServer).GetDrunk(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BeerCellarService_GetServerState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BeerCellarServiceServer).GetServerState(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.BeerCellarService/GetServerState",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerCellarServiceServer).GetServerState(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BeerCellarService_GetToDrink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetToDrinkRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BeerCellarServiceServer).GetToDrink(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/beer.BeerCellarService/GetToDrink",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeerCellarServiceServer).GetToDrink(ctx, req.(*GetToDrinkRequest))
+		return srv.(BeerCellarServiceServer).ListBeers(ctx, req.(*ListBeerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1018,28 +391,8 @@ var _BeerCellarService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _BeerCellarService_AddBeer_Handler,
 		},
 		{
-			MethodName: "GetBeer",
-			Handler:    _BeerCellarService_GetBeer_Handler,
-		},
-		{
-			MethodName: "GetCellar",
-			Handler:    _BeerCellarService_GetCellar_Handler,
-		},
-		{
-			MethodName: "RemoveBeer",
-			Handler:    _BeerCellarService_RemoveBeer_Handler,
-		},
-		{
-			MethodName: "GetDrunk",
-			Handler:    _BeerCellarService_GetDrunk_Handler,
-		},
-		{
-			MethodName: "GetServerState",
-			Handler:    _BeerCellarService_GetServerState_Handler,
-		},
-		{
-			MethodName: "GetToDrink",
-			Handler:    _BeerCellarService_GetToDrink_Handler,
+			MethodName: "ListBeers",
+			Handler:    _BeerCellarService_ListBeers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1049,57 +402,34 @@ var _BeerCellarService_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("beer.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 819 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0xdd, 0x6e, 0xf3, 0x44,
-	0x10, 0x8d, 0xe3, 0x38, 0x4e, 0x26, 0x4d, 0x9a, 0x2c, 0x69, 0xb1, 0x22, 0x5a, 0x85, 0x05, 0x4a,
-	0x2a, 0x50, 0x2b, 0xa5, 0x88, 0xcb, 0xa2, 0x96, 0xa0, 0x08, 0x81, 0x8a, 0xe4, 0xe4, 0x16, 0x2a,
-	0x27, 0x1e, 0x8a, 0xd5, 0xc4, 0x4e, 0xed, 0x4d, 0xab, 0xf0, 0x02, 0x88, 0x77, 0xe0, 0x49, 0x78,
-	0x0e, 0x5e, 0x85, 0x7b, 0xb4, 0x3f, 0xb6, 0x37, 0x75, 0x4b, 0xf3, 0x49, 0xdf, 0xdd, 0xce, 0x19,
-	0xef, 0xd9, 0x73, 0x66, 0x77, 0x26, 0x01, 0x98, 0x21, 0xc6, 0x67, 0xab, 0x38, 0x62, 0x11, 0xa9,
-	0xf0, 0x35, 0xb5, 0xc1, 0xfa, 0x6e, 0xb9, 0x62, 0x1b, 0x7a, 0x0e, 0xd6, 0x34, 0xba, 0xc7, 0x90,
-	0xb4, 0xa0, 0x1c, 0xf8, 0x8e, 0xd1, 0x37, 0x06, 0x75, 0xb7, 0x1c, 0xf8, 0xe4, 0x10, 0xaa, 0x09,
-	0xce, 0x63, 0x64, 0x4e, 0x59, 0x60, 0x2a, 0xa2, 0x3f, 0x41, 0x63, 0x82, 0xf1, 0x23, 0xc6, 0x13,
-	0xe6, 0x31, 0x24, 0x47, 0x00, 0xbf, 0xc6, 0x88, 0xb7, 0xc9, 0xd2, 0x5b, 0x2c, 0xc4, 0x76, 0xcb,
-	0xad, 0x73, 0x64, 0xc2, 0x01, 0xf2, 0x31, 0xec, 0x89, 0xf4, 0x2c, 0x5a, 0xce, 0x30, 0x4e, 0x04,
-	0x97, 0xe5, 0x36, 0x38, 0x76, 0x2d, 0x21, 0xfa, 0x87, 0x01, 0x95, 0x6b, 0xc4, 0x58, 0x53, 0x60,
-	0x0a, 0x05, 0x47, 0x00, 0x7e, 0x1c, 0x84, 0xf7, 0xb7, 0xbe, 0xc7, 0x50, 0xec, 0x34, 0xdd, 0xba,
-	0x40, 0x46, 0xfc, 0x64, 0x02, 0x95, 0x24, 0xf8, 0x1d, 0x1d, 0x53, 0xc8, 0x13, 0x6b, 0x8e, 0x85,
-	0xde, 0x12, 0x9d, 0x8a, 0xc4, 0xf8, 0x5a, 0x18, 0x61, 0xde, 0x1d, 0xfa, 0x8e, 0xd5, 0x37, 0x06,
-	0x35, 0x57, 0x45, 0xa4, 0x0d, 0xa6, 0x37, 0x7b, 0x74, 0xaa, 0x7d, 0x63, 0x50, 0x76, 0xf9, 0x92,
-	0x7e, 0x09, 0x35, 0x2e, 0xe4, 0xc7, 0x20, 0x61, 0xa4, 0x0f, 0x16, 0x2f, 0x54, 0xe2, 0x18, 0x7d,
-	0x73, 0xd0, 0x18, 0xc2, 0x99, 0x28, 0x21, 0x4f, 0xbb, 0x32, 0x41, 0x7f, 0x01, 0xf8, 0x16, 0x17,
-	0x0b, 0x2f, 0x9e, 0x2c, 0x22, 0x46, 0x1c, 0xb0, 0xbd, 0xf9, 0x1c, 0x57, 0x2c, 0x51, 0x35, 0x4c,
-	0x43, 0xd2, 0x05, 0x2b, 0x59, 0x44, 0x2c, 0xf5, 0x2e, 0x83, 0x9c, 0xdf, 0x7c, 0x8d, 0xff, 0x1c,
-	0xac, 0x09, 0xf3, 0x92, 0xdf, 0xc8, 0x49, 0x4a, 0x20, 0xa5, 0xb4, 0xe5, 0xa7, 0xf9, 0xd9, 0x8a,
-	0x92, 0x5e, 0x42, 0x55, 0x82, 0x59, 0x19, 0x0c, 0xad, 0x0c, 0xd9, 0x81, 0xe5, 0xd7, 0x0e, 0xfc,
-	0x19, 0xea, 0x37, 0xf8, 0xa4, 0x28, 0xde, 0xbf, 0x9f, 0xbf, 0x0d, 0x68, 0xde, 0xe0, 0x13, 0x87,
-	0xd4, 0x19, 0x3d, 0xa8, 0x25, 0x9b, 0x70, 0x3e, 0x0d, 0x94, 0x54, 0xd3, 0xcd, 0x62, 0x72, 0x0c,
-	0xb0, 0x0e, 0x99, 0xb7, 0x5a, 0xf9, 0x3f, 0xe0, 0x46, 0x3d, 0x41, 0x0d, 0x21, 0x9f, 0x42, 0x53,
-	0x45, 0x13, 0xf9, 0x4a, 0xe5, 0x33, 0xd8, 0x06, 0xc9, 0x29, 0xd8, 0x73, 0x71, 0x56, 0xe2, 0x54,
-	0x84, 0xae, 0x7d, 0xa9, 0x2b, 0xf3, 0xe9, 0xa6, 0x79, 0xf2, 0x11, 0x98, 0xd1, 0x9a, 0x39, 0x56,
-	0x41, 0x3e, 0x87, 0xe9, 0x17, 0x60, 0x4f, 0xa3, 0x11, 0x7f, 0x7b, 0x3b, 0xbc, 0x8c, 0x7f, 0x0d,
-	0x00, 0xcd, 0xe6, 0x4b, 0xb7, 0xa1, 0x5b, 0x2f, 0xff, 0xaf, 0x75, 0xf3, 0x6d, 0xeb, 0x95, 0x97,
-	0xac, 0x9f, 0xe4, 0xd6, 0xa5, 0xa7, 0x3d, 0xfd, 0xdd, 0xe4, 0xbe, 0xfb, 0x60, 0xf9, 0xf1, 0x3a,
-	0xbc, 0x77, 0xaa, 0x45, 0x3b, 0x22, 0x41, 0x3e, 0x07, 0x9b, 0x45, 0xa2, 0xef, 0x1c, 0xbb, 0x6f,
-	0x0c, 0x1a, 0xc3, 0xa6, 0xfc, 0x46, 0x15, 0xc4, 0x4d, 0xb3, 0xf4, 0x03, 0xe8, 0x8c, 0x91, 0xa5,
-	0x30, 0x3e, 0xac, 0x31, 0x61, 0xf4, 0x6b, 0x20, 0x3a, 0x98, 0xac, 0xa2, 0x30, 0xc1, 0x9d, 0xda,
-	0xab, 0x75, 0xe5, 0xfb, 0x02, 0x91, 0x4c, 0xe4, 0x18, 0xc4, 0xec, 0x12, 0x75, 0xdc, 0xde, 0x22,
-	0x70, 0x5e, 0xd3, 0x87, 0xb5, 0x17, 0xb2, 0x80, 0x6d, 0xd4, 0xdb, 0xcc, 0x62, 0xd1, 0xec, 0x77,
-	0x72, 0x56, 0xd4, 0x5c, 0xbe, 0xa4, 0x17, 0xb0, 0x9f, 0xf1, 0xef, 0x2c, 0xaa, 0x09, 0x0d, 0x3e,
-	0x1d, 0x72, 0x6f, 0x7b, 0x32, 0x54, 0x04, 0xbb, 0x76, 0xea, 0x05, 0x74, 0x6e, 0xf0, 0xe9, 0xdd,
-	0xec, 0xd1, 0x2e, 0x10, 0x7d, 0x93, 0x3c, 0x92, 0x76, 0x60, 0x9f, 0x4b, 0xd0, 0x88, 0xe8, 0x10,
-	0xda, 0x39, 0xa4, 0x94, 0xe5, 0xe4, 0xe6, 0x4b, 0xe4, 0xc3, 0x3f, 0x0d, 0x68, 0xf3, 0x50, 0x4c,
-	0x1c, 0x3e, 0xdf, 0x83, 0x39, 0x92, 0x6f, 0xb2, 0x2b, 0x98, 0x46, 0x72, 0x14, 0x75, 0xe5, 0xc6,
-	0x6d, 0xe5, 0xbd, 0x83, 0x67, 0xa8, 0x92, 0x56, 0x22, 0x5f, 0x41, 0x3d, 0x55, 0x92, 0x90, 0x8e,
-	0xfc, 0x4a, 0xab, 0x5f, 0x8f, 0xe8, 0x50, 0xba, 0x6b, 0xf8, 0x97, 0x01, 0xdd, 0xad, 0x41, 0x91,
-	0xea, 0xb9, 0x04, 0x5b, 0x9d, 0x41, 0x3e, 0xcc, 0xfa, 0xf8, 0x99, 0x16, 0xa7, 0x98, 0xc8, 0xe4,
-	0x8c, 0xa0, 0x93, 0xc9, 0xf9, 0x3e, 0x54, 0xdd, 0x79, 0x90, 0x6b, 0xd0, 0x79, 0x0e, 0x9f, 0xc3,
-	0x99, 0xbc, 0x7f, 0xca, 0xd0, 0x29, 0x6a, 0xfb, 0x2c, 0xd7, 0xa6, 0x55, 0xb7, 0xb7, 0xd5, 0x74,
-	0xb4, 0x44, 0x3e, 0x01, 0x7b, 0x8c, 0xac, 0xf0, 0x99, 0xb6, 0xa6, 0x25, 0x72, 0x0a, 0xf5, 0x31,
-	0x32, 0xa5, 0x6f, 0x8b, 0xa1, 0xc0, 0x77, 0x02, 0xe0, 0xe2, 0x32, 0x7a, 0xc4, 0x37, 0x29, 0x6b,
-	0x63, 0x64, 0x23, 0xd1, 0xcf, 0x0d, 0x99, 0x11, 0xbf, 0xff, 0xbd, 0x56, 0xfe, 0x19, 0xf7, 0x4a,
-	0x4b, 0x64, 0x08, 0xad, 0x31, 0x32, 0xfd, 0x37, 0x7e, 0x6b, 0x83, 0xba, 0x46, 0x2d, 0x4f, 0x4b,
-	0xe4, 0x0a, 0x20, 0x6f, 0xf2, 0xf4, 0x72, 0x0a, 0xb3, 0x20, 0xbd, 0x9c, 0xe2, 0x3c, 0xa0, 0xa5,
-	0x59, 0x55, 0xfc, 0x3d, 0xb9, 0xf8, 0x2f, 0x00, 0x00, 0xff, 0xff, 0xbc, 0x94, 0xbe, 0x33, 0xac,
-	0x08, 0x00, 0x00,
+	// 457 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x53, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0xc5, 0x76, 0xec, 0x24, 0x13, 0x54, 0xd2, 0x51, 0xa9, 0x56, 0x41, 0x20, 0x63, 0x21, 0xe4,
+	0x53, 0x85, 0x02, 0x07, 0x0e, 0x5c, 0xa0, 0x20, 0x2e, 0x3d, 0x2d, 0xdc, 0x2b, 0xc7, 0x3b, 0x54,
+	0xab, 0x24, 0xeb, 0x74, 0x77, 0x5d, 0x51, 0xfe, 0x02, 0xbf, 0x81, 0xff, 0x8a, 0xf6, 0xc3, 0x24,
+	0x04, 0x71, 0xdb, 0xf7, 0xe6, 0xe3, 0xbd, 0x37, 0x89, 0x01, 0x56, 0x44, 0xfa, 0x62, 0xa7, 0x3b,
+	0xdb, 0xe1, 0xc8, 0xbd, 0xab, 0x31, 0xe4, 0x9f, 0xb6, 0x3b, 0x7b, 0x5f, 0x7d, 0x86, 0xfc, 0x6b,
+	0xb7, 0x26, 0x85, 0x27, 0x90, 0x4a, 0xc1, 0x92, 0x32, 0xa9, 0xa7, 0x3c, 0x95, 0x02, 0xcf, 0xa1,
+	0x30, 0xd4, 0x6a, 0xb2, 0x2c, 0xf5, 0x5c, 0x44, 0x8e, 0xd7, 0xd6, 0x4d, 0xb0, 0x2c, 0xf0, 0x01,
+	0x55, 0x06, 0x8a, 0xcb, 0x4e, 0x7d, 0x93, 0x37, 0xf8, 0x1c, 0xf2, 0xd0, 0xe0, 0x96, 0xcd, 0x96,
+	0xb3, 0x0b, 0xaf, 0xee, 0x55, 0x78, 0xa8, 0x60, 0x09, 0xb9, 0xd0, 0xbd, 0x5a, 0xb3, 0xb4, 0xcc,
+	0xea, 0xd9, 0x12, 0x42, 0xcb, 0x07, 0x22, 0xcd, 0x43, 0x01, 0x5f, 0x40, 0xd1, 0xd2, 0x66, 0xd3,
+	0x68, 0x2f, 0x33, 0x5b, 0x3e, 0x0c, 0x2d, 0x97, 0x9e, 0xe3, 0xb1, 0x56, 0xfd, 0x4a, 0x60, 0xe4,
+	0xa6, 0x0e, 0xdc, 0x67, 0xde, 0xfd, 0x53, 0x00, 0xa1, 0xa5, 0x5a, 0x5f, 0x8b, 0xc6, 0x92, 0x4f,
+	0x90, 0xf1, 0xa9, 0x67, 0x3e, 0x36, 0x96, 0x10, 0x61, 0x64, 0xe4, 0x0f, 0x8a, 0x11, 0xfc, 0xdb,
+	0x71, 0xaa, 0xd9, 0x12, 0x1b, 0x05, 0xce, 0xbd, 0xfd, 0x11, 0x6c, 0x73, 0x43, 0x82, 0xe5, 0x65,
+	0x52, 0x4f, 0x78, 0x44, 0x38, 0x87, 0xac, 0x59, 0xdd, 0xb1, 0xa2, 0x4c, 0xea, 0x94, 0xbb, 0x27,
+	0x9e, 0x41, 0x2e, 0x95, 0xa0, 0xef, 0x6c, 0x5c, 0x26, 0x75, 0xce, 0x03, 0xa8, 0x08, 0x20, 0x38,
+	0xfe, 0xb2, 0xe9, 0x2c, 0x32, 0x18, 0x37, 0x6d, 0x4b, 0x3b, 0x6b, 0xe2, 0x9d, 0x07, 0x88, 0x4f,
+	0x60, 0xaa, 0xfa, 0xed, 0xb5, 0xd9, 0x74, 0xd6, 0x78, 0xb7, 0x39, 0x9f, 0xa8, 0x7e, 0xeb, 0xa6,
+	0x8c, 0x3b, 0x96, 0xcb, 0x6e, 0x58, 0xf6, 0xef, 0xb1, 0x7c, 0xa1, 0x7a, 0x05, 0x45, 0x90, 0xc1,
+	0x97, 0x90, 0x87, 0x25, 0x89, 0xef, 0x9d, 0x1f, 0x5e, 0xcd, 0x6d, 0xe3, 0xa1, 0x5c, 0x5d, 0xc1,
+	0xc9, 0x7b, 0x21, 0xfc, 0x0e, 0xba, 0xed, 0xc9, 0x58, 0x7c, 0x06, 0xfe, 0x9f, 0x11, 0x7f, 0xb4,
+	0x43, 0x11, 0xcf, 0xe3, 0x02, 0x26, 0xb7, 0x7d, 0xa3, 0xac, 0xb4, 0xf7, 0x83, 0xc3, 0x01, 0x57,
+	0xa7, 0xf0, 0xe8, 0xcf, 0x36, 0xb3, 0xeb, 0x94, 0x21, 0x47, 0x5d, 0x49, 0x63, 0x0f, 0x14, 0xaa,
+	0x37, 0x30, 0xdf, 0x53, 0xa1, 0x6d, 0x9f, 0x2d, 0xf9, 0x4f, 0xb6, 0xe5, 0xcf, 0x04, 0x4e, 0x1d,
+	0x8e, 0x19, 0x48, 0xdf, 0xc9, 0x96, 0xf0, 0x2d, 0x8c, 0xa3, 0x22, 0x9e, 0x85, 0x99, 0xbf, 0xe3,
+	0x2c, 0x1e, 0x1f, 0xb1, 0xd1, 0xd6, 0x03, 0x7c, 0x07, 0xd3, 0xc1, 0x85, 0xc1, 0xd8, 0x75, 0xe4,
+	0x74, 0x71, 0x7e, 0x4c, 0x0f, 0xd3, 0xab, 0xc2, 0x7f, 0x44, 0xaf, 0x7f, 0x07, 0x00, 0x00, 0xff,
+	0xff, 0x4e, 0x3c, 0xe2, 0xd1, 0x52, 0x03, 0x00, 0x00,
 }
