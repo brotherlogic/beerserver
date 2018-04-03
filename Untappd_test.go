@@ -214,3 +214,12 @@ func TestGetVenuePageConvertHttpFail(t *testing.T) {
 		t.Errorf("Venue page retrieve did not fail\n%q\n", venuePage)
 	}
 }
+
+func TestGetUserPage(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	text := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
+
+	if !strings.Contains(text, "Simon") {
+		t.Errorf("User page retrieve failed: %v", text)
+	}
+}
