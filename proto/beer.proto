@@ -7,11 +7,13 @@ message Empty {}
 message Token {
   string id = 1;
   string secret = 2;
+  string rtoken = 3;
 }
 
-message ServerState {
-  int32 free_small = 1;
-  int32 free_bombers = 2;
+message Config {
+  Token token = 1;
+  repeated Beer drunk = 2;
+  Cellar cellar = 3;
 }
 
 message Beer {
@@ -21,104 +23,33 @@ message Beer {
   string name = 4;
   bool staged = 5;
   float abv = 6;
-}
-
-message BeerList {
-  repeated Beer beers = 1;
+  int32 index = 7;
 }
 
 message CellarSlot {
   string accepts = 1;
-  int32 slots = 2;
+  int32 num_slots = 2;
   repeated Beer beers = 3;
-}
-
-message Stash {
-  repeated CellarSlot slots = 1;
 }
 
 message Cellar {
-  string name = 1;
-  repeated Beer beers = 2;
-}
-
-message NewCellar {
-  string accepts = 1;
-  int32 slots = 2;
-  repeated Beer beers = 3;
-}
-
-message NewBeerCellar {
-  int64 syncTime = 1;
-  string untappdKey = 2;
-  string untappdSecret = 3;
-  repeated NewCellar cellars = 4;
-  repeated Beer out = 5;
-}
-
-message ToDrink {
-  repeated Beer beers = 1;
-}
-
-message BeerCellar {
-  	string name = 1;
-  	int64 syncTime = 2;
-  	string untappdKey = 3;
-  	string untappdSecret = 4;
-    repeated Cellar cellars = 5;
-    repeated Beer drunk = 6;
-    ToDrink todrink = 7;
-}
-
-message GetToDrinkRequest{}
-message GetToDrinkResponse{
-  repeated Beer beers = 1;
+  repeated CellarSlot slots = 1;
 }
 
 message AddBeerRequest {
   Beer beer = 1;
   int32 quantity = 2;
-  bool age = 3;
 }
 
-message AddBeerResponse {
-  repeated Beer beers = 1;
-}
-
-message ListRequest{}
-
-message ListResponse {
-  repeated CellarSlot slots = 1;
-}
-
-service BeerStashService {
-  rpc AddBeerToStash(AddBeerRequest) returns (AddBeerResponse) {};
-  rpc ListBeers(ListRequest) returns (ListResponse) {};
-}
-
-message NewAddBeerRequest {
-  Beer beer = 1;
-}
-
-message NewAddBeerResponse {}
+message AddBeerResponse {}
 
 message ListBeerRequest {}
 
 message ListBeerResponse {
-  repeated Beer beer = 1;
-}
-
-service NewBeerCellarService {
-  rpc AddBeer(NewAddBeerRequest) returns (NewAddBeerResponse) {};
-  rpc ListBeersInCellar(ListBeerRequest) returns (ListBeerResponse) {};
+  repeated Beer beers = 1;
 }
 
 service BeerCellarService {
-  rpc AddBeer(Beer) returns (Cellar) {};
-  rpc GetBeer(Beer) returns (Beer) {};
-  rpc GetCellar(Cellar) returns (Cellar) {};
-  rpc RemoveBeer(Beer) returns (Beer) {};
-  rpc GetDrunk(Empty) returns (BeerList) {};
-  rpc GetServerState(Empty) returns (ServerState) {};
-  rpc GetToDrink(GetToDrinkRequest) returns (GetToDrinkResponse) {};
+  rpc AddBeer(AddBeerRequest) returns (AddBeerResponse) {};
+  rpc ListBeers(ListBeerRequest) returns (ListBeerResponse) {};
 }

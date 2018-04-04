@@ -198,9 +198,9 @@ func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter respons
 }
 
 // GetBeerDetails Determines the name of the beer from the id
-func (u *Untappd) GetBeerDetails(id int64) (string, float32) {
+func (u *Untappd) GetBeerDetails(id int64) *pb.Beer {
 	text := u.getBeerPage(u.f, u.c, int(id))
 	name := convertPageToName(text, u.u)
 	abv := convertPageToABV(text, u.u)
-	return name, abv
+	return &pb.Beer{Name: name, Abv: abv, Id: id}
 }
