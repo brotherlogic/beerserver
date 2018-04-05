@@ -31,12 +31,8 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 	for i := 0; i < int(req.Quantity); i++ {
 		newBeer := proto.Clone(req.Beer).(*pb.Beer)
 		newBeer.DrinkDate = minDate.Unix()
-		err := s.addBeerToCellar(b)
-		if err != nil {
-			return &pb.AddBeerResponse{}, err
-		}
-
-		minDate.AddDate(1, 0, 0)
+		s.addBeerToCellar(newBeer)
+		minDate = minDate.AddDate(1, 0, 0)
 	}
 
 	s.save()

@@ -1,16 +1,16 @@
 package main
 
-import "encoding/json"
-import "errors"
+import (
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
-import "net/http"
-
-import "io/ioutil"
-import "strconv"
-import "strings"
-import "time"
-
-import pb "github.com/brotherlogic/beerserver/proto"
+	pb "github.com/brotherlogic/beerserver/proto"
+)
 
 //Untappd holds the untappd details
 type Untappd struct {
@@ -109,6 +109,19 @@ func (u *Untappd) getVenuePage(fetcher httpResponseFetcher, converter responseCo
 	return "Failed to retrieve " + strconv.Itoa(id)
 }
 
+func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseConverter, username string, maxID int) string {
+	url := "https://api.untappd.com/v4/user/checkins/USERNAME?client_id=CLIENTID&client_secret=CLIENTSECRET&max_id=MAXID"
+	url = strings.Replace(url, "USERNAME", username, 1)
+	url = strings.Replace(url, "CLIENTID", u.untappdID, 1)
+	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
+	url = strings.Replace(url, "MAXID", strconv.Itoa(maxID), 1)
+
+	response, _ := fetcher.Fetch(url)
+
+	contents, _ := converter.Convert(response)
+	return string(contents)
+}
+
 func convertPageToName(page string, unmarshaller unmarshaller) string {
 	var mapper map[string]interface{}
 	err := unmarshaller.Unmarshal([]byte(page), &mapper)
@@ -203,4 +216,22 @@ func (u *Untappd) GetBeerDetails(id int64) *pb.Beer {
 	name := convertPageToName(text, u.u)
 	abv := convertPageToABV(text, u.u)
 	return &pb.Beer{Name: name, Abv: abv, Id: id}
+}
+
+func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller) []*pb.Beer {
+	var resp []interface{}
+	json.Unmarshal([]byte(page), &resp)
+
+	beers := make([]*pb.Beer, len(resp))
+	for i, c := range resp {
+		m := c.(map[string]interface{})
+		id := m["beer_url"].(string)
+		elems := strings.Split(id, "/")
+		val, _ := strconv.Atoi(elems[len(elems)-1])
+		created := m["created_at"].(string)
+		layout := "2006-01-02 15:04:05"
+		t, _ := time.Parse(layout, created)
+		beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix()}
+	}
+	return beers
 }

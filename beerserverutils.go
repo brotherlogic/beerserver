@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -33,4 +34,10 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 	}
 
 	return fmt.Errorf("Unable to find space for this beer")
+}
+
+func (s *Server) loadDrunk(filestr string) {
+	data, _ := ioutil.ReadFile(filestr)
+	b := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
+	s.config.Drunk = b
 }
