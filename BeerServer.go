@@ -84,6 +84,7 @@ func Init() *Server {
 
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
+	var init = flag.Bool("init", false, "Init the output")
 	flag.Parse()
 
 	if *quiet {
@@ -97,5 +98,14 @@ func main() {
 
 	server.Register = server
 	server.RegisterServer("beerserver", false)
+
+	if *init {
+		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
+		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		server.loadDrunk("loaddata/brotherlogic.json")
+	}
+
 	server.Serve()
 }
