@@ -35,7 +35,7 @@ func TestAddMultipleWithCorrectDates(t *testing.T) {
 	s := InitTestServer(".testaddmultiple", true)
 	s.loadDrunk("loaddata/brotherlogic.json")
 
-	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2540909, Size: "bomber"}, Quantity: 1})
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2324956, Size: "bomber"}, Quantity: 1})
 
 	if err != nil {
 		t.Fatalf("Error when adding a beer: %v", err)
@@ -47,7 +47,7 @@ func TestAddMultipleWithCorrectDates(t *testing.T) {
 		t.Fatalf("Error when listing beers: %v", err)
 	}
 
-	if len(list.Beers) != 1 || list.Beers[0].DrinkDate != 1522527999 {
+	if len(list.Beers) != 1 || list.Beers[0].DrinkDate != 1522446990 {
 		t.Errorf("Beer added has errors: %v", list)
 	}
 
@@ -55,4 +55,19 @@ func TestAddMultipleWithCorrectDates(t *testing.T) {
 		t.Errorf("Wrong number of beers added: %v", list)
 	}
 
+}
+
+func TestResyncCorrectsSize(t *testing.T) {
+	s := InitTestServer(".testresynccorrectssize", true)
+	s.loadDrunk("loaddata/brotherlogic.json")
+
+	if len(s.config.Drunk) != 3709 {
+		t.Fatalf("Drunk number is wrong: %v", len(s.config.Drunk))
+	}
+
+	s.syncDrunk(fileFetcher{})
+
+	if len(s.config.Drunk) != 3710 {
+		t.Fatalf("Drunk number is still wrong %v", len(s.config.Drunk))
+	}
 }

@@ -24,6 +24,7 @@ message Beer {
   bool staged = 5;
   float abv = 6;
   int32 index = 7;
+  int32 checkin_id = 8;
 }
 
 message CellarSlot {

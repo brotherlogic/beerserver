@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -109,12 +110,12 @@ func (u *Untappd) getVenuePage(fetcher httpResponseFetcher, converter responseCo
 	return "Failed to retrieve " + strconv.Itoa(id)
 }
 
-func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseConverter, username string, maxID int) string {
-	url := "https://api.untappd.com/v4/user/checkins/USERNAME?client_id=CLIENTID&client_secret=CLIENTSECRET&max_id=MAXID"
+func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseConverter, username string, minID int) string {
+	url := "https://api.untappd.com/v4/user/checkins/USERNAME?client_id=CLIENTID&client_secret=CLIENTSECRET&min_id=MINID"
 	url = strings.Replace(url, "USERNAME", username, 1)
 	url = strings.Replace(url, "CLIENTID", u.untappdID, 1)
 	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
-	url = strings.Replace(url, "MAXID", strconv.Itoa(maxID), 1)
+	url = strings.Replace(url, "MINID", strconv.Itoa(minID), 1)
 
 	response, _ := fetcher.Fetch(url)
 
@@ -161,9 +162,9 @@ func convertPageToABV(page string, unmarshaller unmarshaller) float32 {
 	return float32(abv)
 }
 
-func convertPageToDrinks(page string, unmarshaller unmarshaller) ([]pb.Beer, error) {
+func (u *Untappd) convertPageToDrinks(page string, unmarshaller unmarshaller) ([]*pb.Beer, error) {
 	var mapper map[string]interface{}
-	var values []pb.Beer
+	var values []*pb.Beer
 	err := unmarshaller.Unmarshal([]byte(page), &mapper)
 	if err != nil {
 		return values, err
@@ -185,7 +186,36 @@ func convertPageToDrinks(page string, unmarshaller unmarshaller) ([]pb.Beer, err
 		beerID := int64(beer["bid"].(float64))
 		date := string(v.(map[string]interface{})["created_at"].(string))
 		cdate, _ := time.Parse(time.RFC1123Z, date)
-		nbeer := pb.Beer{Id: beerID, DrinkDate: cdate.Unix()}
+		nbeer := &pb.Beer{Id: beerID, DrinkDate: cdate.Unix()}
+		values = append(values, nbeer)
+	}
+
+	return values, nil
+}
+
+func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller) ([]*pb.Beer, error) {
+	var mapper map[string]interface{}
+	var values []*pb.Beer
+	err := unmarshaller.Unmarshal([]byte(page), &mapper)
+	if err != nil {
+		return values, err
+	}
+
+	meta := mapper["meta"].(map[string]interface{})
+	metaCode := int(meta["code"].(float64))
+	if metaCode != 200 {
+		return values, errors.New("Couldn't retrieve drinks")
+	}
+
+	response := mapper["response"].(map[string]interface{})
+	items := response["items"].([]interface{})
+
+	for _, v := range items {
+		beer := v.(map[string]interface{})["beer"].(map[string]interface{})
+		beerID := int64(beer["bid"].(float64))
+		date := string(v.(map[string]interface{})["created_at"].(string))
+		cdate, _ := time.Parse(time.RFC1123Z, date)
+		nbeer := &pb.Beer{Id: beerID, DrinkDate: cdate.Unix()}
 		values = append(values, nbeer)
 	}
 
@@ -199,7 +229,7 @@ func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter respons
 	var ret []int64
 
 	text := u.getVenuePage(fetcher, converter, 2194560)
-	drinks, _ := convertPageToDrinks(text, unmarshaller)
+	drinks, _ := u.convertPageToDrinks(text, unmarshaller)
 
 	for _, k := range drinks {
 		if date < k.DrinkDate {
@@ -228,10 +258,23 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 		id := m["beer_url"].(string)
 		elems := strings.Split(id, "/")
 		val, _ := strconv.Atoi(elems[len(elems)-1])
+		cid := m["checkin_url"].(string)
+		celems := strings.Split(cid, "/")
+		cval, _ := strconv.Atoi(celems[len(elems)-1])
 		created := m["created_at"].(string)
 		layout := "2006-01-02 15:04:05"
 		t, _ := time.Parse(layout, created)
-		beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix()}
+		beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix(), CheckinId: int32(cval)}
 	}
+
+	log.Printf("HERE %v", len(beers))
+
 	return beers
+}
+
+func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) []*pb.Beer {
+	log.Printf("Checking with %v", lastID)
+	page := u.getUserPage(f, c, "brotherlogic", int(lastID))
+	list, _ := u.convertUserPageToDrinks(page, un)
+	return list
 }

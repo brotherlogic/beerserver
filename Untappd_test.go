@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -33,6 +34,7 @@ func (fetcher fileFetcher) Fetch(url string) (*http.Response, error) {
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	data, err := os.Open("testdata/" + strippedURL)
 	if err != nil {
+		log.Printf("Error reading %v -> %v", url, err)
 		return nil, err
 	}
 	response := &http.Response{}
@@ -93,7 +95,7 @@ func TestGetBeerPageConvertFail(t *testing.T) {
 	var fetcher = fileFetcher{}
 	var converter = mainConverter{}
 	beerPage := u.getBeerPage(fetcher, converter, 7936)
-	beers, err := convertPageToDrinks(beerPage, stubFailUnmarshaller{})
+	beers, err := u.convertPageToDrinks(beerPage, stubFailUnmarshaller{})
 	if err == nil {
 		t.Errorf("Bad unmarshal has not failed: %v", beers)
 	}
@@ -104,7 +106,7 @@ func TestGetBeerPage200Fail(t *testing.T) {
 	var fetcher = fileFetcher{}
 	var converter = mainConverter{}
 	beerPage := u.getBeerPage(fetcher, converter, 0)
-	beers, err := convertPageToDrinks(beerPage, mainUnmarshaller{})
+	beers, err := u.convertPageToDrinks(beerPage, mainUnmarshaller{})
 	if err == nil {
 		t.Errorf("Bad unmarshal has not failed: %v", beers)
 	}
@@ -221,5 +223,25 @@ func TestGetUserPage(t *testing.T) {
 
 	if !strings.Contains(text, "Simon") {
 		t.Errorf("User page retrieve failed: %v", text)
+	}
+}
+
+func TestBadUserPage(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	text := u.getUserPage(fileFetcher{}, mainConverter{}, "blahdyblah", 0)
+	_, err := u.convertUserPageToDrinks(text, mainUnmarshaller{})
+
+	if err == nil {
+		t.Errorf("Did not error")
+	}
+}
+
+func TestBadUserPageUnmarshal(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	text := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
+	_, err := u.convertUserPageToDrinks(text, stubFailUnmarshaller{})
+
+	if err == nil {
+		t.Errorf("Did not error")
 	}
 }

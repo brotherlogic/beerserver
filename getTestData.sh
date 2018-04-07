@@ -1,4 +1,8 @@
 mkdir -p testdata/v4/user/checkins/
+curl "https://api.untappd.com/v4/user/checkins/blahdybblah?client_id=$1&client_secret=$2&min_id=0" > testdata/v4/user/checkins/blahdyblah_client_id=testid_client_secret=testsecret_min_id=0
+exit
+curl "https://api.untappd.com/v4/user/checkins/brotherlogic?client_id=$1&client_secret=$2&min_id=579454692" > testdata/v4/user/checkins/brotherlogic_client_id=testid_client_secret=testsecret_min_id=579454692
+exit
 curl "https://api.untappd.com/v4/user/checkins/brotherlogic?client_id=$1&client_secret=$2&max_id=8471" > testdata/v4/user/checkins/brotherlogic_client_id=testid_client_secret=testsecret_max_id=8471
 curl "https://api.untappd.com/v4/user/checkins/brotherlogic?client_id=$1&client_secret=$2&min_id=0" > testdata/v4/user/checkins/brotherlogic_client_id=testid_client_secret=testsecret_min_id=0
 exit
