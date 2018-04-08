@@ -71,3 +71,21 @@ func TestResyncCorrectsSize(t *testing.T) {
 		t.Fatalf("Drunk number is still wrong %v", len(s.config.Drunk))
 	}
 }
+
+func TestMoveToOnDeck(t *testing.T) {
+	s := InitTestServer(".testmovetoondeck", true)
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 7936, Size: "bomber"}, Quantity: 2})
+	if err != nil {
+		t.Fatalf("Error adding beer: %v", err)
+	}
+	time.Sleep(time.Second * 2)
+	s.moveToOnDeck(time.Now())
+
+	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
+	if err != nil {
+		t.Fatalf("Error listing beers: %v", err)
+	}
+	if len(list.Beers) != 1 || !list.Beers[0].OnDeck {
+		t.Errorf("List is not correct: %v", list)
+	}
+}

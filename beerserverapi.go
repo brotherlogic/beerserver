@@ -43,9 +43,16 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.ListBeerResponse, error) {
 	beers := make([]*pb.Beer, 0)
 
-	for _, c := range s.config.Cellar.Slots {
-		for _, b := range c.Beers {
+	if req.OnDeck {
+		for _, b := range s.config.Cellar.OnDeck {
 			beers = append(beers, b)
+		}
+	} else {
+
+		for _, c := range s.config.Cellar.Slots {
+			for _, b := range c.Beers {
+				beers = append(beers, b)
+			}
 		}
 	}
 

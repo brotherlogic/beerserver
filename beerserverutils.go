@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
+	"time"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 )
@@ -43,4 +45,20 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 	lastID := s.config.Drunk[len(s.config.Drunk)-1].CheckinId
 	ndrinks := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
 	s.config.Drunk = append(s.config.Drunk, ndrinks...)
+}
+
+func (s *Server) moveToOnDeck(t time.Time) {
+	for _, cellar := range s.config.Cellar.Slots {
+		i := 0
+		for i < len(cellar.Beers) {
+			if cellar.Beers[i].DrinkDate < t.Unix() {
+				cellar.Beers[i].OnDeck = true
+				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, cellar.Beers[i])
+				cellar.Beers = append(cellar.Beers[:i], cellar.Beers[i+1:]...)
+			} else {
+				log.Printf("%v and %v", cellar.Beers[i], t.Unix())
+				i++
+			}
+		}
+	}
 }
