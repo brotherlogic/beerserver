@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -267,13 +266,10 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 		beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix(), CheckinId: int32(cval)}
 	}
 
-	log.Printf("HERE %v", len(beers))
-
 	return beers
 }
 
 func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) []*pb.Beer {
-	log.Printf("Checking with %v", lastID)
 	page := u.getUserPage(f, c, "brotherlogic", int(lastID))
 	list, _ := u.convertUserPageToDrinks(page, un)
 	return list

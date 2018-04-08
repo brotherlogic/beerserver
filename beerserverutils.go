@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"time"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -11,13 +10,11 @@ import (
 
 func findIndex(slot *pb.CellarSlot, date int64) int32 {
 	bestIndex := int32(len(slot.Beers))
-	log.Printf("PRELEN = %v", len(slot.Beers))
 	for _, b := range slot.Beers {
 		if date < b.DrinkDate && b.Index < bestIndex {
 			bestIndex = b.Index
 		}
 	}
-	log.Printf("BEST INDEX = %v", bestIndex)
 	return bestIndex
 }
 
@@ -83,7 +80,6 @@ func (s *Server) moveToOnDeck(t time.Time) {
 				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, cellar.Beers[i])
 				cellar.Beers = append(cellar.Beers[:i], cellar.Beers[i+1:]...)
 			} else {
-				log.Printf("%v and %v", cellar.Beers[i], t.Unix())
 				i++
 			}
 		}
