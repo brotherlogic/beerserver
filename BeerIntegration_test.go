@@ -89,3 +89,27 @@ func TestMoveToOnDeck(t *testing.T) {
 		t.Errorf("List is not correct: %v", list)
 	}
 }
+
+func TestOrderBeerCorrectly(t *testing.T) {
+	s := InitTestServer(".testorderbeercorrectly", true)
+	s.loadDrunk("loaddata/brotherlogic.json")
+
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2324956, Size: "bomber"}, Quantity: 1})
+	_, err = s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2428618, Size: "bomber"}, Quantity: 1})
+
+	if err != nil {
+		t.Fatalf("Error adding beer: %v", err)
+	}
+
+	for _, c := range s.config.Cellar.Slots {
+		for _, b := range c.Beers {
+			if b.Id == 2324956 && b.Index != 1 {
+				t.Errorf("Index is incorrect: %v", c)
+			}
+			if b.Id == 2428618 && b.Index != 0 {
+				t.Errorf("Index is incorrect: %v", c)
+			}
+
+		}
+	}
+}
