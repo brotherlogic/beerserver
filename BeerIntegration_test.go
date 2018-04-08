@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"testing"
 	"time"
 
@@ -101,15 +102,46 @@ func TestOrderBeerCorrectly(t *testing.T) {
 		t.Fatalf("Error adding beer: %v", err)
 	}
 
+	drinkFirst := int64(0)
+	drinkSecond := int64(0)
 	for _, c := range s.config.Cellar.Slots {
 		for _, b := range c.Beers {
-			if b.Id == 2324956 && b.Index != 1 {
-				t.Errorf("Index is incorrect: %v", c)
+			if b.Index == 0 {
+				if drinkFirst != 0 {
+					t.Fatalf("Trying to set two firsts: %v", c)
+				}
+				drinkFirst = b.DrinkDate
 			}
-			if b.Id == 2428618 && b.Index != 0 {
-				t.Errorf("Index is incorrect: %v", c)
+			if b.Index == 1 {
+				if drinkSecond != 0 {
+					t.Fatalf("Trying to set two seconds: %v", c)
+				}
+				drinkSecond = b.DrinkDate
 			}
 
 		}
+	}
+
+	if drinkFirst > drinkSecond || drinkFirst == 0 || drinkSecond == 0 {
+		t.Errorf("Ordering is incorrect!: %v", s.config.Cellar.Slots)
+	}
+
+	log.Printf("%v before %v", time.Unix(drinkFirst, 0), time.Unix(drinkSecond, 0))
+}
+
+func TestBeerGoesInRightCellar(t *testing.T) {
+	s := InitTestServer(".testbeergoesinrightcellar", true)
+	s.config.Cellar.Slots = append(s.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 10, Beers: []*pb.Beer{&pb.Beer{Id: 2324956, Size: "bomber", DrinkDate: 1234}}})
+	s.config.Cellar.Slots = append(s.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 10, Beers: []*pb.Beer{&pb.Beer{Id: 2324956, Size: "bomber", DrinkDate: time.Now().Unix() + 100}}})
+
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2428618, Size: "bomber"}, Quantity: 1})
+
+	if err != nil {
+		t.Fatalf("Error adding the beer: %v", err)
+	}
+
+	//New beer should be in the third slot
+	if len(s.config.Cellar.Slots[0].Beers) != 0 || len(s.config.Cellar.Slots[1].Beers) != 1 {
+		t.Errorf("beer has been added to the wrong slot!: %v or %v or %v", s.config.Cellar.Slots[0], s.config.Cellar.Slots[1], s.config.Cellar.Slots[2])
 	}
 }

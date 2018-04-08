@@ -10,26 +10,53 @@ import (
 )
 
 func findIndex(slot *pb.CellarSlot, date int64) int32 {
-	return 0
+	bestIndex := int32(len(slot.Beers))
+	log.Printf("PRELEN = %v", len(slot.Beers))
+	for _, b := range slot.Beers {
+		if date < b.DrinkDate && b.Index < bestIndex {
+			bestIndex = b.Index
+		}
+	}
+	log.Printf("BEST INDEX = %v", bestIndex)
+	return bestIndex
 }
 
 func (s *Server) addBeerToCellar(b *pb.Beer) error {
+	bestIndex := int32(99)
+	bestCellar := -1
 	//Do we have room for this beer
-	for _, c := range s.config.Cellar.Slots {
+	for i, c := range s.config.Cellar.Slots {
 		if c.Accepts == b.Size {
-			if int(c.NumSlots) > len(c.Beers) {
-				index := findIndex(c, b.DrinkDate)
-				for _, beer := range c.Beers {
-					if beer.Index >= index {
-						beer.Index++
+			if len(c.Beers) == 0 {
+				bestCellar = i
+			} else {
+				if int(c.NumSlots) > len(c.Beers) {
+					index := findIndex(c, b.DrinkDate)
+					if index < bestIndex {
+						bestIndex = index
+						bestCellar = i
 					}
 				}
-				b.Index = index
-				c.Beers = append(c.Beers, b)
-
-				return nil
 			}
 		}
+	}
+
+	if bestCellar >= 0 {
+		// We reset when we have to add to a new cellar
+		if bestIndex == 99 {
+			bestIndex = 0
+		}
+		c := s.config.Cellar.Slots[bestCellar]
+		for _, beer := range c.Beers {
+			if beer.Index >= bestIndex {
+				beer.Index++
+			}
+		}
+		b.Index = bestIndex
+		c.Beers = append(c.Beers, b)
+
+		return nil
+
 	}
 
 	return fmt.Errorf("Unable to find space for this beer")
