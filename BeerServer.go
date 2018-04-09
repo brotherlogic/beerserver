@@ -85,6 +85,8 @@ func Init() *Server {
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	var init = flag.Bool("init", false, "Init the output")
+	var secret = flag.String("secret", "", "Untappd secret")
+	var client = flag.String("client", "", "Untappd client")
 	flag.Parse()
 
 	if *quiet {
@@ -106,6 +108,7 @@ func main() {
 		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		server.loadDrunk("loaddata/brotherlogic.json")
+		server.config.Token = &pb.Token{Secret: *secret, Id: *client}
 		server.save()
 		panic("Saved!")
 	}
