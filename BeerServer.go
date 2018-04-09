@@ -100,6 +100,7 @@ func main() {
 	server.RegisterServer("beerserver", false)
 
 	if *init {
+		server.config = &pb.Config{Cellar: &pb.Cellar{Slots: []*pb.CellarSlot{}}}
 		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
 		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
