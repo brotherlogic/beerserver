@@ -52,6 +52,19 @@ func main() {
 				fmt.Printf("Error getting beers: %v\n", err)
 			}
 		}
+	case "add":
+		addFlags := flag.NewFlagSet("Add", flag.ExitOnError)
+		var id = addFlags.Int("id", -1, "Id of beer to add")
+		var quantity = addFlags.Int("quantity", 0, "Number of beers to add")
+		var size = addFlags.String("size", "", "Size of beer")
+		if err := addFlags.Parse(os.Args[2:]); err == nil {
+			if len(*size) != 0 {
+				_, err := client.AddBeer(ctx, &pb.AddBeerRequest{Beer: &pb.Beer{Id: int64(*id), Size: *size}, Quantity: int32(*quantity)})
+				if err != nil {
+					fmt.Printf("Error adding beer: %v\n", err)
+				}
+			}
+		}
 	}
 
 }
