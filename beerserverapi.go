@@ -11,6 +11,7 @@ import (
 
 //AddBeer adds a beer to the server
 func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBeerResponse, error) {
+	t := time.Now()
 	b := s.ut.GetBeerDetails(req.Beer.Id)
 	b.Size = req.Beer.Size
 
@@ -36,11 +37,13 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 	}
 
 	s.save()
+	s.LogFunction("AddBeer", t)
 	return &pb.AddBeerResponse{}, nil
 }
 
 //ListBeers gets the beers in the cellar
 func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.ListBeerResponse, error) {
+	t := time.Now()
 	beers := make([]*pb.Beer, 0)
 
 	if req.OnDeck {
@@ -56,5 +59,6 @@ func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.Li
 		}
 	}
 
+	s.LogFunction("ListBeers", t)
 	return &pb.ListBeerResponse{Beers: beers}, nil
 }
