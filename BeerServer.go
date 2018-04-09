@@ -105,6 +105,8 @@ func main() {
 		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		server.loadDrunk("loaddata/brotherlogic.json")
+		server.save()
+		panic()
 	}
 
 	server.Serve()
