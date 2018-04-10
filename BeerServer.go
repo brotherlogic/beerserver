@@ -57,6 +57,7 @@ func (s *Server) Mote(master bool) error {
 		}
 
 		s.config = bResp.(*pb.Config)
+		s.ut = GetUntappd(s.config.Token.Id, s.config.Token.Secret)
 	}
 
 	return nil
