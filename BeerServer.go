@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
@@ -83,6 +84,10 @@ func Init() *Server {
 	return s
 }
 
+func (s *Server) doSync() {
+	s.syncDrunk(mainFetcher{})
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	var init = flag.Bool("init", false, "Init the output")
@@ -113,6 +118,8 @@ func main() {
 		server.save()
 		panic("Saved!")
 	}
+
+	server.RegisterRepeatingTask(server.doSync, time.Hour)
 
 	server.Serve()
 }
