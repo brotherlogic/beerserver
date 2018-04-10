@@ -32,6 +32,28 @@ func TestAddMultipleRetrieveMultiple(t *testing.T) {
 
 }
 
+func TestAddJR(t *testing.T) {
+	s := InitTestServer(".testaddjr", true)
+	s.loadDrunk("loaddata/brotherlogic.json")
+
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2407538, Size: "bomber"}, Quantity: 2})
+	if err != nil {
+		t.Fatalf("Error adding beer: %v", err)
+	}
+
+	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{})
+	for _, b := range list.Beers {
+		d := time.Unix(b.DrinkDate, 0)
+		if d.Year() == 2018 {
+			t.Errorf("Beer placement is wrong %v -> %v", b, d)
+		}
+
+		if b.Name != "Drake's Brewing Company - Barrel Aged Jolly Rodger (2017)" {
+			t.Errorf("Beer name is wrong: %v", b.Name)
+		}
+	}
+}
+
 func TestAddMultipleWithCorrectDates(t *testing.T) {
 	s := InitTestServer(".testaddmultiple", true)
 	s.loadDrunk("loaddata/brotherlogic.json")
@@ -48,7 +70,7 @@ func TestAddMultipleWithCorrectDates(t *testing.T) {
 		t.Fatalf("Error when listing beers: %v", err)
 	}
 
-	if len(list.Beers) != 1 || list.Beers[0].DrinkDate != 1522446990 {
+	if len(list.Beers) != 1 || list.Beers[0].DrinkDate != 1553982990 {
 		t.Errorf("Beer added has errors: %v", list)
 	}
 
