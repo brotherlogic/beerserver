@@ -15,6 +15,7 @@ func InitTestServer(dir string, delete bool) *Server {
 		os.RemoveAll(dir)
 	}
 	s.KSclient = *keystoreclient.GetTestClient(dir)
+	s.SkipLog = true
 	s.ut = GetTestUntappd()
 
 	return s
