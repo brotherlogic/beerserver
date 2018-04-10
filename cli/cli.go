@@ -45,7 +45,7 @@ func main() {
 				for i := 0; i < len(list.Beers); i++ {
 					for _, b := range list.Beers {
 						if int(b.Index) == i && int(b.InCellar) == *cellar {
-							fmt.Printf("%v. %v\n", i, b.Name)
+							fmt.Printf("%v. %v (%v)\n", i, b.Name, time.Unix(b.DrinkDate, 0))
 						}
 					}
 				}
