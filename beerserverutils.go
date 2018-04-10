@@ -50,7 +50,7 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 			}
 		}
 		b.Index = bestIndex
-		b.Cellar = bestCellar
+		b.InCellar = int32(bestCellar)
 		c.Beers = append(c.Beers, b)
 
 		return nil
