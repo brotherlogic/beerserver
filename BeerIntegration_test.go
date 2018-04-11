@@ -167,3 +167,26 @@ func TestBeerGoesInRightCellar(t *testing.T) {
 		t.Errorf("beer has been added to the wrong slot!: %v or %v or %v", s.config.Cellar.Slots[0], s.config.Cellar.Slots[1], s.config.Cellar.Slots[2])
 	}
 }
+
+func TestBeerDateLatest(t *testing.T) {
+	s := InitTestServer(".testbeerdatelatest", true)
+	s.loadDrunk("loaddata/brotherlogic.json")
+
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 5771, Size: "bomber"}, Quantity: 1})
+	if err != nil {
+		t.Fatalf("Error addding beer: %v", err)
+	}
+
+	//New beer should have drink date of 16th November 2018
+	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{})
+
+	if len(list.Beers) != 1 {
+		t.Fatalf("Wrong number of beers: %v", list)
+	}
+
+	date := time.Unix(list.Beers[0].DrinkDate, 0)
+	if date.Year() != 2018 || date.Month() != time.November || date.Day() != 15 {
+		t.Errorf("Wrong date returned: %v", date)
+	}
+
+}

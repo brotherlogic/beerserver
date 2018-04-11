@@ -15,13 +15,16 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 	b := s.ut.GetBeerDetails(req.Beer.Id)
 	b.Size = req.Beer.Size
 
-	minTime := time.Now().Unix()
+	minTime := int64(0)
 	before := false
 	for _, b := range s.config.Drunk {
-		if b.Id == req.Beer.Id && b.DrinkDate < minTime {
+		if b.Id == req.Beer.Id && b.DrinkDate > minTime {
 			minTime = b.DrinkDate
 			before = true
 		}
+	}
+	if minTime == 0 {
+		minTime = time.Now().Unix()
 	}
 
 	minDate := time.Unix(minTime, 0)
