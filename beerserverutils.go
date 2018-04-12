@@ -72,6 +72,7 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 	lastID := s.config.Drunk[len(s.config.Drunk)-1].CheckinId
 	ndrinks := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
 	s.config.Drunk = append(s.config.Drunk, ndrinks...)
+	s.save()
 }
 
 func (s *Server) moveToOnDeck(t time.Time) {
@@ -87,6 +88,8 @@ func (s *Server) moveToOnDeck(t time.Time) {
 			}
 		}
 	}
+
+	s.save()
 }
 
 //ClearDeck clears out the decks
