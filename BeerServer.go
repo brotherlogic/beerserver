@@ -88,6 +88,10 @@ func (s *Server) doSync() {
 	s.syncDrunk(mainFetcher{})
 }
 
+func (s *Server) doMove() {
+	s.moveToOnDeck(time.Now())
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	var init = flag.Bool("init", false, "Init the output")
@@ -120,6 +124,7 @@ func main() {
 	}
 
 	server.RegisterRepeatingTask(server.doSync, time.Hour)
+	server.RegisterRepeatingTask(server.doMove, time.Hour)
 
 	server.Serve()
 }
