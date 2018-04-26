@@ -43,6 +43,9 @@ func main() {
 			list, err := client.ListBeers(ctx, &pb.ListBeerRequest{OnDeck: *ondeck})
 			if err == nil {
 				for i := 0; i < len(list.Beers); i++ {
+					if *ondeck {
+						fmt.Printf("%v. %v (%v)\n", i, list.Beers[i].Name, time.Unix(list.Beers[i].DrinkDate, 0))
+					}
 					for _, b := range list.Beers {
 						if int(b.Index) == i && int(b.InCellar) == *cellar {
 							fmt.Printf("%v. %v (%v)\n", i, b.Name, time.Unix(b.DrinkDate, 0))
