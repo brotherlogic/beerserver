@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -49,6 +50,7 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 //ListBeers gets the beers in the cellar
 func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.ListBeerResponse, error) {
 	s.LogTrace(ctx, "ListBeers", time.Now(), pbt.Milestone_START_FUNCTION)
+	s.Log(fmt.Sprintf("FOUND CONETXT: %v", ctx))
 	beers := make([]*pb.Beer, 0)
 
 	if req.OnDeck {

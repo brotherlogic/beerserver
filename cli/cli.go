@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
+	pbgs "github.com/brotherlogic/goserver/proto"
+	pbt "github.com/brotherlogic/tracer/proto"
 
 	//Needed to pull in gzip encoding init
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -31,8 +33,8 @@ func main() {
 	}
 
 	client := pb.NewBeerCellarServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
+	ctx2, cancel2 := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel2()
 
 	switch os.Args[1] {
 	case "list":
@@ -40,6 +42,9 @@ func main() {
 		var ondeck = listFlags.Bool("deck", false, "View on deck")
 		var cellar = listFlags.Int("cellar", 1, "Cellar to view")
 		if err := listFlags.Parse(os.Args[2:]); err == nil {
+			ctx, cancel := utils.BuildContext("beerserver-cli", pbgs.ContextType_REGULAR)
+			defer cancel()
+			log.Printf("CONTEXT : %v", ctx)
 			list, err := client.ListBeers(ctx, &pb.ListBeerRequest{OnDeck: *ondeck})
 			if err == nil {
 				for i := 0; i < len(list.Beers); i++ {
@@ -55,6 +60,7 @@ func main() {
 			} else {
 				fmt.Printf("Error getting beers: %v\n", err)
 			}
+			utils.SendTrace(ctx, "beerserver-cli", time.Now(), pbt.Milestone_END, "beerserver-cli")
 		}
 	case "add":
 		addFlags := flag.NewFlagSet("Add", flag.ExitOnError)
@@ -63,7 +69,7 @@ func main() {
 		var size = addFlags.String("size", "", "Size of beer")
 		if err := addFlags.Parse(os.Args[2:]); err == nil {
 			if len(*size) != 0 {
-				_, err := client.AddBeer(ctx, &pb.AddBeerRequest{Beer: &pb.Beer{Id: int64(*id), Size: *size}, Quantity: int32(*quantity)})
+				_, err := client.AddBeer(ctx2, &pb.AddBeerRequest{Beer: &pb.Beer{Id: int64(*id), Size: *size}, Quantity: int32(*quantity)})
 				if err != nil {
 					fmt.Printf("Error adding beer: %v\n", err)
 				}
