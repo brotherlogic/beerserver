@@ -113,6 +113,28 @@ func TestMoveToOnDeck(t *testing.T) {
 	}
 }
 
+func TestMoveToOnDeckTwoCellars(t *testing.T) {
+	s := InitTestServer(".testmovetoondeck", true)
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 7936, Size: "bomber"}, Quantity: 2})
+	_, err = s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2324956, Size: "small"}, Quantity: 2})
+	if err != nil {
+		t.Fatalf("Error adding beer: %v", err)
+	}
+	time.Sleep(time.Second * 2)
+	s.moveToOnDeck(time.Now())
+	s.moveToOnDeck(time.Now())
+
+	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
+	if err != nil {
+		t.Fatalf("Error listing beers: %v", err)
+	}
+	if len(list.Beers) != 2 || !list.Beers[0].OnDeck {
+		t.Errorf("List is not correct: %v", list)
+	}
+
+	log.Printf("HERE = %v", list.Beers)
+}
+
 func TestOrderBeerCorrectly(t *testing.T) {
 	s := InitTestServer(".testorderbeercorrectly", true)
 	s.loadDrunk("loaddata/brotherlogic.json")
@@ -163,7 +185,7 @@ func TestBeerGoesInRightCellar(t *testing.T) {
 	}
 
 	//New beer should be in the third slot
-	if len(s.config.Cellar.Slots[0].Beers) != 0 || len(s.config.Cellar.Slots[1].Beers) != 1 {
+	if len(s.config.Cellar.Slots[0].Beers) != 0 || len(s.config.Cellar.Slots[2].Beers) != 1 {
 		t.Errorf("beer has been added to the wrong slot!: %v or %v or %v", s.config.Cellar.Slots[0], s.config.Cellar.Slots[1], s.config.Cellar.Slots[2])
 	}
 }

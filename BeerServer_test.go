@@ -10,7 +10,7 @@ import (
 
 func InitTestServer(dir string, delete bool) *Server {
 	s := Init()
-	s.config.Cellar = &pb.Cellar{Slots: []*pb.CellarSlot{&pb.CellarSlot{Accepts: "bomber", NumSlots: 10}}}
+	s.config.Cellar = &pb.Cellar{Slots: []*pb.CellarSlot{&pb.CellarSlot{Accepts: "bomber", NumSlots: 10}, &pb.CellarSlot{Accepts: "small", NumSlots: 10}}}
 	if delete {
 		os.RemoveAll(dir)
 	}
