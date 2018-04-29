@@ -1,10 +1,10 @@
 package main
 
 import (
-	"context"
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 	pbt "github.com/brotherlogic/tracer/proto"

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"time"
 
 	pb "github.com/brotherlogic/beerserver/proto"
+	pbt "github.com/brotherlogic/tracer/proto"
 )
 
 func findIndex(slot *pb.CellarSlot, date int64) int32 {
@@ -85,4 +87,19 @@ func (s *Server) moveToOnDeck(t time.Time) {
 			}
 		}
 	}
+}
+
+//ClearDeck clears out the decks
+func (s *Server) ClearDeck(ctx context.Context) {
+	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_START_FUNCTION)
+
+	for _, bdr := range s.config.Drunk {
+		for i, bde := range s.config.Cellar.OnDeck {
+			if bdr.Id == bde.Id && bdr.DrinkDate > bde.DrinkDate {
+				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck[:i], s.config.Cellar.OnDeck[i+1:]...)
+			}
+		}
+	}
+
+	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_END_FUNCTION)
 }

@@ -44,7 +44,6 @@ func main() {
 		if err := listFlags.Parse(os.Args[2:]); err == nil {
 			ctx, cancel := utils.BuildContext("beerserver-cli", pbgs.ContextType_REGULAR)
 			defer cancel()
-			log.Printf("CONTEXT : %v", ctx)
 			list, err := client.ListBeers(ctx, &pb.ListBeerRequest{OnDeck: *ondeck})
 			if err == nil {
 				for i := 0; i < len(list.Beers); i++ {
@@ -60,8 +59,7 @@ func main() {
 			} else {
 				fmt.Printf("Error getting beers: %v\n", err)
 			}
-			e2 := utils.SendTrace(ctx, "beerserver-cli", time.Now(), pbt.Milestone_END, "beerserver-cli")
-			log.Printf("RESULT= %v", e2)
+			utils.SendTrace(ctx, "beerserver-cli", time.Now(), pbt.Milestone_END, "beerserver-cli")
 		}
 	case "add":
 		addFlags := flag.NewFlagSet("Add", flag.ExitOnError)
