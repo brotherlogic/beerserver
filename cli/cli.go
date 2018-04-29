@@ -60,7 +60,8 @@ func main() {
 			} else {
 				fmt.Printf("Error getting beers: %v\n", err)
 			}
-			utils.SendTrace(ctx, "beerserver-cli", time.Now(), pbt.Milestone_END, "beerserver-cli")
+			e2 := utils.SendTrace(ctx, "beerserver-cli", time.Now(), pbt.Milestone_END, "beerserver-cli")
+			log.Printf("RESULT= %v", e2)
 		}
 	case "add":
 		addFlags := flag.NewFlagSet("Add", flag.ExitOnError)
