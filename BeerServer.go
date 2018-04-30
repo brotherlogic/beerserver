@@ -9,6 +9,7 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -84,11 +85,11 @@ func Init() *Server {
 	return s
 }
 
-func (s *Server) doSync() {
+func (s *Server) doSync(ctx context.Context) {
 	s.syncDrunk(mainFetcher{})
 }
 
-func (s *Server) doMove() {
+func (s *Server) doMove(ctx context.Context) {
 	s.moveToOnDeck(time.Now())
 }
 
@@ -125,6 +126,7 @@ func main() {
 
 	server.RegisterRepeatingTask(server.doSync, time.Hour)
 	server.RegisterRepeatingTask(server.doMove, time.Hour)
+	server.RegisterRepeatingTask(server.clearDeck, time.Hour)
 
 	server.Serve()
 }

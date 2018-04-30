@@ -14,7 +14,7 @@ func TestRemoveDrunkThings(t *testing.T) {
 	s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, &pb.Beer{Id: 123, DrinkDate: ts - 2})
 	s.config.Drunk = append(s.config.Drunk, &pb.Beer{Id: 123, DrinkDate: ts})
 
-	s.ClearDeck(context.Background())
+	s.clearDeck(context.Background())
 
 	if len(s.config.Cellar.OnDeck) == 1 {
 		t.Errorf("Failure to clear the decks: %v", s.config)
