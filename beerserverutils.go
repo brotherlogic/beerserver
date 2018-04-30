@@ -1,10 +1,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"time"
+
+	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 	pbt "github.com/brotherlogic/tracer/proto"
@@ -92,8 +93,7 @@ func (s *Server) moveToOnDeck(t time.Time) {
 	s.save()
 }
 
-//ClearDeck clears out the decks
-func (s *Server) ClearDeck(ctx context.Context) {
+func (s *Server) clearDeck(ctx context.Context) {
 	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_START_FUNCTION)
 
 	for _, bdr := range s.config.Drunk {
