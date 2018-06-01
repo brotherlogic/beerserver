@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -28,9 +29,14 @@ func (converter stubFailConverter) Convert(response *http.Response) ([]byte, err
 	return make([]byte, 0), errors.New("Built to fail")
 }
 
-type fileFetcher struct{}
+type fileFetcher struct {
+	fail bool
+}
 
 func (fetcher fileFetcher) Fetch(url string) (*http.Response, error) {
+	if fetcher.fail {
+		return nil, fmt.Errorf("Built to fail")
+	}
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	data, err := os.Open("testdata/" + strippedURL)
 	if err != nil {
@@ -219,7 +225,7 @@ func TestGetVenuePageConvertHttpFail(t *testing.T) {
 
 func TestGetUserPage(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
-	text := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
+	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
 
 	if !strings.Contains(text, "Simon") {
 		t.Errorf("User page retrieve failed: %v", text)
@@ -228,7 +234,7 @@ func TestGetUserPage(t *testing.T) {
 
 func TestBadUserPage(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
-	text := u.getUserPage(fileFetcher{}, mainConverter{}, "blahdyblah", 0)
+	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "blahdyblah", 0)
 	_, err := u.convertUserPageToDrinks(text, mainUnmarshaller{})
 
 	if err == nil {
@@ -238,10 +244,28 @@ func TestBadUserPage(t *testing.T) {
 
 func TestBadUserPageUnmarshal(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
-	text := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
+	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
 	_, err := u.convertUserPageToDrinks(text, stubFailUnmarshaller{})
 
 	if err == nil {
+		t.Errorf("Did not error")
+	}
+}
+
+func TestBadUserPageUnmarshalFail(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	_, err := u.getUserPage(fileFetcher{fail: true}, mainConverter{}, "brotherlogic", 0)
+
+	if err == nil {
+		t.Errorf("Did not error")
+	}
+}
+
+func TestGetLastBeersFail(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	beers := u.getLastBeers(fileFetcher{fail: true}, mainConverter{}, mainUnmarshaller{}, 123)
+
+	if len(beers) != 0 {
 		t.Errorf("Did not error")
 	}
 }
