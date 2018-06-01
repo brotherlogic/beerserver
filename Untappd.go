@@ -109,17 +109,20 @@ func (u *Untappd) getVenuePage(fetcher httpResponseFetcher, converter responseCo
 	return "Failed to retrieve " + strconv.Itoa(id)
 }
 
-func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseConverter, username string, minID int) string {
+func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseConverter, username string, minID int) (string, error) {
 	url := "https://api.untappd.com/v4/user/checkins/USERNAME?client_id=CLIENTID&client_secret=CLIENTSECRET&min_id=MINID"
 	url = strings.Replace(url, "USERNAME", username, 1)
 	url = strings.Replace(url, "CLIENTID", u.untappdID, 1)
 	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
 	url = strings.Replace(url, "MINID", strconv.Itoa(minID), 1)
 
-	response, _ := fetcher.Fetch(url)
+	response, err := fetcher.Fetch(url)
+	if err != nil {
+		return "", err
+	}
 
 	contents, _ := converter.Convert(response)
-	return string(contents)
+	return string(contents), nil
 }
 
 func convertPageToName(page string, unmarshaller unmarshaller) string {
@@ -270,7 +273,10 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 }
 
 func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) []*pb.Beer {
-	page := u.getUserPage(f, c, "brotherlogic", int(lastID))
+	page, err := u.getUserPage(f, c, "brotherlogic", int(lastID))
+	if err != nil {
+		return []*pb.Beer{}
+	}
 	list, _ := u.convertUserPageToDrinks(page, un)
 	return list
 }
