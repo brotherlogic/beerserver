@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -275,8 +276,12 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) []*pb.Beer {
 	page, err := u.getUserPage(f, c, "brotherlogic", int(lastID))
 	if err != nil {
+		log.Fatalf("Error getting beers!: %v", err)
 		return []*pb.Beer{}
 	}
-	list, _ := u.convertUserPageToDrinks(page, un)
+	list, err := u.convertUserPageToDrinks(page, un)
+	if err != nil {
+		log.Fatalf("Error converting beers!: %v", err)
+	}
 	return list
 }
