@@ -67,7 +67,18 @@ func (s *Server) Mote(master bool) error {
 
 //GetState gets the state of the server
 func (s *Server) GetState() []*pbgs.State {
-	return []*pbgs.State{}
+	drunkDate := int64(0)
+	lastDrunk := ""
+	for _, drunk := range s.config.Drunk {
+		if drunk.GetDrinkDate() > drunkDate {
+			drunkDate = drunk.GetDrinkDate()
+			lastDrunk = drunk.Name
+		}
+	}
+	return []*pbgs.State{
+		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
+		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
+	}
 }
 
 func (s *Server) save() {
