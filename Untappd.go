@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -208,7 +207,7 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 	meta := mapper["meta"].(map[string]interface{})
 	metaCode := int(meta["code"].(float64))
 	if metaCode != 200 {
-		return values, errors.New("Couldn't retrieve drinks")
+		return values, fmt.Errorf("Couldn't retrieve drinks: %v", mapper)
 	}
 
 	response := mapper["response"].(map[string]interface{})
