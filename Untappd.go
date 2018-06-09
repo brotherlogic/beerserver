@@ -117,6 +117,7 @@ func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseCon
 	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
 	url = strings.Replace(url, "MINID", strconv.Itoa(minID), 1)
 
+	log.Fatalf("GETTING %v", url)
 	response, err := fetcher.Fetch(url)
 	if err != nil {
 		return "", err
