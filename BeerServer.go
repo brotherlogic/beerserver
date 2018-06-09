@@ -106,9 +106,7 @@ func (s *Server) doMove(ctx context.Context) {
 
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
-	var init = flag.Bool("init", false, "Init the output")
-	var secret = flag.String("secret", "", "Untappd secret")
-	var client = flag.String("client", "", "Untappd client")
+	var updateDrunk = flag.Bool("update", false, "Update the drunk")
 	flag.Parse()
 
 	if *quiet {
@@ -123,16 +121,11 @@ func main() {
 	server.Register = server
 	server.RegisterServer("beerserver", false)
 
-	if *init {
-		server.config = &pb.Config{Cellar: &pb.Cellar{Slots: []*pb.CellarSlot{}}}
-		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
-		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		server.config.Cellar.Slots = append(server.config.Cellar.Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+	if *updateDrunk {
+		server.Mote(true)
 		server.loadDrunk("loaddata/brotherlogic.json")
-		server.config.Token = &pb.Token{Secret: *secret, Id: *client}
 		server.save()
-		panic("Saved!")
+		log.Fatalf("UPDATED: %v", server.config.Drunk)
 	}
 
 	server.RegisterRepeatingTask(server.doSync, time.Hour)
