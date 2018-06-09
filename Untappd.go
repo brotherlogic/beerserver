@@ -210,6 +210,7 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 		return values, fmt.Errorf("Couldn't retrieve drinks: %v", mapper)
 	}
 
+	log.Fatalf("Response: %v", mapper)
 	response := mapper["response"].(map[string]interface{})
 	items := response["items"].([]interface{})
 

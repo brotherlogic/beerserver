@@ -66,7 +66,18 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 func (s *Server) loadDrunk(filestr string) {
 	data, _ := ioutil.ReadFile(filestr)
 	b := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
-	s.config.Drunk = b
+	for _, beer := range b {
+		found := false
+		for _, d := range s.config.Drunk {
+			if d.CheckinId == beer.CheckinId {
+				found = true
+			}
+		}
+
+		if !found {
+			s.config.Drunk = append(s.config.Drunk, beer)
+		}
+	}
 }
 
 func (s *Server) syncDrunk(f httpResponseFetcher) {
