@@ -84,13 +84,13 @@ func TestResyncCorrectsSize(t *testing.T) {
 	s := InitTestServer(".testresynccorrectssize", true)
 	s.loadDrunk("loaddata/brotherlogic.json")
 
-	if len(s.config.Drunk) != 3709 {
+	if len(s.config.Drunk) != 3740 {
 		t.Fatalf("Drunk number is wrong: %v", len(s.config.Drunk))
 	}
 
 	s.syncDrunk(fileFetcher{})
 
-	if len(s.config.Drunk) != 3710 {
+	if len(s.config.Drunk) != 3741 {
 		t.Fatalf("Drunk number is still wrong %v", len(s.config.Drunk))
 	}
 }
@@ -207,7 +207,7 @@ func TestBeerDateLatest(t *testing.T) {
 	}
 
 	date := time.Unix(list.Beers[0].DrinkDate, 0)
-	if date.Year() != 2018 || date.Month() != time.November || date.Day() != 15 {
+	if date.Year() != 2019 || date.Month() != time.April || date.Day() != 15 {
 		t.Errorf("Wrong date returned: %v", date)
 	}
 

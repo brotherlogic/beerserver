@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -117,7 +116,6 @@ func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseCon
 	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
 	url = strings.Replace(url, "MINID", strconv.Itoa(minID), 1)
 
-	log.Fatalf("GETTING %v", url)
 	response, err := fetcher.Fetch(url)
 	if err != nil {
 		return "", err
@@ -211,7 +209,6 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 		return values, fmt.Errorf("Couldn't retrieve drinks: %v", mapper)
 	}
 
-	log.Fatalf("Response: %v", mapper)
 	response := mapper["response"].(map[string]interface{})
 	items := response["items"].([]interface{})
 
@@ -278,12 +275,8 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) []*pb.Beer {
 	page, err := u.getUserPage(f, c, "brotherlogic", int(lastID))
 	if err != nil {
-		log.Fatalf("Error getting beers!: %v", err)
 		return []*pb.Beer{}
 	}
-	list, err := u.convertUserPageToDrinks(page, un)
-	if err != nil {
-		log.Fatalf("Error converting beers!: %v", err)
-	}
+	list, _ := u.convertUserPageToDrinks(page, un)
 	return list
 }

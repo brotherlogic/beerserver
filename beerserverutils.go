@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"time"
 
 	"golang.org/x/net/context"
@@ -82,8 +81,12 @@ func (s *Server) loadDrunk(filestr string) {
 }
 
 func (s *Server) syncDrunk(f httpResponseFetcher) {
-	log.Fatalf("DRUNK: %v", s.config.Drunk)
-	lastID := s.config.Drunk[len(s.config.Drunk)-1].CheckinId
+	lastID := int32(0)
+	for _, drunk := range s.config.Drunk {
+		if drunk.CheckinId > lastID {
+			lastID = drunk.CheckinId
+		}
+	}
 	ndrinks := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
 	s.config.Drunk = append(s.config.Drunk, ndrinks...)
 	s.save()
