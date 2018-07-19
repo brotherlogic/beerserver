@@ -92,6 +92,8 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 		s.config.Drunk = append(s.config.Drunk, ndrinks...)
 		s.save()
 		s.lastSync = time.Now().Unix()
+	} else {
+		s.Log(fmt.Sprintf("Sync error: %v", err))
 	}
 }
 
