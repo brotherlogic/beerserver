@@ -272,11 +272,14 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 	return beers
 }
 
-func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) []*pb.Beer {
+func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) ([]*pb.Beer, error) {
 	page, err := u.getUserPage(f, c, "brotherlogic", int(lastID))
 	if err != nil {
-		return []*pb.Beer{}
+		return []*pb.Beer{}, err
 	}
-	list, _ := u.convertUserPageToDrinks(page, un)
-	return list
+	list, err := u.convertUserPageToDrinks(page, un)
+	if err != nil {
+		return []*pb.Beer{}, err
+	}
+	return list, nil
 }

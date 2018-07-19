@@ -87,9 +87,12 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 			lastID = drunk.CheckinId
 		}
 	}
-	ndrinks := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
-	s.config.Drunk = append(s.config.Drunk, ndrinks...)
-	s.save()
+	ndrinks, err := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
+	if err == nil {
+		s.config.Drunk = append(s.config.Drunk, ndrinks...)
+		s.save()
+		s.lastSync = time.Now().Unix()
+	}
 }
 
 func (s *Server) moveToOnDeck(t time.Time) {
