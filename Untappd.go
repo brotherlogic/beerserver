@@ -278,8 +278,5 @@ func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un un
 		return []*pb.Beer{}, err
 	}
 	list, err := u.convertUserPageToDrinks(page, un)
-	if err != nil {
-		return []*pb.Beer{}, err
-	}
-	return list, nil
+	return list, err
 }
