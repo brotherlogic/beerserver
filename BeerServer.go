@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,9 +20,8 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	config   *pb.Config
-	ut       *Untappd
-	lastSync int64
+	config *pb.Config
+	ut     *Untappd
 }
 
 const (
@@ -79,7 +79,13 @@ func (s *Server) GetState() []*pbgs.State {
 	return []*pbgs.State{
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
-		&pbgs.State{Key: "lastsync", TimeValue: s.lastSync},
+		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
+	}
+}
+
+func (s *Server) checkSync(ctx context.Context) {
+	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
+		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v", time.Unix(s.config.LastSync, 0)))
 	}
 }
 
@@ -94,7 +100,7 @@ func GetUntappd(id, secret string) *Untappd {
 
 //Init builds a server
 func Init() *Server {
-	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}, int64(1)}
+	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}}
 	return s
 }
 
@@ -133,6 +139,7 @@ func main() {
 	server.RegisterRepeatingTask(server.doSync, time.Hour)
 	server.RegisterRepeatingTask(server.doMove, time.Hour)
 	server.RegisterRepeatingTask(server.clearDeck, time.Hour)
+	server.RegisterRepeatingTask(server.checkSync, time.Hour)
 
 	server.Serve()
 }

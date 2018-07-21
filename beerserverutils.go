@@ -90,8 +90,8 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 	ndrinks, err := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
 	if err == nil {
 		s.config.Drunk = append(s.config.Drunk, ndrinks...)
+		s.config.LastSync = time.Now().Unix()
 		s.save()
-		s.lastSync = time.Now().Unix()
 	} else {
 		s.Log(fmt.Sprintf("Sync error with %v: %v", lastID, err))
 	}
