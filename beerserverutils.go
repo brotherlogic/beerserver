@@ -117,6 +117,8 @@ func (s *Server) moveToOnDeck(t time.Time) {
 func (s *Server) clearDeck(ctx context.Context) {
 	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_START_FUNCTION)
 
+	s.lastClean = time.Now()
+
 	for _, bdr := range s.config.Drunk {
 		for i, bde := range s.config.Cellar.OnDeck {
 			if bdr.Id == bde.Id && bdr.DrinkDate > bde.DrinkDate {

@@ -20,8 +20,9 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	config *pb.Config
-	ut     *Untappd
+	config    *pb.Config
+	ut        *Untappd
+	lastClean time.Time
 }
 
 const (
@@ -80,6 +81,7 @@ func (s *Server) GetState() []*pbgs.State {
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
 		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
+		&pbgs.State{Key: "last_clean", TimeValue: s.lastClean.Unix()},
 	}
 }
 
@@ -100,7 +102,7 @@ func GetUntappd(id, secret string) *Untappd {
 
 //Init builds a server
 func Init() *Server {
-	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}}
+	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}, time.Unix(1, 0)}
 	return s
 }
 
