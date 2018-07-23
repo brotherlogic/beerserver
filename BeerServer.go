@@ -140,7 +140,7 @@ func main() {
 
 	server.RegisterRepeatingTask(server.doSync, time.Hour)
 	server.RegisterRepeatingTask(server.doMove, time.Hour)
-	server.RegisterRepeatingTask(server.clearDeck, time.Hour)
+	server.RegisterRepeatingTask(server.clearDeck, time.Minute*5)
 	server.RegisterRepeatingTask(server.checkSync, time.Hour)
 
 	server.Serve()
