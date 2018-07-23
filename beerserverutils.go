@@ -122,7 +122,7 @@ func (s *Server) clearDeck(ctx context.Context) {
 	for _, bdr := range s.config.Drunk {
 		for i, bde := range s.config.Cellar.OnDeck {
 			if bdr.Id == bde.Id {
-				s.Log(fmt.Sprintf("FOUND MATCH %v and %v", bdr.Id, bde.Id))
+				s.Log(fmt.Sprintf("FOUND MATCH %v and %v also %v and %v", bdr.Id, bde.Id, bdr.DrinkDate, bde.DrinkDate))
 			}
 			if bdr.Id == bde.Id && bdr.DrinkDate > bde.DrinkDate {
 				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck[:i], s.config.Cellar.OnDeck[i+1:]...)
