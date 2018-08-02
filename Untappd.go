@@ -268,9 +268,8 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 		t, _ := time.Parse(layout, created)
 		if cval == 0 {
 			return nil, fmt.Errorf("Unable to parse a checkin id from %v", cid)
-		} else {
-			beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix(), CheckinId: int32(cval)}
 		}
+		beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix(), CheckinId: int32(cval)}
 	}
 
 	return beers, nil
