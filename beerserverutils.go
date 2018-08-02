@@ -96,8 +96,6 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 		s.config.Drunk = append(s.config.Drunk, ndrinks...)
 		s.config.LastSync = time.Now().Unix()
 		s.save()
-	} else {
-		s.Log(fmt.Sprintf("Sync error with %v: %v", lastID, err))
 	}
 }
 
@@ -125,9 +123,6 @@ func (s *Server) clearDeck(ctx context.Context) {
 
 	for _, bdr := range s.config.Drunk {
 		for i, bde := range s.config.Cellar.OnDeck {
-			if bdr.Id == bde.Id && bdr.Id == 2500585 {
-				s.Log(fmt.Sprintf("FOUND MATCH %v and %v also %v and %v", bdr.Id, bde.Id, time.Unix(bdr.DrinkDate, 0), time.Unix(bde.DrinkDate, 0)))
-			}
 			if bdr.Id == bde.Id && bdr.DrinkDate > bde.DrinkDate {
 				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck[:i], s.config.Cellar.OnDeck[i+1:]...)
 			}
