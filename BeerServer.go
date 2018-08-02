@@ -82,6 +82,7 @@ func (s *Server) GetState() []*pbgs.State {
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
 		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
 		&pbgs.State{Key: "last_clean", TimeValue: s.lastClean.Unix()},
+		&pbgs.State{Key: "druuuunk", Value: int64(len(s.config.Drunk))},
 	}
 }
 
