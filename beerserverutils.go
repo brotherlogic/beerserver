@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"time"
 
 	"golang.org/x/net/context"
@@ -65,7 +66,10 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 
 func (s *Server) loadDrunk(filestr string) {
 	data, _ := ioutil.ReadFile(filestr)
-	b := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
+	b, err := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
+	if err != nil {
+		log.Fatalf("Bad convert: %v", err)
+	}
 	for _, beer := range b {
 		found := false
 		for _, d := range s.config.Drunk {
