@@ -71,13 +71,14 @@ func (s *Server) Mote(master bool) error {
 func (s *Server) GetState() []*pbgs.State {
 	drunkDate := int64(0)
 	lastDrunk := ""
+	missing := int64(0)
 	for _, drunk := range s.config.Drunk {
 		if drunk.GetDrinkDate() > drunkDate {
 			if drunk.CheckinId > 0 {
 				drunkDate = drunk.GetDrinkDate()
 				lastDrunk = fmt.Sprintf("%v", drunk.CheckinId)
 			} else {
-				s.Log(fmt.Sprintf("Checkin Id is zero %v, %v, %v", drunk.CheckinId, drunk.Id, drunk.Abv))
+				missing++
 			}
 		}
 	}
@@ -87,6 +88,7 @@ func (s *Server) GetState() []*pbgs.State {
 		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
 		&pbgs.State{Key: "last_clean", TimeValue: s.lastClean.Unix()},
 		&pbgs.State{Key: "druuuunk", Value: int64(len(s.config.Drunk))},
+		&pbgs.State{Key: "drnnnnnk", Value: missing},
 	}
 }
 
