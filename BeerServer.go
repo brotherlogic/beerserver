@@ -72,7 +72,7 @@ func (s *Server) GetState() []*pbgs.State {
 	drunkDate := int64(0)
 	lastDrunk := ""
 	for _, drunk := range s.config.Drunk {
-		if drunk.GetDrinkDate() > drunkDate {
+		if drunk.GetDrinkDate() > drunkDate && drunk.CheckinId > 0 {
 			drunkDate = drunk.GetDrinkDate()
 			lastDrunk = fmt.Sprintf("%v", drunk.CheckinId)
 		}
