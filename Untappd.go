@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -210,14 +211,21 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 	}
 
 	response := mapper["response"].(map[string]interface{})
-	items := response["items"].([]interface{})
+	checkins := response["checkins"].(map[string]interface{})
+	items := checkins["items"].([]interface{})
 
 	for _, v := range items {
 		beer := v.(map[string]interface{})["beer"].(map[string]interface{})
 		beerID := int64(beer["bid"].(float64))
+		checkID := int32(v.(map[string]interface{})["checkin_id"].(float64))
 		date := string(v.(map[string]interface{})["created_at"].(string))
 		cdate, _ := time.Parse(time.RFC1123Z, date)
-		nbeer := &pb.Beer{Id: beerID, DrinkDate: cdate.Unix()}
+		nbeer := &pb.Beer{Id: beerID, DrinkDate: cdate.Unix(), CheckinId: checkID}
+
+		if nbeer.CheckinId == 0 {
+			log.Fatalf("Failure to get checkin ID: %v", v)
+		}
+
 		values = append(values, nbeer)
 	}
 
