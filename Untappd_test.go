@@ -226,6 +226,11 @@ func TestGetVenuePageConvertHttpFail(t *testing.T) {
 func TestGetUserPage(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
 	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
+	_, err := u.convertUserPageToDrinks(text, mainUnmarshaller{})
+
+	if err != nil {
+		t.Errorf("Yep")
+	}
 
 	if !strings.Contains(text, "Simon") {
 		t.Errorf("User page retrieve failed: %v", text)
