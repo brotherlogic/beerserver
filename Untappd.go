@@ -205,6 +205,8 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 		return values, err
 	}
 
+	u.l(fmt.Sprintf("PAGE = %v", page))
+
 	meta := mapper["meta"].(map[string]interface{})
 	metaCode := int(meta["code"].(float64))
 	if metaCode != 200 {
