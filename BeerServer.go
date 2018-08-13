@@ -62,6 +62,7 @@ func (s *Server) Mote(master bool) error {
 
 		s.config = bResp.(*pb.Config)
 		s.ut = GetUntappd(s.config.Token.Id, s.config.Token.Secret)
+		s.ut.l = s.Log
 	}
 
 	return nil
@@ -149,6 +150,8 @@ func main() {
 	server.RegisterRepeatingTask(server.doMove, time.Hour)
 	server.RegisterRepeatingTask(server.clearDeck, time.Minute*5)
 	server.RegisterRepeatingTask(server.checkSync, time.Hour)
+
+	server.Log("Started!")
 
 	server.Serve()
 }
