@@ -1,12 +1,17 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/brotherlogic/keystore/client"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 )
+
+func doLog(str string) {
+	log.Printf(str)
+}
 
 func InitTestServer(dir string, delete bool) *Server {
 	s := Init()
@@ -17,6 +22,7 @@ func InitTestServer(dir string, delete bool) *Server {
 	s.KSclient = *keystoreclient.GetTestClient(dir)
 	s.SkipLog = true
 	s.ut = GetTestUntappd()
+	s.ut.l = doLog
 
 	return s
 }

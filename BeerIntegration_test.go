@@ -84,13 +84,13 @@ func TestResyncCorrectsSize(t *testing.T) {
 	s := InitTestServer(".testresynccorrectssize", true)
 	s.loadDrunk("loaddata/brotherlogic.json")
 
-	if len(s.config.Drunk) != 3740 {
+	if len(s.config.Drunk) != 3795 {
 		t.Fatalf("Drunk number is wrong: %v", len(s.config.Drunk))
 	}
 
 	s.syncDrunk(fileFetcher{})
 
-	if len(s.config.Drunk) != 3741 {
+	if len(s.config.Drunk) != 3795 {
 		t.Fatalf("Drunk number is still wrong %v", len(s.config.Drunk))
 	}
 }
