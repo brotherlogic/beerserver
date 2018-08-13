@@ -88,6 +88,7 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 		}
 	}
 	ndrinks, err := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
+	s.Log(fmt.Sprintf("From %v got %v", lastID, len(ndrinks)))
 	if err == nil {
 		s.config.Drunk = append(s.config.Drunk, ndrinks...)
 		s.save()
