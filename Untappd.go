@@ -112,12 +112,12 @@ func (u *Untappd) getVenuePage(fetcher httpResponseFetcher, converter responseCo
 
 func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseConverter, username string, minID int) (string, error) {
 	url := "https://api.untappd.com/v4/user/checkins/USERNAME?client_id=CLIENTID&client_secret=CLIENTSECRET&min_id=MINID"
-	u.l(fmt.Sprintf("FETCH %v", url))
 	url = strings.Replace(url, "USERNAME", username, 1)
 	url = strings.Replace(url, "CLIENTID", u.untappdID, 1)
 	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
 	url = strings.Replace(url, "MINID", strconv.Itoa(minID), 1)
 
+	u.l(fmt.Sprintf("FETCH %v", url))
 	response, err := fetcher.Fetch(url)
 	if err != nil {
 		return "", err
