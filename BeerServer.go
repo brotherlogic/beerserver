@@ -97,6 +97,20 @@ func (s *Server) checkSync(ctx context.Context) {
 	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
 		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v", time.Unix(s.config.LastSync, 0)))
 	}
+
+	drunkDate := int64(0)
+	for _, drunk := range s.config.Drunk {
+		if drunk.GetDrinkDate() > drunkDate {
+			if drunk.CheckinId > 0 {
+				drunkDate = drunk.GetDrinkDate()
+			}
+		}
+	}
+
+	if time.Now().Sub(time.Unix(drunkDate, 0)) > time.Hour*24*7 {
+		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Syncd beer was %v", time.Unix(s.config.LastSync, 0)))
+	}
+
 }
 
 func (s *Server) save() {

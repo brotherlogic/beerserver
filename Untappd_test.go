@@ -225,6 +225,7 @@ func TestGetVenuePageConvertHttpFail(t *testing.T) {
 
 func TestGetUserPage(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	u.l = doLog
 	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
 
 	if !strings.Contains(text, "Simon") {
@@ -234,6 +235,7 @@ func TestGetUserPage(t *testing.T) {
 
 func TestBadUserPage(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	u.l = doLog
 	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "blahdyblah", 0)
 	_, err := u.convertUserPageToDrinks(text, mainUnmarshaller{})
 
@@ -244,6 +246,7 @@ func TestBadUserPage(t *testing.T) {
 
 func TestBadUserPageUnmarshal(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	u.l = doLog
 	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
 	_, err := u.convertUserPageToDrinks(text, stubFailUnmarshaller{})
 
@@ -254,6 +257,7 @@ func TestBadUserPageUnmarshal(t *testing.T) {
 
 func TestBadUserPageUnmarshalFail(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	u.l = doLog
 	_, err := u.getUserPage(fileFetcher{fail: true}, mainConverter{}, "brotherlogic", 0)
 
 	if err == nil {
@@ -263,6 +267,7 @@ func TestBadUserPageUnmarshalFail(t *testing.T) {
 
 func TestGetLastBeersFail(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	u.l = doLog
 	beers, _ := u.getLastBeers(fileFetcher{fail: true}, mainConverter{}, mainUnmarshaller{}, 123)
 
 	if len(beers) != 0 {
