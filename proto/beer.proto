@@ -14,6 +14,7 @@ message Config {
   Token token = 1;
   repeated Beer drunk = 2;
   Cellar cellar = 3;
+  int64 last_sync = 4;
 }
 
 message Beer {

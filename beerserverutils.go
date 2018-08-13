@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"time"
 
 	"golang.org/x/net/context"
@@ -65,7 +66,10 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 
 func (s *Server) loadDrunk(filestr string) {
 	data, _ := ioutil.ReadFile(filestr)
-	b := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
+	b, err := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
+	if err != nil {
+		log.Fatalf("Bad convert: %v", err)
+	}
 	for _, beer := range b {
 		found := false
 		for _, d := range s.config.Drunk {
@@ -91,10 +95,8 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 	s.Log(fmt.Sprintf("From %v got %v", lastID, len(ndrinks)))
 	if err == nil {
 		s.config.Drunk = append(s.config.Drunk, ndrinks...)
+		s.config.LastSync = time.Now().Unix()
 		s.save()
-		s.lastSync = time.Now().Unix()
-	} else {
-		s.Log(fmt.Sprintf("Sync error: %v", err))
 	}
 }
 
@@ -117,6 +119,8 @@ func (s *Server) moveToOnDeck(t time.Time) {
 
 func (s *Server) clearDeck(ctx context.Context) {
 	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_START_FUNCTION)
+
+	s.lastClean = time.Now()
 
 	for _, bdr := range s.config.Drunk {
 		for i, bde := range s.config.Cellar.OnDeck {

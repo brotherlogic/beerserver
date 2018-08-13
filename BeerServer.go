@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,9 +20,9 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	config   *pb.Config
-	ut       *Untappd
-	lastSync int64
+	config    *pb.Config
+	ut        *Untappd
+	lastClean time.Time
 }
 
 const (
@@ -70,16 +71,30 @@ func (s *Server) Mote(master bool) error {
 func (s *Server) GetState() []*pbgs.State {
 	drunkDate := int64(0)
 	lastDrunk := ""
+	missing := int64(0)
 	for _, drunk := range s.config.Drunk {
 		if drunk.GetDrinkDate() > drunkDate {
-			drunkDate = drunk.GetDrinkDate()
-			lastDrunk = drunk.Name
+			if drunk.CheckinId > 0 {
+				drunkDate = drunk.GetDrinkDate()
+				lastDrunk = fmt.Sprintf("%v", drunk.CheckinId)
+			} else {
+				missing++
+			}
 		}
 	}
 	return []*pbgs.State{
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
-		&pbgs.State{Key: "lastsync", TimeValue: s.lastSync},
+		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
+		&pbgs.State{Key: "last_clean", TimeValue: s.lastClean.Unix()},
+		&pbgs.State{Key: "druuuunk", Value: int64(len(s.config.Drunk))},
+		&pbgs.State{Key: "drnnnnnk", Value: missing},
+	}
+}
+
+func (s *Server) checkSync(ctx context.Context) {
+	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
+		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v", time.Unix(s.config.LastSync, 0)))
 	}
 }
 
@@ -94,7 +109,7 @@ func GetUntappd(id, secret string) *Untappd {
 
 //Init builds a server
 func Init() *Server {
-	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}, int64(1)}
+	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}, time.Unix(1, 0)}
 	return s
 }
 
@@ -132,7 +147,8 @@ func main() {
 
 	server.RegisterRepeatingTask(server.doSync, time.Hour)
 	server.RegisterRepeatingTask(server.doMove, time.Hour)
-	server.RegisterRepeatingTask(server.clearDeck, time.Hour)
+	server.RegisterRepeatingTask(server.clearDeck, time.Minute*5)
+	server.RegisterRepeatingTask(server.checkSync, time.Hour)
 
 	server.Serve()
 }

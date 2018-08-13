@@ -250,7 +250,7 @@ func (u *Untappd) GetBeerDetails(id int64) *pb.Beer {
 	return &pb.Beer{Name: name, Abv: abv, Id: id}
 }
 
-func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller) []*pb.Beer {
+func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller) ([]*pb.Beer, error) {
 	var resp []interface{}
 	json.Unmarshal([]byte(page), &resp)
 
@@ -266,10 +266,13 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 		created := m["created_at"].(string)
 		layout := "2006-01-02 15:04:05"
 		t, _ := time.Parse(layout, created)
+		if cval == 0 {
+			return nil, fmt.Errorf("Unable to parse a checkin id from %v", cid)
+		}
 		beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix(), CheckinId: int32(cval)}
 	}
 
-	return beers
+	return beers, nil
 }
 
 func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un unmarshaller, lastID int32) ([]*pb.Beer, error) {
@@ -278,8 +281,5 @@ func (u *Untappd) getLastBeers(f httpResponseFetcher, c responseConverter, un un
 		return []*pb.Beer{}, err
 	}
 	list, err := u.convertUserPageToDrinks(page, un)
-	if err != nil {
-		return []*pb.Beer{}, err
-	}
-	return list, nil
+	return list, err
 }

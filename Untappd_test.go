@@ -263,7 +263,7 @@ func TestBadUserPageUnmarshalFail(t *testing.T) {
 
 func TestGetLastBeersFail(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
-	beers := u.getLastBeers(fileFetcher{fail: true}, mainConverter{}, mainUnmarshaller{}, 123)
+	beers, _ := u.getLastBeers(fileFetcher{fail: true}, mainConverter{}, mainUnmarshaller{}, 123)
 
 	if len(beers) != 0 {
 		t.Errorf("Did not error")
