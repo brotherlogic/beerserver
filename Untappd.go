@@ -221,7 +221,8 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 		beerID := int64(beer["bid"].(float64))
 		date := string(v.(map[string]interface{})["created_at"].(string))
 		cdate, _ := time.Parse(time.RFC1123Z, date)
-		nbeer := &pb.Beer{Id: beerID, DrinkDate: cdate.Unix()}
+		cid := v.(map[string]interface{})["checkin_id"].(float64)
+		nbeer := &pb.Beer{Id: beerID, DrinkDate: cdate.Unix(), CheckinId: int32(cid)}
 		values = append(values, nbeer)
 	}
 
