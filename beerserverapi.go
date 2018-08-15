@@ -41,7 +41,7 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 		minDate = minDate.AddDate(1, 0, 0)
 	}
 
-	s.save()
+	s.save(ctx)
 	s.LogFunction("AddBeer", t)
 	return &pb.AddBeerResponse{}, nil
 }

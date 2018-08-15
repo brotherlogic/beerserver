@@ -50,11 +50,11 @@ func (s *Server) ReportHealth() bool {
 }
 
 // Mote promotes this server
-func (s *Server) Mote(master bool) error {
+func (s *Server) Mote(ctx context.Context, master bool) error {
 	if master {
 		// Read the cellar
 		bType := &pb.Config{}
-		bResp, _, err := s.KSclient.Read(TOKEN, bType)
+		bResp, _, err := s.KSclient.Read(ctx, TOKEN, bType)
 
 		if err != nil {
 			return err
@@ -113,8 +113,8 @@ func (s *Server) checkSync(ctx context.Context) {
 
 }
 
-func (s *Server) save() {
-	s.KSclient.Save(TOKEN, s.config)
+func (s *Server) save(ctx context.Context) {
+	s.KSclient.Save(ctx, TOKEN, s.config)
 }
 
 //GetUntappd builds a untappd retriever
@@ -129,11 +129,11 @@ func Init() *Server {
 }
 
 func (s *Server) doSync(ctx context.Context) {
-	s.syncDrunk(mainFetcher{})
+	s.syncDrunk(ctx, mainFetcher{})
 }
 
 func (s *Server) doMove(ctx context.Context) {
-	s.moveToOnDeck(time.Now())
+	s.moveToOnDeck(ctx, time.Now())
 }
 
 func main() {
@@ -154,9 +154,9 @@ func main() {
 	server.RegisterServer("beerserver", false)
 
 	if *updateDrunk {
-		server.Mote(true)
+		server.Mote(context.Background(), true)
 		server.loadDrunk("loaddata/brotherlogic.json")
-		server.save()
+		server.save(context.Background())
 		log.Fatalf("UPDATED: %v", server.config.Drunk)
 	}
 

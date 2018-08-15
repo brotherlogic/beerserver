@@ -84,7 +84,7 @@ func (s *Server) loadDrunk(filestr string) {
 	}
 }
 
-func (s *Server) syncDrunk(f httpResponseFetcher) {
+func (s *Server) syncDrunk(ctx context.Context, f httpResponseFetcher) {
 	lastID := int32(0)
 	for _, drunk := range s.config.Drunk {
 		if drunk.CheckinId > lastID {
@@ -95,11 +95,11 @@ func (s *Server) syncDrunk(f httpResponseFetcher) {
 	if err == nil {
 		s.config.Drunk = append(s.config.Drunk, ndrinks...)
 		s.config.LastSync = time.Now().Unix()
-		s.save()
+		s.save(ctx)
 	}
 }
 
-func (s *Server) moveToOnDeck(t time.Time) {
+func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 	for _, cellar := range s.config.Cellar.Slots {
 		i := 0
 		for i < len(cellar.Beers) {
@@ -113,7 +113,7 @@ func (s *Server) moveToOnDeck(t time.Time) {
 		}
 	}
 
-	s.save()
+	s.save(ctx)
 }
 
 func (s *Server) clearDeck(ctx context.Context) {
