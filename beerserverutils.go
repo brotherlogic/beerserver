@@ -100,11 +100,13 @@ func (s *Server) syncDrunk(ctx context.Context, f httpResponseFetcher) {
 }
 
 func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
+	moved := []*pb.Beer{}
 	for _, cellar := range s.config.Cellar.Slots {
 		i := 0
 		for i < len(cellar.Beers) {
 			if cellar.Beers[i].DrinkDate < t.Unix() {
 				cellar.Beers[i].OnDeck = true
+				moved = append(moved, cellar.Beers[i])
 				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, cellar.Beers[i])
 				cellar.Beers = append(cellar.Beers[:i], cellar.Beers[i+1:]...)
 			} else {
