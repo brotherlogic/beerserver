@@ -42,7 +42,7 @@ func main() {
 		var ondeck = listFlags.Bool("deck", false, "View on deck")
 		var cellar = listFlags.Int("cellar", 1, "Cellar to view")
 		if err := listFlags.Parse(os.Args[2:]); err == nil {
-			ctx, cancel := utils.BuildContext("beerserver-cli", pbgs.ContextType_REGULAR)
+			ctx, cancel := utils.BuildContext("beerserver-cli", "beerserver-cli", pbgs.ContextType_REGULAR)
 			defer cancel()
 			list, err := client.ListBeers(ctx, &pb.ListBeerRequest{OnDeck: *ondeck})
 			if err == nil {
