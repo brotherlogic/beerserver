@@ -84,13 +84,13 @@ func TestResyncCorrectsSize(t *testing.T) {
 	s := InitTestServer(".testresynccorrectssize", true)
 	s.loadDrunk("loaddata/brotherlogic.json")
 
-	if len(s.config.Drunk) != 3795 {
+	if len(s.config.Drunk) != 3794 {
 		t.Fatalf("Drunk number is wrong: %v", len(s.config.Drunk))
 	}
 
-	s.syncDrunk(fileFetcher{})
+	s.syncDrunk(context.Background(), fileFetcher{})
 
-	if len(s.config.Drunk) != 3795 {
+	if len(s.config.Drunk) != 3794 {
 		t.Fatalf("Drunk number is still wrong %v", len(s.config.Drunk))
 	}
 }
@@ -102,7 +102,7 @@ func TestMoveToOnDeck(t *testing.T) {
 		t.Fatalf("Error adding beer: %v", err)
 	}
 	time.Sleep(time.Second * 2)
-	s.moveToOnDeck(time.Now())
+	s.moveToOnDeck(context.Background(), time.Now())
 
 	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
 	if err != nil {
@@ -121,8 +121,8 @@ func TestMoveToOnDeckTwoCellars(t *testing.T) {
 		t.Fatalf("Error adding beer: %v", err)
 	}
 	time.Sleep(time.Second * 2)
-	s.moveToOnDeck(time.Now())
-	s.moveToOnDeck(time.Now())
+	s.moveToOnDeck(context.Background(), time.Now())
+	s.moveToOnDeck(context.Background(), time.Now())
 
 	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
 	if err != nil {
