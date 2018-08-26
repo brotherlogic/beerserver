@@ -205,10 +205,9 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 		return values, err
 	}
 
-	u.l(fmt.Sprintf("PAGE = %v", page))
-
 	meta := mapper["meta"].(map[string]interface{})
 	metaCode := int(meta["code"].(float64))
+
 	if metaCode != 200 {
 		return values, fmt.Errorf("Couldn't retrieve drinks: %v", mapper)
 	}
@@ -271,9 +270,6 @@ func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller
 		created := m["created_at"].(string)
 		layout := "2006-01-02 15:04:05"
 		t, _ := time.Parse(layout, created)
-		if cval == 0 {
-			return nil, fmt.Errorf("Unable to parse a checkin id from %v", cid)
-		}
 		beers[i] = &pb.Beer{Name: m["beer_name"].(string), Id: int64(val), DrinkDate: t.Unix(), CheckinId: int32(cval)}
 	}
 
