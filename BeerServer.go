@@ -94,6 +94,24 @@ func (s *Server) GetState() []*pbgs.State {
 	}
 }
 
+func (s *Server) loadDrunk(filestr string) {
+	data, _ := ioutil.ReadFile(filestr)
+	b, _ := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
+	for _, beer := range b {
+		found := false
+		for _, d := range s.config.Drunk {
+			if d.CheckinId == beer.CheckinId {
+				found = true
+			}
+		}
+
+		if !found {
+			s.config.Drunk = append(s.config.Drunk, beer)
+		}
+	}
+}
+
+
 func (s *Server) checkSync(ctx context.Context) {
 	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
 		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v", time.Unix(s.config.LastSync, 0)))

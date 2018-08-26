@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"time"
 
 	"golang.org/x/net/context"
@@ -62,26 +60,6 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 	}
 
 	return fmt.Errorf("Unable to find space for this beer")
-}
-
-func (s *Server) loadDrunk(filestr string) {
-	data, _ := ioutil.ReadFile(filestr)
-	b, err := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
-	if err != nil {
-		log.Fatalf("Bad convert: %v", err)
-	}
-	for _, beer := range b {
-		found := false
-		for _, d := range s.config.Drunk {
-			if d.CheckinId == beer.CheckinId {
-				found = true
-			}
-		}
-
-		if !found {
-			s.config.Drunk = append(s.config.Drunk, beer)
-		}
-	}
 }
 
 func (s *Server) syncDrunk(ctx context.Context, f httpResponseFetcher) {
