@@ -98,7 +98,7 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 		for _, b := range moved {
 			moveStr += fmt.Sprintf("%v\n", b.Name)
 		}
-		s.RaiseIssue(ctx, "Beer Move", moveStr)
+		s.RaiseIssue(ctx, "Beer Move", moveStr, true)
 	}
 
 	s.save(ctx)
