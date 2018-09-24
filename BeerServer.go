@@ -178,10 +178,10 @@ func main() {
 		log.Fatalf("UPDATED: %v", server.config.Drunk)
 	}
 
-	server.RegisterRepeatingTask(server.doSync, time.Hour)
-	server.RegisterRepeatingTask(server.doMove, time.Hour)
-	server.RegisterRepeatingTask(server.clearDeck, time.Minute*5)
-	server.RegisterRepeatingTask(server.checkSync, time.Hour)
+	server.RegisterRepeatingTask(server.doSync, "do_sync", time.Hour)
+	server.RegisterRepeatingTask(server.doMove, "do_move", time.Hour)
+	server.RegisterRepeatingTask(server.clearDeck, "clear_deck", time.Minute*5)
+	server.RegisterRepeatingTask(server.checkSync, "check_sync", time.Hour)
 
 	server.Log("Started!")
 
