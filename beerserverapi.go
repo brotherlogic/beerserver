@@ -12,7 +12,6 @@ import (
 
 //AddBeer adds a beer to the server
 func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBeerResponse, error) {
-	t := time.Now()
 	b := s.ut.GetBeerDetails(req.Beer.Id)
 	b.Size = req.Beer.Size
 
@@ -42,7 +41,6 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 	}
 
 	s.save(ctx)
-	s.LogFunction("AddBeer", t)
 	return &pb.AddBeerResponse{}, nil
 }
 
