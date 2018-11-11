@@ -40,6 +40,11 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 		minDate = minDate.AddDate(1, 0, 0)
 	}
 
+	// Reorder all the cellars
+	for _, cellar := range s.config.Cellar.Slots {
+		s.reorderCellar(ctx, cellar)
+	}
+
 	s.save(ctx)
 	return &pb.AddBeerResponse{}, nil
 }
