@@ -156,7 +156,7 @@ func (s *Server) doMove(ctx context.Context) {
 
 func (s *Server) checkCellars(ctx context.Context) {
 	for i, slot := range s.config.Cellar.Slots {
-		if s.checkCellar(ctx, slot) {
+		if !s.checkCellar(ctx, slot) {
 			s.RaiseIssue(ctx, "Cellar not ordered", fmt.Sprintf("Cellar %v is not ordered correctly", i), false)
 		}
 	}
