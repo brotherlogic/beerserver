@@ -20,3 +20,27 @@ func TestRemoveDrunkThings(t *testing.T) {
 		t.Errorf("Failure to clear the decks: %v", s.config)
 	}
 }
+
+func TestCellarOrder(t *testing.T) {
+	s := InitTestServer(".testtry", true)
+	slot := &pb.CellarSlot{Beers: []*pb.Beer{
+		&pb.Beer{Id: 123, DrinkDate: 10},
+		&pb.Beer{Id: 123, DrinkDate: 5},
+	}}
+	if s.checkCellar(context.Background(), slot) {
+		t.Errorf("Problem in ordering")
+	}
+
+}
+
+func TestCellarOrderBad(t *testing.T) {
+	s := InitTestServer(".testtry", true)
+	slot := &pb.CellarSlot{Beers: []*pb.Beer{
+		&pb.Beer{Id: 123, DrinkDate: 5},
+		&pb.Beer{Id: 123, DrinkDate: 10},
+	}}
+	if !s.checkCellar(context.Background(), slot) {
+		t.Errorf("Problem in ordering")
+	}
+
+}

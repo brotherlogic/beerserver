@@ -154,6 +154,14 @@ func (s *Server) doMove(ctx context.Context) {
 	s.moveToOnDeck(ctx, time.Now())
 }
 
+func (s *Server) checkCellars(ctx context.Context) {
+	for i, slot := range s.config.Cellar.Slots {
+		if s.checkCellar(ctx, slot) {
+			s.RaiseIssue(ctx, "Cellar not ordered", fmt.Sprintf("Cellar %v is not ordered correctly", i), false)
+		}
+	}
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	var updateDrunk = flag.Bool("update", false, "Update the drunk")
@@ -178,6 +186,7 @@ func main() {
 		log.Fatalf("UPDATED: %v", server.config.Drunk)
 	}
 
+	server.RegisterRepeatingTask(server.checkCellars, "check_cellars", time.Minute)
 	server.RegisterRepeatingTask(server.doSync, "do_sync", time.Hour)
 	server.RegisterRepeatingTask(server.doMove, "do_move", time.Hour)
 	server.RegisterRepeatingTask(server.clearDeck, "clear_deck", time.Minute*5)

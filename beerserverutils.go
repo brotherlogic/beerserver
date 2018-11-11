@@ -119,3 +119,13 @@ func (s *Server) clearDeck(ctx context.Context) {
 
 	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_END_FUNCTION)
 }
+
+func (s *Server) checkCellar(ctx context.Context, cellar *pb.CellarSlot) bool {
+	for i := range cellar.Beers {
+		if i > 0 && cellar.Beers[i].DrinkDate > cellar.Beers[i-1].DrinkDate {
+			return true
+		}
+	}
+
+	return false
+}
