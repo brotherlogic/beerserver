@@ -24,10 +24,10 @@ func TestRemoveDrunkThings(t *testing.T) {
 func TestCellarOrder(t *testing.T) {
 	s := InitTestServer(".testtry", true)
 	slot := &pb.CellarSlot{Beers: []*pb.Beer{
-		&pb.Beer{Id: 123, DrinkDate: 10},
-		&pb.Beer{Id: 123, DrinkDate: 5},
+		&pb.Beer{Id: 123, DrinkDate: 5, Index: 1},
+		&pb.Beer{Id: 123, DrinkDate: 10, Index: 2},
 	}}
-	if s.checkCellar(context.Background(), slot) {
+	if s.cellarOutOfOrder(context.Background(), slot) {
 		t.Errorf("Problem in ordering")
 	}
 
@@ -36,10 +36,10 @@ func TestCellarOrder(t *testing.T) {
 func TestCellarOrderBad(t *testing.T) {
 	s := InitTestServer(".testtry", true)
 	slot := &pb.CellarSlot{Beers: []*pb.Beer{
-		&pb.Beer{Id: 123, DrinkDate: 5},
-		&pb.Beer{Id: 123, DrinkDate: 10},
+		&pb.Beer{Id: 123, DrinkDate: 10, Index: 1},
+		&pb.Beer{Id: 124, DrinkDate: 5, Index: 2},
 	}}
-	if !s.checkCellar(context.Background(), slot) {
+	if !s.cellarOutOfOrder(context.Background(), slot) {
 		t.Errorf("Problem in ordering")
 	}
 

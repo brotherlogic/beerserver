@@ -120,10 +120,15 @@ func (s *Server) clearDeck(ctx context.Context) {
 	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_END_FUNCTION)
 }
 
-func (s *Server) checkCellar(ctx context.Context, cellar *pb.CellarSlot) bool {
+func (s *Server) cellarOutOfOrder(ctx context.Context, cellar *pb.CellarSlot) bool {
 	for i := range cellar.Beers {
-		if i > 0 && cellar.Beers[i].DrinkDate > cellar.Beers[i-1].DrinkDate {
-			return true
+		for j := range cellar.Beers {
+			if j > i {
+				if (cellar.Beers[i].Index < cellar.Beers[j].Index && cellar.Beers[i].DrinkDate > cellar.Beers[j].DrinkDate) || (cellar.Beers[i].Index > cellar.Beers[j].Index && cellar.Beers[i].DrinkDate < cellar.Beers[j].DrinkDate) {
+
+					return true
+				}
+			}
 		}
 	}
 
