@@ -126,7 +126,7 @@ func (s *Server) checkSync(ctx context.Context) {
 	}
 
 	if time.Now().Sub(time.Unix(drunkDate, 0)) > time.Hour*24*7 {
-		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Syncd beer was %v", time.Unix(s.config.LastSync, 0)), false)
+		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Syncd beer was %v", time.Unix(drunkDate, 0)), false)
 	}
 
 }
