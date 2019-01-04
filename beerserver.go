@@ -6,16 +6,49 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/brotherlogic/goserver"
+	"github.com/brotherlogic/goserver/utils"
 	"github.com/brotherlogic/keystore/client"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 	pbgs "github.com/brotherlogic/goserver/proto"
+	pbp "github.com/brotherlogic/printer/proto"
 )
+
+type printer interface {
+	print(ctx context.Context, lines []string) error
+}
+
+type prodPrinter struct {
+	testing bool
+}
+
+func (p *prodPrinter) print(ctx context.Context, lines []string) error {
+	if p.testing {
+		return nil
+	}
+	host, port, err := utils.Resolve("printer")
+	if err != nil {
+		return err
+	}
+	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	defer conn.Close()
+
+	if err != nil {
+		return err
+	}
+
+	client := pbp.NewPrintServiceClient(conn)
+	_, err = client.Print(ctx, &pbp.PrintRequest{Lines: lines, Origin: "beerserver"})
+
+	return err
+
+}
 
 //Server main server type
 type Server struct {
@@ -23,6 +56,19 @@ type Server struct {
 	config    *pb.Config
 	ut        *Untappd
 	lastClean time.Time
+	printer   printer
+}
+
+//Init builds a server
+func Init() *Server {
+	s := &Server{
+		&goserver.GoServer{},
+		&pb.Config{},
+		&Untappd{},
+		time.Unix(1, 0),
+		&prodPrinter{},
+	}
+	return s
 }
 
 const (
@@ -138,12 +184,6 @@ func (s *Server) save(ctx context.Context) {
 //GetUntappd builds a untappd retriever
 func GetUntappd(id, secret string) *Untappd {
 	return &Untappd{untappdID: id, untappdSecret: secret, u: mainUnmarshaller{}, f: mainFetcher{}, c: mainConverter{}}
-}
-
-//Init builds a server
-func Init() *Server {
-	s := &Server{&goserver.GoServer{}, &pb.Config{}, &Untappd{}, time.Unix(1, 0)}
-	return s
 }
 
 func (s *Server) doSync(ctx context.Context) {
