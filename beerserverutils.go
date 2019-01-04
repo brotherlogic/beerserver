@@ -95,11 +95,12 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 	}
 
 	if len(moved) > 0 {
-		moveStr := ""
+		moveStr := []string{}
 		for _, b := range moved {
-			moveStr += fmt.Sprintf("%v\n", b.Name)
+			moveStr = append(moveStr, fmt.Sprintf("%v\n", b.Name))
 		}
-		s.RaiseIssue(ctx, "Beer Move", moveStr, true)
+		err := s.printer.print(ctx, moveStr)
+		s.Log(fmt.Sprintf("PRINT %v", err))
 	}
 
 	s.save(ctx)
