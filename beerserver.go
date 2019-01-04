@@ -238,7 +238,5 @@ func main() {
 	server.RegisterRepeatingTask(server.clearDeck, "clear_deck", time.Minute*5)
 	server.RegisterRepeatingTask(server.checkSync, "check_sync", time.Hour)
 
-	server.Log("Started!")
-
 	server.Serve()
 }
