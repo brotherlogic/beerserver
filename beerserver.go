@@ -26,6 +26,7 @@ type printer interface {
 
 type prodPrinter struct {
 	testing bool
+	count   int64
 }
 
 func (p *prodPrinter) print(ctx context.Context, lines []string) error {
@@ -45,6 +46,10 @@ func (p *prodPrinter) print(ctx context.Context, lines []string) error {
 
 	client := pbp.NewPrintServiceClient(conn)
 	_, err = client.Print(ctx, &pbp.PrintRequest{Lines: lines, Origin: "beerserver"})
+
+	if err == nil {
+		p.count++
+	}
 
 	return err
 
@@ -131,6 +136,7 @@ func (s *Server) GetState() []*pbgs.State {
 		}
 	}
 	return []*pbgs.State{
+		&pbgs.State{Key: "prints", Value: s.printer.(*prodPrinter).count},
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
 		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
