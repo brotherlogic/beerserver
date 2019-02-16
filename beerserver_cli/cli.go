@@ -52,7 +52,7 @@ func main() {
 					}
 					for _, b := range list.Beers {
 						if int(b.Index) == i && int(b.InCellar) == *cellar {
-							fmt.Printf("%v. %v (%v) - %v\n", i, b.Name, time.Unix(b.DrinkDate, 0), b.Size)
+							fmt.Printf("%v. %v (%v) - %v\n", i, b.Name, time.Unix(b.DrinkDate, 0), b.Id)
 						}
 					}
 				}
