@@ -13,8 +13,6 @@ import (
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
-	pbgs "github.com/brotherlogic/goserver/proto"
-	pbt "github.com/brotherlogic/tracer/proto"
 
 	//Needed to pull in gzip encoding init
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -42,7 +40,7 @@ func main() {
 		var ondeck = listFlags.Bool("deck", false, "View on deck")
 		var cellar = listFlags.Int("cellar", 1, "Cellar to view")
 		if err := listFlags.Parse(os.Args[2:]); err == nil {
-			ctx, cancel := utils.BuildContext("beerserver-cli", "beerserver-cli", pbgs.ContextType_REGULAR)
+			ctx, cancel := utils.BuildContext("beerserver-cli", "beerserver-cli")
 			defer cancel()
 			list, err := client.ListBeers(ctx, &pb.ListBeerRequest{OnDeck: *ondeck})
 			if err == nil {
@@ -59,7 +57,6 @@ func main() {
 			} else {
 				fmt.Printf("Error getting beers: %v\n", err)
 			}
-			utils.SendTrace(ctx, "beerserver-cli", time.Now(), pbt.Milestone_END, "beerserver-cli")
 		}
 	case "add":
 		addFlags := flag.NewFlagSet("Add", flag.ExitOnError)
