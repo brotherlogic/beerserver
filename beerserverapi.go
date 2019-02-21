@@ -7,7 +7,6 @@ import (
 	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/beerserver/proto"
-	pbt "github.com/brotherlogic/tracer/proto"
 )
 
 //AddBeer adds a beer to the server
@@ -51,7 +50,6 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 
 //ListBeers gets the beers in the cellar
 func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.ListBeerResponse, error) {
-	s.LogTrace(ctx, "ListBeers", time.Now(), pbt.Milestone_START_FUNCTION)
 	beers := make([]*pb.Beer, 0)
 
 	if req.OnDeck {
@@ -67,6 +65,5 @@ func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.Li
 		}
 	}
 
-	s.LogTrace(ctx, "ListBeers", time.Now(), pbt.Milestone_END_FUNCTION)
 	return &pb.ListBeerResponse{Beers: beers}, nil
 }

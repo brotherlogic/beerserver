@@ -8,7 +8,6 @@ import (
 	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/beerserver/proto"
-	pbt "github.com/brotherlogic/tracer/proto"
 )
 
 func findIndex(slot *pb.CellarSlot, date int64) int32 {
@@ -107,8 +106,6 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 }
 
 func (s *Server) clearDeck(ctx context.Context) {
-	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_START_FUNCTION)
-
 	s.lastClean = time.Now()
 
 	for _, bdr := range s.config.Drunk {
@@ -118,8 +115,6 @@ func (s *Server) clearDeck(ctx context.Context) {
 			}
 		}
 	}
-
-	s.LogTrace(ctx, "ClearDeck", time.Now(), pbt.Milestone_END_FUNCTION)
 }
 
 func (s *Server) cellarOutOfOrder(ctx context.Context, cellar *pb.CellarSlot) bool {

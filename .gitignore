@@ -39,4 +39,4 @@ beerserver
 testcellar
 
 .*
-cli/cli
+beerserver_cli/beerserver_cli
