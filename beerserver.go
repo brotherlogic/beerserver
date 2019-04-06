@@ -168,7 +168,7 @@ func (s *Server) loadDrunk(filestr string) {
 	}
 }
 
-func (s *Server) checkSync(ctx context.Context) {
+func (s *Server) checkSync(ctx context.Context) error {
 	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
 		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v", time.Unix(s.config.LastSync, 0)), false)
 	}
@@ -186,6 +186,7 @@ func (s *Server) checkSync(ctx context.Context) {
 		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Syncd beer was %v", time.Unix(drunkDate, 0)), false)
 	}
 
+	return nil
 }
 
 func (s *Server) save(ctx context.Context) {
@@ -197,20 +198,23 @@ func GetUntappd(id, secret string) *Untappd {
 	return &Untappd{untappdID: id, untappdSecret: secret, u: mainUnmarshaller{}, f: mainFetcher{}, c: mainConverter{}}
 }
 
-func (s *Server) doSync(ctx context.Context) {
+func (s *Server) doSync(ctx context.Context) error {
 	s.syncDrunk(ctx, mainFetcher{})
+	return nil
 }
 
-func (s *Server) doMove(ctx context.Context) {
+func (s *Server) doMove(ctx context.Context) error {
 	s.moveToOnDeck(ctx, time.Now())
+	return nil
 }
 
-func (s *Server) checkCellars(ctx context.Context) {
+func (s *Server) checkCellars(ctx context.Context) error {
 	for i, slot := range s.config.Cellar.Slots {
 		if s.cellarOutOfOrder(ctx, slot) {
 			s.RaiseIssue(ctx, "Cellar not ordered", fmt.Sprintf("Cellar %v is not ordered correctly", i), false)
 		}
 	}
+	return nil
 }
 
 func main() {

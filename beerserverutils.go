@@ -105,7 +105,7 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 	s.save(ctx)
 }
 
-func (s *Server) clearDeck(ctx context.Context) {
+func (s *Server) clearDeck(ctx context.Context) error {
 	s.lastClean = time.Now()
 
 	for _, bdr := range s.config.Drunk {
@@ -115,6 +115,7 @@ func (s *Server) clearDeck(ctx context.Context) {
 			}
 		}
 	}
+	return nil
 }
 
 func (s *Server) cellarOutOfOrder(ctx context.Context, cellar *pb.CellarSlot) bool {
