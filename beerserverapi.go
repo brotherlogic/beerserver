@@ -59,7 +59,9 @@ func (s *Server) DeleteBeer(ctx context.Context, req *pb.DeleteBeerRequest) (*pb
 	for _, c := range s.config.Cellar.Slots {
 		for i, b := range c.Beers {
 			if b.Uid == req.Uid {
+				s.Log(fmt.Sprintf("Deleteing beer %v", b))
 				c.Beers = append(c.Beers[:i], c.Beers[i+1:]...)
+				s.save(ctx)
 				return &pb.DeleteBeerResponse{}, nil
 			}
 		}
