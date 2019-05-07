@@ -140,7 +140,17 @@ func (s *Server) GetState() []*pbgs.State {
 			}
 		}
 	}
+	missingUID := int64(0)
+	for _, c := range s.config.Cellar.Slots {
+		for _, b := range c.Beers {
+			if b.Uid == 0 {
+				missingUID++
+			}
+		}
+	}
+
 	return []*pbgs.State{
+		&pbgs.State{Key: "missing_uid", Value: missingUID},
 		&pbgs.State{Key: "prints", Value: s.printer.(*prodPrinter).count},
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -35,6 +36,7 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 		newBeer := proto.Clone(req.Beer).(*pb.Beer)
 		newBeer.DrinkDate = minDate.Unix()
 		newBeer.Name = b.Name
+		newBeer.Uid = time.Now().UnixNano()
 		s.addBeerToCellar(newBeer)
 		minDate = minDate.AddDate(1, 0, 0)
 	}
@@ -46,6 +48,24 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 
 	s.save(ctx)
 	return &pb.AddBeerResponse{}, nil
+}
+
+//DeleteBeer deletes a beer
+func (s *Server) DeleteBeer(ctx context.Context, req *pb.DeleteBeerRequest) (*pb.DeleteBeerResponse, error) {
+	if (req.Uid) == 0 {
+		return nil, fmt.Errorf("Cannot specify zero id for delete request")
+	}
+
+	for _, c := range s.config.Cellar.Slots {
+		for i, b := range c.Beers {
+			if b.Uid == req.Uid {
+				c.Beers = append(c.Beers[:i], c.Beers[i+1:]...)
+				return &pb.DeleteBeerResponse{}, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("Unable to locate beer with uid %v", req.Uid)
 }
 
 //ListBeers gets the beers in the cellar
