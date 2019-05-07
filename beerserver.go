@@ -105,6 +105,18 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return nil
 }
 
+func (s *Server) validateCellars(ctx context.Context) {
+	for _, c := range s.config.Cellar.Slots {
+		for _, b := range c.Beers {
+			if b.Uid == 0 {
+				b.Uid = time.Now().UnixNano()
+				s.Log(fmt.Sprintf("Updating UID for %v", b))
+				time.Sleep(time.Millisecond * 10)
+			}
+		}
+	}
+}
+
 // Mote promotes this server
 func (s *Server) Mote(ctx context.Context, master bool) error {
 	if master {
@@ -120,6 +132,7 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 		s.ut = GetUntappd(s.config.Token.Id, s.config.Token.Secret)
 		s.Log(fmt.Sprintf("FOUND %v and %v", s.config.Token.Id, s.config.Token.Secret))
 		s.ut.l = s.Log
+		s.validateCellars(ctx)
 	}
 
 	return nil
