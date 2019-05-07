@@ -71,6 +71,17 @@ func main() {
 				}
 			}
 		}
+	case "delete":
+		deleteFlags := flag.NewFlagSet("Delete", flag.ExitOnError)
+		var id = deleteFlags.Int("id", -1, "Id of beer to delete")
+		if err := deleteFlags.Parse(os.Args[2:]); err == nil {
+			if *id != -1 {
+				_, err := client.DeleteBeer(ctx2, &pb.DeleteBeerRequest{Uid: int64(*id)})
+				if err != nil {
+					fmt.Printf("%v\n", err)
+				}
+			}
+		}
 	}
 
 }
