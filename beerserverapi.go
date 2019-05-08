@@ -67,6 +67,15 @@ func (s *Server) DeleteBeer(ctx context.Context, req *pb.DeleteBeerRequest) (*pb
 		}
 	}
 
+	for i, b := range s.config.Cellar.OnDeck {
+		if b.Uid == req.Uid {
+			s.Log(fmt.Sprintf("Deleteing beer %v", b))
+			s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck[:i], s.config.Cellar.OnDeck[i+1:]...)
+			s.save(ctx)
+			return &pb.DeleteBeerResponse{}, nil
+		}
+	}
+
 	return nil, fmt.Errorf("Unable to locate beer with uid %v", req.Uid)
 }
 

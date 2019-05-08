@@ -115,6 +115,13 @@ func (s *Server) validateCellars(ctx context.Context) {
 			}
 		}
 	}
+
+	for _, b := range s.config.Cellar.OnDeck {
+		if b.Uid == 0 {
+			b.Uid = time.Now().UnixNano()
+			time.Sleep(time.Millisecond * 10)
+		}
+	}
 }
 
 // Mote promotes this server
