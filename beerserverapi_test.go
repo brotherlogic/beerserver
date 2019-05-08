@@ -47,6 +47,32 @@ func TestDeleteBeer(t *testing.T) {
 	}
 }
 
+func TestDeleteBeerOnDeck(t *testing.T) {
+	s := InitTestServer(".testdeletebeer", true)
+
+	s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, &pb.Beer{Id: 1234, Size: "bomber", Uid: 12})
+	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
+
+	if err != nil {
+		t.Fatalf("Error in listing beers: %v", err)
+	}
+
+	uid := list.Beers[0].Uid
+	_, err = s.DeleteBeer(context.Background(), &pb.DeleteBeerRequest{Uid: uid})
+	if err != nil {
+		t.Fatalf("Error in deleting beer: %v", err)
+	}
+
+	list, err = s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
+	if err != nil {
+		t.Fatalf("Error in listing beers: %v", err)
+	}
+
+	if len(list.Beers) != 0 {
+		t.Errorf("Beer was not deleted: %v", list.Beers)
+	}
+}
+
 func TestDeleteBeerWithEmptyRequest(t *testing.T) {
 	s := InitTestServer(".testdeletebeer", true)
 
