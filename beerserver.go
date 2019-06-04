@@ -161,7 +161,7 @@ func (s *Server) GetState() []*pbgs.State {
 		}
 	}
 	missingUID := int64(0)
-	if s.config != nil {
+	if s.config != nil && s.config.Cellar != nil {
 		for _, c := range s.config.Cellar.Slots {
 			for _, b := range c.Beers {
 				if b.Uid == 0 {
