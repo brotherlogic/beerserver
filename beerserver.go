@@ -261,7 +261,7 @@ func main() {
 
 	server := Init()
 	server.PrepServer()
-	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
+	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
 
 	server.Register = server
 	server.RegisterServer("beerserver", false)
