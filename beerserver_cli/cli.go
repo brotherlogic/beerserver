@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	host, port, err := utils.Resolve("beerserver")
+	host, port, err := utils.Resolve("beerserver", "beerserver-cli")
 	if err != nil {
 		log.Fatalf("Unable to reach beerserver: %v", err)
 	}
