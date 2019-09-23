@@ -6,11 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/brotherlogic/goserver"
-	"github.com/brotherlogic/goserver/utils"
 	"github.com/brotherlogic/keystore/client"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -27,22 +25,18 @@ type printer interface {
 type prodPrinter struct {
 	testing bool
 	count   int64
+	dial    func(server string) (*grpc.ClientConn, error)
 }
 
 func (p *prodPrinter) print(ctx context.Context, lines []string) error {
 	if p.testing {
 		return nil
 	}
-	host, port, err := utils.Resolve("printer")
+	conn, err := p.dial("printer")
 	if err != nil {
 		return err
 	}
-	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
 	defer conn.Close()
-
-	if err != nil {
-		return err
-	}
 
 	client := pbp.NewPrintServiceClient(conn)
 	_, err = client.Print(ctx, &pbp.PrintRequest{Lines: lines, Origin: "beerserver"})
@@ -73,6 +67,7 @@ func Init() *Server {
 		time.Unix(1, 0),
 		&prodPrinter{},
 	}
+	s.printer = &prodPrinter{dial: s.DialMaster}
 	return s
 }
 
