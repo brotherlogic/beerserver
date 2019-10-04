@@ -117,6 +117,20 @@ func (s *Server) validateCellars(ctx context.Context) {
 			time.Sleep(time.Millisecond * 10)
 		}
 	}
+
+	// Add a stash cellar if one doesn't exist
+	found := false
+	for _, c := range s.config.Cellar.Slots {
+		if c.Accepts == "stash" {
+			found = true
+		}
+	}
+
+	if !found {
+		s.config.Cellar.Slots = append(s.config.Cellar.Slots, &pb.CellarSlot{Accepts: "stash", NumSlots: 1000, Beers: []*pb.Beer{}})
+	} else {
+		s.RaiseIssue(ctx, "Remove slot add", "Slot add is done, you can remove it", false)
+	}
 }
 
 // Mote promotes this server
