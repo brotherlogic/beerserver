@@ -70,6 +70,10 @@ func (s *Server) syncDrunk(ctx context.Context, f httpResponseFetcher) {
 		}
 	}
 	ndrinks, err := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
+	s.addDrunks(ctx, err, ndrinks)
+}
+
+func (s *Server) addDrunks(ctx context.Context, err error, ndrinks []*pb.Beer) {
 	if err == nil {
 		s.config.Drunk = append(s.config.Drunk, ndrinks...)
 		s.config.LastSync = time.Now().Unix()

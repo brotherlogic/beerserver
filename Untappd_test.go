@@ -235,12 +235,12 @@ func TestGetUserPage(t *testing.T) {
 	vals, err := u.convertUserPageToDrinks(text, mainUnmarshaller{})
 
 	if err != nil {
-	   t.Errorf("Error: %v", err)
-}
+		t.Errorf("Error: %v", err)
+	}
 
 	if len(vals) != 1 {
-	t.Errorf("Wrong number pulled: %v", len(vals))
-}
+		t.Errorf("Wrong number pulled: %v", len(vals))
+	}
 }
 
 func TestBadUserPage(t *testing.T) {
@@ -282,5 +282,15 @@ func TestGetLastBeersFail(t *testing.T) {
 
 	if len(beers) != 0 {
 		t.Errorf("Did not error")
+	}
+}
+
+func TestGetLastBeers(t *testing.T) {
+	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
+	u.l = doLog
+	beers, _ := u.getLastBeers(fileFetcher{}, mainConverter{}, mainUnmarshaller{}, 579454692)
+
+	if len(beers) == 0 {
+		t.Errorf("Did not ru")
 	}
 }

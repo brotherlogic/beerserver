@@ -21,6 +21,7 @@ func InitTestServer(dir string, delete bool) *Server {
 	}
 	s.KSclient = *keystoreclient.GetTestClient(dir)
 	s.SkipLog = true
+	s.printer = &prodPrinter{testing: true}
 	s.ut = GetTestUntappd()
 	s.ut.l = doLog
 

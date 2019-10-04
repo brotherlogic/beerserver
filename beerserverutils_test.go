@@ -74,3 +74,8 @@ func TestCellarOrderBadSort(t *testing.T) {
 	}
 
 }
+
+func TestAddDrinks(t *testing.T) {
+	s := InitTestServer(".testadddrunks", true)
+	s.addDrunks(context.Background(), nil, []*pb.Beer{})
+}
