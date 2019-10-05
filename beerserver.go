@@ -273,6 +273,7 @@ func main() {
 	server.RegisterRepeatingTask(server.doMove, "do_move", time.Hour)
 	server.RegisterRepeatingTask(server.clearDeck, "clear_deck", time.Minute*5)
 	server.RegisterRepeatingTask(server.checkSync, "check_sync", time.Hour)
+	server.RegisterRepeatingTask(server.refreshStash, "refresh_stash", time.Hour)
 
 	server.Serve()
 }

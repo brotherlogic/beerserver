@@ -25,7 +25,7 @@ func (s *Server) refreshStash(ctx context.Context) error {
 					b.OnDeck = true
 					s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, b)
 					c.Beers = append(c.Beers[:i], c.Beers[i+1:]...)
-					return nil
+					return s.printer.print(ctx, []string{fmt.Sprintf("%v\n", b.Name)})
 				}
 			}
 		}
