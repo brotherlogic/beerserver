@@ -185,7 +185,7 @@ func TestBeerGoesInRightCellar(t *testing.T) {
 	}
 
 	//New beer should be in the third slot
-	if len(s.config.Cellar.Slots[0].Beers) != 0 || len(s.config.Cellar.Slots[2].Beers) != 1 {
+	if len(s.config.Cellar.Slots[0].Beers) != 0 || len(s.config.Cellar.Slots[3].Beers) != 1 {
 		t.Errorf("beer has been added to the wrong slot!: %v or %v or %v", s.config.Cellar.Slots[0], s.config.Cellar.Slots[1], s.config.Cellar.Slots[2])
 	}
 }
@@ -209,6 +209,37 @@ func TestBeerDateLatest(t *testing.T) {
 	date := time.Unix(list.Beers[0].DrinkDate, 0)
 	if date.Year() != 2019 || date.Month() != time.April || date.Day() != 15 {
 		t.Errorf("Wrong date returned: %v", date)
+	}
+
+}
+
+func TestStashProcess(t *testing.T) {
+	s := InitTestServer(".teststashprocess", true)
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 1234, Size: "stash"}, Quantity: 10})
+
+	if err != nil {
+		t.Fatalf("Error adding beer")
+	}
+
+	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{})
+	if err != nil || len(list.Beers) != 10 {
+		t.Fatalf("Bad initial add: %v, %v", list, err)
+	}
+
+	//Run the stash twice
+	s.refreshStash(context.Background())
+	s.refreshStash(context.Background())
+
+	// Nine in the cellar
+	list, err = s.ListBeers(context.Background(), &pb.ListBeerRequest{})
+	if err != nil || len(list.Beers) != 9 {
+		t.Fatalf("Bad post refresh list: %v, %v", list, err)
+	}
+
+	// One on deck
+	list, err = s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
+	if err != nil || len(list.Beers) != 1 {
+		t.Fatalf("Bad add to deck: %v, %v", list, err)
 	}
 
 }

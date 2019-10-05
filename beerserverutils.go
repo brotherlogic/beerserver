@@ -10,6 +10,30 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+func (s *Server) refreshStash(ctx context.Context) error {
+	onDeck := make(map[int64]bool)
+
+	for _, beer := range s.config.Cellar.OnDeck {
+		onDeck[beer.Id] = true
+	}
+
+	for _, c := range s.config.Cellar.Slots {
+		if c.Accepts == "stash" {
+			for i, b := range c.Beers {
+				if !onDeck[b.Id] {
+					b.DrinkDate = time.Now().Unix()
+					b.OnDeck = true
+					s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, b)
+					c.Beers = append(c.Beers[:i], c.Beers[i+1:]...)
+					return nil
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func findIndex(slot *pb.CellarSlot, date int64) int32 {
 	bestIndex := int32(len(slot.Beers))
 	for _, b := range slot.Beers {
