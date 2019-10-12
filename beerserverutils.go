@@ -120,15 +120,17 @@ func (s *Server) addDrunks(ctx context.Context, err error, ndrinks []*pb.Beer) {
 func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 	moved := []*pb.Beer{}
 	for _, cellar := range s.config.Cellar.Slots {
-		i := 0
-		for i < len(cellar.Beers) {
-			if cellar.Beers[i].DrinkDate < t.Unix() {
-				cellar.Beers[i].OnDeck = true
-				moved = append(moved, cellar.Beers[i])
-				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, cellar.Beers[i])
-				cellar.Beers = append(cellar.Beers[:i], cellar.Beers[i+1:]...)
-			} else {
-				i++
+		if cellar.Accepts != "stash" {
+			i := 0
+			for i < len(cellar.Beers) {
+				if cellar.Beers[i].DrinkDate < t.Unix() {
+					cellar.Beers[i].OnDeck = true
+					moved = append(moved, cellar.Beers[i])
+					s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, cellar.Beers[i])
+					cellar.Beers = append(cellar.Beers[:i], cellar.Beers[i+1:]...)
+				} else {
+					i++
+				}
 			}
 		}
 	}
