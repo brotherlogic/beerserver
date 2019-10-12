@@ -216,13 +216,14 @@ func TestBeerDateLatest(t *testing.T) {
 func TestStashProcess(t *testing.T) {
 	s := InitTestServer(".teststashprocess", true)
 	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 1234, Size: "stash"}, Quantity: 10})
+	_, err = s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 12345, Size: "stash"}, Quantity: 10})
 
 	if err != nil {
 		t.Fatalf("Error adding beer")
 	}
 
 	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{})
-	if err != nil || len(list.Beers) != 10 {
+	if err != nil || len(list.Beers) != 20 {
 		t.Fatalf("Bad initial add: %v, %v", list, err)
 	}
 
@@ -230,10 +231,10 @@ func TestStashProcess(t *testing.T) {
 	s.refreshStash(context.Background())
 	s.refreshStash(context.Background())
 
-	// Nine in the cellar
+	// Nineteen in the cellar
 	list, err = s.ListBeers(context.Background(), &pb.ListBeerRequest{})
-	if err != nil || len(list.Beers) != 9 {
-		t.Fatalf("Bad post refresh list: %v, %v", list, err)
+	if err != nil || len(list.Beers) != 19 {
+		t.Fatalf("Bad post refresh list: %v, %v", len(list.Beers), err)
 	}
 
 	// One on deck
