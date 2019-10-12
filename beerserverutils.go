@@ -17,20 +17,32 @@ func (s *Server) refreshStash(ctx context.Context) error {
 		onDeck[beer.Id] = true
 	}
 
+	var chosenBeer *pb.Beer
+	chosenIndex := 0
+	count := 0
 	for _, c := range s.config.Cellar.Slots {
 		if c.Accepts == "stash" {
 			for i, b := range c.Beers {
 				if !onDeck[b.Id] {
-					b.DrinkDate = time.Now().Unix()
-					b.OnDeck = true
-					s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, b)
-					c.Beers = append(c.Beers[:i], c.Beers[i+1:]...)
-					return s.printer.print(ctx, []string{fmt.Sprintf("%v\n", b.Name)})
+					chosenBeer = b
+					chosenIndex = i
+				} else {
+					count++
 				}
+			}
+
+			if count == 0 {
+				err := s.printer.print(ctx, []string{fmt.Sprintf("%v\n", chosenBeer.Name)})
+				if err == nil {
+					chosenBeer.DrinkDate = time.Now().Unix()
+					chosenBeer.OnDeck = true
+					s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, chosenBeer)
+					c.Beers = append(c.Beers[:chosenIndex], c.Beers[chosenIndex+1:]...)
+				}
+
 			}
 		}
 	}
-
 	return nil
 }
 
