@@ -167,8 +167,8 @@ func (s *Server) GetState() []*pbgs.State {
 	}
 
 	return []*pbgs.State{
-		&pbgs.State{Key: "missing_uid", Value: missingUID},
 		&pbgs.State{Key: "prints", Value: s.printer.(*prodPrinter).count},
+		&pbgs.State{Key: "missing_uid", Value: missingUID},
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
 		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
