@@ -259,7 +259,7 @@ func main() {
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
 
 	server.Register = server
-	server.RegisterServerV2("beerserver", false)
+	server.RegisterServer("beerserver", false)
 
 	if *updateDrunk {
 		server.Mote(context.Background(), true)
