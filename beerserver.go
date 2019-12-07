@@ -131,6 +131,7 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 		}
 
 		s.config = bResp.(*pb.Config)
+		s.Log(fmt.Sprintf("Read config: %v", s.config))
 		s.ut = GetUntappd(s.config.Token.Id, s.config.Token.Secret)
 		s.Log(fmt.Sprintf("FOUND %v and %v", s.config.Token.Id, s.config.Token.Secret))
 		s.ut.l = s.Log
