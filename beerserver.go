@@ -132,10 +132,10 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 
 		s.config = bResp.(*pb.Config)
 		s.Log(fmt.Sprintf("Read config: %v", s.config.Token))
-		s.ut = GetUntappd(s.config.Token.Id, s.config.Token.Secret)
-		s.Log(fmt.Sprintf("FOUND %v and %v", s.config.Token.Id, s.config.Token.Secret))
-		s.ut.l = s.Log
-		s.validateCellars(ctx)
+		//s.ut = GetUntappd(s.config.Token.Id, s.config.Token.Secret)
+		//s.Log(fmt.Sprintf("FOUND %v and %v", s.config.Token.Id, s.config.Token.Secret))
+		//s.ut.l = s.Log
+		//s.validateCellars(ctx)
 	}
 
 	return nil
@@ -168,6 +168,7 @@ func (s *Server) GetState() []*pbgs.State {
 	}
 
 	return []*pbgs.State{
+		&pbgs.State{Key: "cellars", Value: int64(len(s.config.Cellar.Slots))},
 		&pbgs.State{Key: "token", Text: fmt.Sprintf("%v", s.config.Token)},
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "missing_uid", Value: missingUID},
@@ -249,6 +250,8 @@ func (s *Server) checkCellars(ctx context.Context) error {
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	var updateDrunk = flag.Bool("update", false, "Update the drunk")
+	var id = flag.String("id", "", "token id")
+	var secret = flag.String("secret", "", "token secret")
 	flag.Parse()
 
 	if *quiet {
@@ -263,8 +266,25 @@ func main() {
 	server.Register = server
 	server.RegisterServerV2("beerserver", false, false)
 
+	if len(*secret) > 0 {
+
+		err := server.Mote(context.Background(), true)
+		if err != nil {
+			log.Fatalf("Mote %v", err)
+		}
+
+		server.config.Token = &pb.Token{}
+		server.config.Token.Id = *id
+		server.config.Token.Secret = *secret
+
+		server.save(context.Background())
+		return
+	}
+
 	if *updateDrunk {
-		server.Mote(context.Background(), true)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		server.Mote(ctx, true)
 		server.loadDrunk("loaddata/brotherlogic.json")
 		server.save(context.Background())
 		log.Fatalf("UPDATED: %v", server.config.Drunk)
