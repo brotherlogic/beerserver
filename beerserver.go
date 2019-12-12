@@ -168,7 +168,7 @@ func (s *Server) GetState() []*pbgs.State {
 	}
 
 	return []*pbgs.State{
-		&pbgs.State{Key: "cellars", Value: int64(len(s.config.Cellar.Slots))},
+		&pbgs.State{Key: "cellars", Value: int64(len(s.config.GetCellar().GetSlots()))},
 		&pbgs.State{Key: "token", Text: fmt.Sprintf("%v", s.config.Token)},
 		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
 		&pbgs.State{Key: "missing_uid", Value: missingUID},
