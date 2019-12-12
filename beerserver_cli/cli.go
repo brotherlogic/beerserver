@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
@@ -16,14 +15,16 @@ import (
 
 	//Needed to pull in gzip encoding init
 	_ "google.golang.org/grpc/encoding/gzip"
+	"google.golang.org/grpc/resolver"
 )
 
+func init() {
+	resolver.Register(&utils.DiscoveryClientResolverBuilder{})
+}
+
 func main() {
-	host, port, err := utils.Resolve("beerserver", "beerserver-cli")
-	if err != nil {
-		log.Fatalf("Unable to reach beerserver: %v", err)
-	}
-	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	conn, err := grpc.Dial("discovery:///beerserver", grpc.WithInsecure(),
+		grpc.WithBalancerName("my_pick_first"))
 	defer conn.Close()
 
 	if err != nil {
