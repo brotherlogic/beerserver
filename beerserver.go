@@ -239,7 +239,7 @@ func (s *Server) doMove(ctx context.Context) error {
 }
 
 func (s *Server) checkCellars(ctx context.Context) error {
-	for i, slot := range s.config.Cellar.Slots {
+	for i, slot := range s.config.GetCellar().GetSlots() {
 		if s.cellarOutOfOrder(ctx, slot) {
 			s.RaiseIssue(ctx, "Cellar not ordered", fmt.Sprintf("Cellar %v is not ordered correctly", i), false)
 		}
