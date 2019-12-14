@@ -119,7 +119,7 @@ func (s *Server) addDrunks(ctx context.Context, err error, ndrinks []*pb.Beer) {
 
 func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 	moved := []*pb.Beer{}
-	for _, cellar := range s.config.Cellar.Slots {
+	for _, cellar := range s.config.GetCellar().GetSlots() {
 		if cellar.Accepts != "stash" {
 			i := 0
 			for i < len(cellar.Beers) {
