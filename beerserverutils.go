@@ -150,8 +150,8 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 func (s *Server) clearDeck(ctx context.Context) error {
 	s.lastClean = time.Now()
 
-	for _, bdr := range s.config.Drunk {
-		for i, bde := range s.config.Cellar.OnDeck {
+	for _, bdr := range s.config.GetDrunk() {
+		for i, bde := range s.config.GetCellar().GetOnDeck() {
 			if bdr.Id == bde.Id && bdr.DrinkDate > bde.DrinkDate {
 				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck[:i], s.config.Cellar.OnDeck[i+1:]...)
 			}
