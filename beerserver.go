@@ -175,7 +175,7 @@ func (s *Server) GetState() []*pbgs.State {
 		&pbgs.State{Key: "missing_uid", Value: missingUID},
 		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
 		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
-		&pbgs.State{Key: "lastsyncerr", Text: s.lastSyncErr},
+		&pbgs.State{Key: "lastsyncerr", Text: s.lastErr},
 		&pbgs.State{Key: "last_clean", TimeValue: s.lastClean.Unix()},
 		&pbgs.State{Key: "druuuunk", Value: int64(len(s.config.Drunk))},
 		&pbgs.State{Key: "drnnnnnk", Value: missing},
