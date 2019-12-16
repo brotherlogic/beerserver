@@ -264,7 +264,10 @@ func main() {
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
 
 	server.Register = server
-	server.RegisterServerV2("beerserver", false, false)
+	err := server.RegisterServerV2("beerserver", false, false)
+	if err != nil {
+		return
+	}
 
 	if len(*secret) > 0 {
 
