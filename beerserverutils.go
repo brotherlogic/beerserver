@@ -13,14 +13,14 @@ import (
 func (s *Server) refreshStash(ctx context.Context) error {
 	onDeck := make(map[int64]bool)
 
-	for _, beer := range s.config.Cellar.OnDeck {
+	for _, beer := range s.config.GetCellar().GetOnDeck() {
 		onDeck[beer.Id] = true
 	}
 
 	var chosenBeer *pb.Beer
 	chosenIndex := 0
 	count := 0
-	for _, c := range s.config.Cellar.Slots {
+	for _, c := range s.config.GetCellar().GetSlots() {
 		if c.Accepts == "stash" {
 			for i, b := range c.Beers {
 				if !onDeck[b.Id] {
@@ -36,7 +36,7 @@ func (s *Server) refreshStash(ctx context.Context) error {
 				if err == nil {
 					chosenBeer.DrinkDate = time.Now().Unix()
 					chosenBeer.OnDeck = true
-					s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, chosenBeer)
+					s.config.GetCellar().OnDeck = append(s.config.GetCellar().GetOnDeck(), chosenBeer)
 					c.Beers = append(c.Beers[:chosenIndex], c.Beers[chosenIndex+1:]...)
 				}
 
@@ -60,7 +60,7 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 	bestIndex := int32(99)
 	bestCellar := -1
 	//Do we have room for this beer
-	for i, c := range s.config.Cellar.Slots {
+	for i, c := range s.config.GetCellar().GetSlots() {
 		if c.Accepts == b.Size {
 			if len(c.Beers) == 0 {
 				bestCellar = i
@@ -100,7 +100,7 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 
 func (s *Server) syncDrunk(ctx context.Context, f httpResponseFetcher) {
 	lastID := int32(0)
-	for _, drunk := range s.config.Drunk {
+	for _, drunk := range s.config.GetDrunk() {
 		if drunk.CheckinId > lastID {
 			lastID = drunk.CheckinId
 		}
