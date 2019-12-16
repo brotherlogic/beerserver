@@ -56,6 +56,7 @@ type Server struct {
 	ut        *Untappd
 	lastClean time.Time
 	printer   printer
+	lastErr   string
 }
 
 //Init builds a server
@@ -66,6 +67,7 @@ func Init() *Server {
 		&Untappd{},
 		time.Unix(1, 0),
 		&prodPrinter{},
+		"",
 	}
 	s.printer = &prodPrinter{dial: s.DialMaster}
 	return s
@@ -199,7 +201,7 @@ func (s *Server) loadDrunk(filestr string) {
 
 func (s *Server) checkSync(ctx context.Context) error {
 	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
-		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v", time.Unix(s.config.LastSync, 0)), false)
+		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v (%v)", time.Unix(s.config.LastSync, 0), s.lastErr), false)
 	}
 
 	drunkDate := int64(0)
