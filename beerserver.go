@@ -103,7 +103,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 func (s *Server) validateCellars(ctx context.Context) {
-	for _, c := range s.config.Cellar.Slots {
+	for _, c := range s.config.GetCellar().GetSlots() {
 		for _, b := range c.Beers {
 			if b.Uid == 0 {
 				b.Uid = time.Now().UnixNano()
@@ -113,7 +113,7 @@ func (s *Server) validateCellars(ctx context.Context) {
 		}
 	}
 
-	for _, b := range s.config.Cellar.OnDeck {
+	for _, b := range s.config.GetCellar().GetOnDeck() {
 		if b.Uid == 0 {
 			b.Uid = time.Now().UnixNano()
 			time.Sleep(time.Millisecond * 10)
