@@ -119,6 +119,17 @@ func (s *Server) validateCellars(ctx context.Context) {
 			time.Sleep(time.Millisecond * 10)
 		}
 	}
+
+	//Create the cellars if we need to
+	if len(s.config.GetCellar().GetSlots()) == 0 {
+		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
+		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "stash", NumSlots: 9999})
+		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "wedding", NumSlots: 24})
+	}
 }
 
 // Mote promotes this server
