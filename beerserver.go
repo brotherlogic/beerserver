@@ -121,6 +121,9 @@ func (s *Server) validateCellars(ctx context.Context) {
 	}
 
 	//Create the cellars if we need to
+	if s.config.GetCellar() == nil {
+		s.config.Cellar = &pb.Cellar{Slots: []*pb.CellarSlot{}, OnDeck: []*pb.Beer{}}
+	}
 	if len(s.config.GetCellar().GetSlots()) == 0 {
 		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
 		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
