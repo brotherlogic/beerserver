@@ -47,7 +47,7 @@ func main() {
 			if err == nil {
 				for i := 0; i < len(list.Beers); i++ {
 					if *ondeck {
-						fmt.Printf("%v. %v [%v] (%v) - %v\n", i, list.Beers[i].Name, list.Beers[i].Id, time.Unix(list.Beers[i].DrinkDate, 0), list.Beers[i].Uid)
+						fmt.Printf("%v. %v [%v] (%v) - %v [%v]\n", i, list.Beers[i].Name, list.Beers[i].Id, time.Unix(list.Beers[i].DrinkDate, 0), list.Beers[i].Uid, list.Beers[i].Size)
 					}
 					for _, b := range list.Beers {
 						if int(b.Index) == i && int(b.InCellar) == *cellar {

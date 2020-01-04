@@ -129,7 +129,6 @@ func (s *Server) validateCellars(ctx context.Context) {
 		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "stash", NumSlots: 9999})
 		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "wedding", NumSlots: 24})
 	}
