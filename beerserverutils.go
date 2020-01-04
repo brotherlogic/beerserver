@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 func (s *Server) refreshStash(ctx context.Context) error {
 	onDeck := make(map[int64]bool)
 
+	rand.Seed(time.Now().UnixNano())
+
 	for _, beer := range s.config.GetCellar().GetOnDeck() {
 		onDeck[beer.Id] = true
 	}
@@ -22,6 +25,8 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	count := 0
 	for _, c := range s.config.GetCellar().GetSlots() {
 		if c.Accepts == "stash" {
+			// Randomize the stash for the pull
+			rand.Shuffle(len(c.Beers), func(i, j int) { c.Beers[i], c.Beers[j] = c.Beers[j], c.Beers[i] })
 			for i, b := range c.Beers {
 				if !onDeck[b.Id] {
 					chosenBeer = b
