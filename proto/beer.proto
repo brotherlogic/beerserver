@@ -1,7 +1,7 @@
 
 syntax = "proto3";
 
-package beer;
+package beerserver;
 
 message Empty {}
 
