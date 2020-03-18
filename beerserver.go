@@ -24,11 +24,15 @@ type printer interface {
 
 type prodPrinter struct {
 	testing bool
+	fail    bool
 	count   int64
 	dial    func(server string) (*grpc.ClientConn, error)
 }
 
 func (p *prodPrinter) print(ctx context.Context, lines []string) error {
+	if p.fail {
+		return fmt.Errorf("Built fail")
+	}
 	if p.testing {
 		return nil
 	}
@@ -234,8 +238,8 @@ func (s *Server) checkSync(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) save(ctx context.Context) {
-	s.KSclient.Save(ctx, TOKEN, s.config)
+func (s *Server) save(ctx context.Context) error {
+	return s.KSclient.Save(ctx, TOKEN, s.config)
 }
 
 //GetUntappd builds a untappd retriever
@@ -249,8 +253,7 @@ func (s *Server) doSync(ctx context.Context) error {
 }
 
 func (s *Server) doMove(ctx context.Context) error {
-	s.moveToOnDeck(ctx, time.Now())
-	return nil
+	return s.moveToOnDeck(ctx, time.Now())
 }
 
 func (s *Server) checkCellars(ctx context.Context) error {

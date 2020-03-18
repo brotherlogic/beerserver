@@ -123,8 +123,30 @@ func (s *Server) addDrunks(ctx context.Context, err error, ndrinks []*pb.Beer) {
 	}
 }
 
-func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
+func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) error {
 	moved := []*pb.Beer{}
+
+	for _, cellar := range s.config.GetCellar().GetSlots() {
+		if cellar.Accepts != "stash" {
+			for _, b := range cellar.Beers {
+				if b.DrinkDate < t.Unix() {
+					moved = append(moved, b)
+				}
+			}
+		}
+	}
+
+	if len(moved) > 0 {
+		moveStr := []string{}
+		for _, b := range moved {
+			moveStr = append(moveStr, fmt.Sprintf("%v\n", b.Name))
+		}
+		err := s.printer.print(ctx, moveStr)
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, cellar := range s.config.GetCellar().GetSlots() {
 		if cellar.Accepts != "stash" {
 			i := 0
@@ -141,16 +163,7 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) {
 		}
 	}
 
-	if len(moved) > 0 {
-		moveStr := []string{}
-		for _, b := range moved {
-			moveStr = append(moveStr, fmt.Sprintf("%v\n", b.Name))
-		}
-		err := s.printer.print(ctx, moveStr)
-		s.Log(fmt.Sprintf("PRINT %v", err))
-	}
-
-	s.save(ctx)
+	return s.save(ctx)
 }
 
 func (s *Server) clearDeck(ctx context.Context) error {

@@ -113,6 +113,21 @@ func TestMoveToOnDeck(t *testing.T) {
 	}
 }
 
+func TestMoveToOnDeckFailPrint(t *testing.T) {
+	s := InitTestServer(".testmovetoondeck", true)
+	s.printer = &prodPrinter{fail: true}
+	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 7936, Size: "bomber"}, Quantity: 2})
+	if err != nil {
+		t.Fatalf("Error adding beer: %v", err)
+	}
+	time.Sleep(time.Second * 2)
+	err = s.moveToOnDeck(context.Background(), time.Now())
+
+	if err == nil {
+		t.Errorf("Did not fail")
+	}
+}
+
 func TestMoveToOnDeckTwoCellars(t *testing.T) {
 	s := InitTestServer(".testmovetoondeck", true)
 	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 7936, Size: "bomber"}, Quantity: 2})
