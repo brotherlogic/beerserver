@@ -40,18 +40,36 @@ func main() {
 		listFlags := flag.NewFlagSet("List", flag.ExitOnError)
 		var ondeck = listFlags.Bool("deck", false, "View on deck")
 		var cellar = listFlags.Int("cellar", 1, "Cellar to view")
+		var summarise = listFlags.Bool("sum", false, "Summarize the view")
 		if err := listFlags.Parse(os.Args[2:]); err == nil {
 			ctx, cancel := utils.BuildContext("beerserver-cli", "beerserver-cli")
 			defer cancel()
 			list, err := client.ListBeers(ctx, &pb.ListBeerRequest{OnDeck: *ondeck})
 			if err == nil {
-				for i := 0; i < len(list.Beers); i++ {
-					if *ondeck {
-						fmt.Printf("%v. %v (%v) [%v] (%v) - %v [%v]\n", i, list.Beers[i].Name, list.Beers[i].BreweryId, list.Beers[i].Id, time.Unix(list.Beers[i].DrinkDate, 0), list.Beers[i].Uid, list.Beers[i].Size)
+				if *summarise {
+					idcount := make(map[int64]int)
+					for _, beer := range list.Beers {
+						if beer.InCellar == int32(*cellar) {
+							idcount[beer.GetId()]++
+						}
 					}
-					for _, b := range list.Beers {
-						if int(b.Index) == i && int(b.InCellar) == *cellar {
-							fmt.Printf("%v. %v (%v) (%v) - %v\n", i, b.Name, b.BreweryId, time.Unix(b.DrinkDate, 0), b.Uid)
+					for id, count := range idcount {
+						for _, beer := range list.Beers {
+							if beer.GetId() == id {
+								fmt.Printf("%v - %v\n", count, beer.GetName())
+								break
+							}
+						}
+					}
+				} else {
+					for i := 0; i < len(list.Beers); i++ {
+						if *ondeck {
+							fmt.Printf("%v. %v [%v] (%v) - %v [%v]\n", i, list.Beers[i].Name, list.Beers[i].Id, time.Unix(list.Beers[i].DrinkDate, 0), list.Beers[i].Uid, list.Beers[i].Size)
+						}
+						for _, b := range list.Beers {
+							if int(b.Index) == i && int(b.InCellar) == *cellar {
+								fmt.Printf("%v. %v (%v) - %v\n", i, b.Name, time.Unix(b.DrinkDate, 0), b.Uid)
+							}
 						}
 					}
 				}

@@ -98,3 +98,42 @@ func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.Li
 
 	return &pb.ListBeerResponse{Beers: beers}, nil
 }
+
+func (s *Server) singleConsolidate(ctx context.Context) error {
+	for i, co := range s.config.Cellar.Slots {
+		if int(co.NumSlots) > len(co.Beers) {
+			for j, cs := range s.config.Cellar.Slots {
+				if j > i && cs.Accepts == co.Accepts && len(cs.Beers) > 0 {
+					beer := cs.Beers[0]
+					cs.Beers = cs.Beers[1:]
+					co.Beers = append(co.Beers, beer)
+					s.reorderCellar(ctx, co)
+
+					return nil
+				}
+			}
+		}
+	}
+
+	return fmt.Errorf("No consolidation needed")
+}
+
+// Consolidate the cellars into a smaller number
+func (s *Server) Consolidate(ctx context.Context, req *pb.ConsolidateRequest) (*pb.ConsolidateResponse, error) {
+	//Move beers around until we can move no more
+	for s.singleConsolidate(ctx) == nil {
+		// pass
+	}
+
+	//Clean out the existing cellars
+	newCellarSlots := make([]*pb.CellarSlot, 0)
+	for _, c := range s.config.Cellar.Slots {
+		if len(c.Beers) > 0 {
+			newCellarSlots = append(newCellarSlots, c)
+		}
+	}
+
+	s.config.Cellar.Slots = newCellarSlots
+
+	return &pb.ConsolidateResponse{}, nil
+}
