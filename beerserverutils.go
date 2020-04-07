@@ -23,7 +23,8 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	var chosenBeer *pb.Beer
 	chosenIndex := 0
 	count := 0
-	for _, c := range s.config.GetCellar().GetSlots() {
+	slot := 0
+	for sn, c := range s.config.GetCellar().GetSlots() {
 		if c.Accepts == "stash" {
 
 			//Raise an issue on the stash size
@@ -35,21 +36,21 @@ func (s *Server) refreshStash(ctx context.Context) error {
 				if !onDeck[b.Id] {
 					chosenBeer = b
 					chosenIndex = i
+					slot = sn
 				} else {
 					count++
 				}
 			}
+		}
+	}
 
-			if count == 0 {
-				err := s.printer.print(ctx, []string{fmt.Sprintf("%v\n", chosenBeer.Name)})
-				if err == nil {
-					chosenBeer.DrinkDate = time.Now().Unix()
-					chosenBeer.OnDeck = true
-					s.config.GetCellar().OnDeck = append(s.config.GetCellar().GetOnDeck(), chosenBeer)
-					c.Beers = append(c.Beers[:chosenIndex], c.Beers[chosenIndex+1:]...)
-				}
-
-			}
+	if count == 0 {
+		err := s.printer.print(ctx, []string{fmt.Sprintf("%v\n", chosenBeer.Name)})
+		if err == nil {
+			chosenBeer.DrinkDate = time.Now().Unix()
+			chosenBeer.OnDeck = true
+			s.config.GetCellar().OnDeck = append(s.config.GetCellar().GetOnDeck(), chosenBeer)
+			s.config.GetCellar().GetSlots()[slot].Beers = append(s.config.GetCellar().GetSlots()[slot].Beers[:chosenIndex], s.config.GetCellar().GetSlots()[slot].Beers[chosenIndex+1:]...)
 		}
 	}
 	return nil
