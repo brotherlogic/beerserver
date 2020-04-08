@@ -30,7 +30,9 @@ func (s *Server) refreshStash(ctx context.Context) error {
 		if c.Accepts == "stash" {
 
 			//Raise an issue on the stash size
-			s.RaiseIssue(ctx, "Stash Size", fmt.Sprintf("The current size of the stash is %v", len(c.Beers)), false)
+			if len(c.Beers) < 20 {
+				s.RaiseIssue(ctx, "Buy some beer!", fmt.Sprintf("The current size of the stash is %v", len(c.Beers)), false)
+			}
 
 			// Randomize the stash for the pull
 			rand.Shuffle(len(c.Beers), func(i, j int) { c.Beers[i], c.Beers[j] = c.Beers[j], c.Beers[i] })
