@@ -16,7 +16,9 @@ func (s *Server) refreshStash(ctx context.Context) error {
 
 	rand.Seed(time.Now().UnixNano())
 
+	found := false
 	for _, beer := range s.config.GetCellar().GetOnDeck() {
+		found = found || beer.GetSize() == "stash"
 		onDeck[beer.Id] = true
 	}
 
@@ -44,7 +46,7 @@ func (s *Server) refreshStash(ctx context.Context) error {
 		}
 	}
 
-	if count == 0 {
+	if !found {
 		err := s.printer.print(ctx, []string{fmt.Sprintf("%v\n", chosenBeer.Name)})
 		if err == nil {
 			chosenBeer.DrinkDate = time.Now().Unix()
