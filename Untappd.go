@@ -127,23 +127,23 @@ func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseCon
 	return string(contents), nil
 }
 
-func convertPageToName(page string, unmarshaller unmarshaller) string {
+func convertPageToName(page string, unmarshaller unmarshaller) (string, int) {
 	var mapper map[string]interface{}
 	err := unmarshaller.Unmarshal([]byte(page), &mapper)
 	if err != nil {
-		return "Failed to unmarshal"
+		return "Failed to unmarshal", -1
 	}
 
 	meta := mapper["meta"].(map[string]interface{})
 	metaCode := int(meta["code"].(float64))
 	if metaCode != 200 {
-		return meta["error_detail"].(string)
+		return meta["error_detail"].(string), -1
 	}
 
 	response := mapper["response"].(map[string]interface{})
 	beer := response["beer"].(map[string]interface{})
 	brewery := beer["brewery"].(map[string]interface{})
-	return brewery["brewery_name"].(string) + " - " + beer["beer_name"].(string)
+	return brewery["brewery_name"].(string) + " - " + beer["beer_name"].(string), int(brewery["brewery_id"].(float64))
 }
 
 func convertPageToABV(page string, unmarshaller unmarshaller) float32 {
@@ -249,9 +249,9 @@ func (u *Untappd) GetRecentDrinks(fetcher httpResponseFetcher, converter respons
 // GetBeerDetails Determines the name of the beer from the id
 func (u *Untappd) GetBeerDetails(id int64) *pb.Beer {
 	text := u.getBeerPage(u.f, u.c, int(id))
-	name := convertPageToName(text, u.u)
+	name, breweryID := convertPageToName(text, u.u)
 	abv := convertPageToABV(text, u.u)
-	return &pb.Beer{Name: name, Abv: abv, Id: id}
+	return &pb.Beer{Name: name, Abv: abv, Id: id, BreweryId: int32(breweryID)}
 }
 
 func (u *Untappd) convertDrinkListToBeers(page string, unmarshaller unmarshaller) ([]*pb.Beer, error) {

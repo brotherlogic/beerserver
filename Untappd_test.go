@@ -70,7 +70,7 @@ func GetTestUntappd() *Untappd {
 func TestGetBeerDetails(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret", f: fileFetcher{}, c: mainConverter{}, u: mainUnmarshaller{}}
 	beer := u.GetBeerDetails(7936)
-	if beer.Name != "Firestone Walker Brewing Company - Parabola" || beer.Abv != 14.5 {
+	if beer.Name != "Firestone Walker Brewing Company - Parabola" || beer.Abv != 14.5 || beer.BreweryId != 524 {
 		t.Errorf("Beer has come back wrong %v", beer)
 	}
 }
@@ -123,9 +123,12 @@ func TestGetBeerName200Fail(t *testing.T) {
 	var fetcher = fileFetcher{}
 	var converter = mainConverter{}
 	beerPage := u.getBeerPage(fetcher, converter, 0)
-	name := convertPageToName(beerPage, mainUnmarshaller{})
+	name, id := convertPageToName(beerPage, mainUnmarshaller{})
 	if strings.Contains(name, "Firestone") {
 		t.Errorf("Get name worked: %v", name)
+	}
+	if id != -1 {
+		t.Errorf("Get id passed: %v", id)
 	}
 }
 
@@ -145,9 +148,13 @@ func TestGetBeerNameBadUnmarshal(t *testing.T) {
 	var fetcher = fileFetcher{}
 	var converter = mainConverter{}
 	beerPage := u.getBeerPage(fetcher, converter, 0)
-	name := convertPageToName(beerPage, stubFailUnmarshaller{})
+	name, id := convertPageToName(beerPage, stubFailUnmarshaller{})
 	if strings.Contains(name, "Firestone") {
 		t.Errorf("Get name worked: %v", name)
+	}
+
+	if id != -1 {
+		t.Errorf("Pah: %v", id)
 	}
 }
 

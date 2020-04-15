@@ -26,6 +26,7 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	chosenIndex := 0
 	count := 0
 	slot := 0
+	opCount := 0
 	for sn, c := range s.config.GetCellar().GetSlots() {
 		if c.Accepts == "stash" {
 
@@ -37,6 +38,9 @@ func (s *Server) refreshStash(ctx context.Context) error {
 			// Randomize the stash for the pull
 			rand.Shuffle(len(c.Beers), func(i, j int) { c.Beers[i], c.Beers[j] = c.Beers[j], c.Beers[i] })
 			for i, b := range c.Beers {
+				if b.GetBreweryId() == 6065704 {
+					opCount++
+				}
 				if !onDeck[b.Id] {
 					chosenBeer = b
 					chosenIndex = i
@@ -46,6 +50,10 @@ func (s *Server) refreshStash(ctx context.Context) error {
 				}
 			}
 		}
+	}
+
+	if opCount < 4 {
+		s.RaiseIssue(ctx, "Buy Original Pattern", fmt.Sprintf("Stocks are low, go buy some Original Patter"), false)
 	}
 
 	if !found {
