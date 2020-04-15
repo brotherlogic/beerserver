@@ -3,6 +3,8 @@ syntax = "proto3";
 
 package beerserver;
 
+option go_package = "github.com/brotherlogic/beerserver";
+
 message Empty {}
 
 message Token {
