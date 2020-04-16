@@ -27,13 +27,12 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	count := 0
 	slot := 0
 	opCount := 0
+	stashSize := 100
 	for sn, c := range s.config.GetCellar().GetSlots() {
 		if c.Accepts == "stash" {
 
 			//Raise an issue on the stash size
-			if len(c.Beers) < 20 {
-				s.RaiseIssue(ctx, "Buy some beer!", fmt.Sprintf("The current size of the stash is %v", len(c.Beers)), false)
-			}
+			stashSize = len(c.Beers)
 
 			// Randomize the stash for the pull
 			rand.Shuffle(len(c.Beers), func(i, j int) { c.Beers[i], c.Beers[j] = c.Beers[j], c.Beers[i] })
@@ -54,6 +53,10 @@ func (s *Server) refreshStash(ctx context.Context) error {
 
 	if opCount < 4 {
 		s.RaiseIssue(ctx, "Buy Original Pattern", fmt.Sprintf("Stocks are low, go buy some Original Patter"), false)
+	}
+
+	if stashSize < 20 {
+		s.RaiseIssue(ctx, "Buy some beer!", fmt.Sprintf("The current size of the stash is %v", stashSize), false)
 	}
 
 	if !found {
