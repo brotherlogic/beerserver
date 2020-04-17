@@ -269,7 +269,8 @@ func (s *Server) refreshBreweryID(ctx context.Context) error {
 	for _, cellar := range s.config.GetCellar().GetSlots() {
 		for _, b := range cellar.GetBeers() {
 			if b.GetBreweryId() == 0 {
-				s.Log(fmt.Sprintf("%v has no brewery id", b))
+				tb := s.ut.GetBeerDetails(b.Id)
+				s.Log(fmt.Sprintf("%v -> %v has no brewery id", tb.GetBreweryId(), b))
 				return nil
 			}
 		}
