@@ -265,6 +265,18 @@ func (s *Server) checkCellars(ctx context.Context) error {
 	return nil
 }
 
+func (s *Server) refreshBreweryID(ctx context.Context) error {
+	for _, cellar := range s.config.GetCellar().GetSlots() {
+		for _, b := range cellar.GetBeers() {
+			if b.GetBreweryId() == 0 {
+				s.Log(fmt.Sprintf("%v has no brewery id", b))
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	var updateDrunk = flag.Bool("update", false, "Update the drunk")
@@ -317,6 +329,7 @@ func main() {
 	server.RegisterRepeatingTask(server.clearDeck, "clear_deck", time.Minute*5)
 	server.RegisterRepeatingTask(server.checkSync, "check_sync", time.Hour)
 	server.RegisterRepeatingTask(server.refreshStash, "refresh_stash", time.Hour)
+	server.RegisterRepeatingTask(server.refreshBreweryID, "refresh_brewery_id", time.Minute)
 
 	server.Serve()
 }
