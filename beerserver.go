@@ -270,12 +270,15 @@ func (s *Server) refreshBreweryID(ctx context.Context) error {
 		for _, b := range cellar.GetBeers() {
 			if b.GetBreweryId() == 0 {
 				tb := s.ut.GetBeerDetails(b.Id)
-				s.Log(fmt.Sprintf("%v -> %v has no brewery id", tb.GetBreweryId(), b))
+				if tb.GetBreweryId() > 0 {
+					b.BreweryId = tb.GetBreweryId()
+					s.Log(fmt.Sprintf("%v -> %v has no brewery id", tb.GetBreweryId(), b))
+				}
 				return nil
 			}
 		}
 	}
-	return nil
+	return fmt.Errorf("This can be deleted now")
 }
 
 func main() {
