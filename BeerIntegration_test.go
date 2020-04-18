@@ -231,7 +231,7 @@ func TestBeerDateLatest(t *testing.T) {
 func TestStashProcess(t *testing.T) {
 	s := InitTestServer(".teststashprocess", true)
 	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 1234, Size: "stash"}, Quantity: 10})
-	_, err = s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 12345, Size: "stash", BreweryId: 6065704}, Quantity: 3})
+	_, err = s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 12345, Size: "stash", BreweryId: 333511}, Quantity: 3})
 
 	if err != nil {
 		t.Fatalf("Error adding beer")
