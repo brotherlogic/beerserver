@@ -186,8 +186,10 @@ func (s *Server) GetState() []*pbgs.State {
 	}
 
 	csize := make(map[int]int32)
-	for i, c := range s.config.Cellar.Slots {
-		csize[i] = c.NumSlots
+	if s.config != nil && s.config.Cellar != nil {
+		for i, c := range s.config.Cellar.Slots {
+			csize[i] = c.NumSlots
+		}
 	}
 
 	return []*pbgs.State{
