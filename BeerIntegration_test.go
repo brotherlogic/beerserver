@@ -9,6 +9,62 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+func TestConsolidate(t *testing.T) {
+	s := InitTestServer(".testconsolidate", true)
+
+	s.config.Cellar = &pb.Cellar{
+		Slots: []*pb.CellarSlot{
+			&pb.CellarSlot{
+				Accepts:  "small",
+				NumSlots: 5,
+				Beers: []*pb.Beer{
+					&pb.Beer{Id: 1},
+				},
+			},
+			&pb.CellarSlot{
+				Accepts:  "bomber",
+				NumSlots: 5,
+				Beers: []*pb.Beer{
+					&pb.Beer{Id: 2},
+				},
+			},
+			&pb.CellarSlot{
+				Accepts:  "small",
+				NumSlots: 10,
+				Beers: []*pb.Beer{
+					&pb.Beer{Id: 3},
+					&pb.Beer{Id: 3},
+					&pb.Beer{Id: 3},
+					&pb.Beer{Id: 3},
+					&pb.Beer{Id: 3},
+				},
+			},
+			&pb.CellarSlot{
+				Accepts:  "bomber",
+				NumSlots: 10,
+				Beers: []*pb.Beer{
+					&pb.Beer{Id: 4},
+					&pb.Beer{Id: 4},
+				},
+			},
+		},
+	}
+
+	log.Printf("BEFORE %v", s.config.Cellar)
+
+	s.Consolidate(context.Background(), &pb.ConsolidateRequest{})
+
+	log.Printf("AFTER %v", s.config.Cellar)
+
+	if len(s.config.Cellar.Slots) != 3 {
+		t.Errorf("Wrong number of slots %v", len(s.config.Cellar.Slots))
+	}
+
+	if len(s.config.Cellar.Slots[0].Beers) != 5 {
+		t.Errorf("Wrong number of beers overall %v", len(s.config.Cellar.Slots[0].Beers))
+	}
+}
+
 func TestAddMultipleRetrieveMultiple(t *testing.T) {
 	tm := time.Now()
 
