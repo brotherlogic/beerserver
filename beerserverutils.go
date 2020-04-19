@@ -215,11 +215,12 @@ func (s *Server) cellarOutOfOrder(ctx context.Context, cellar *pb.CellarSlot) bo
 	return false
 }
 
-func (s *Server) reorderCellar(ctx context.Context, cellar *pb.CellarSlot) {
+func (s *Server) reorderCellar(ctx context.Context, cellar *pb.CellarSlot, cellarNumber int32) {
 	sort.SliceStable(cellar.Beers, func(i, j int) bool {
 		return cellar.Beers[i].DrinkDate < cellar.Beers[j].DrinkDate
 	})
 	for i, beer := range cellar.Beers {
 		beer.Index = int32(i)
+		beer.InCellar = cellarNumber
 	}
 }

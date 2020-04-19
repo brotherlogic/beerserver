@@ -42,8 +42,8 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 	}
 
 	// Reorder all the cellars
-	for _, cellar := range s.config.Cellar.Slots {
-		s.reorderCellar(ctx, cellar)
+	for i, cellar := range s.config.Cellar.Slots {
+		s.reorderCellar(ctx, cellar, int32(i))
 	}
 
 	s.save(ctx)
@@ -107,7 +107,7 @@ func (s *Server) singleConsolidate(ctx context.Context) error {
 					beer := cs.Beers[0]
 					cs.Beers = cs.Beers[1:]
 					co.Beers = append(co.Beers, beer)
-					s.reorderCellar(ctx, co)
+					s.reorderCellar(ctx, co, int32(i))
 
 					return nil
 				}
