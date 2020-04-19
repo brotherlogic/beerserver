@@ -185,6 +185,11 @@ func (s *Server) GetState() []*pbgs.State {
 		}
 	}
 
+	csize := make(map[int]int32)
+	for i, c := range s.config.Cellar.Slots {
+		csize[i] = c.NumSlots
+	}
+
 	return []*pbgs.State{
 		&pbgs.State{Key: "cellars", Value: int64(len(s.config.GetCellar().GetSlots()))},
 		&pbgs.State{Key: "token", Text: fmt.Sprintf("%v", s.config.Token)},
@@ -197,6 +202,7 @@ func (s *Server) GetState() []*pbgs.State {
 		&pbgs.State{Key: "druuuunk", Value: int64(len(s.config.Drunk))},
 		&pbgs.State{Key: "drnnnnnk", Value: missing},
 		&pbgs.State{Key: "prints", Value: s.printer.(*prodPrinter).count},
+		&pbgs.State{Key: "cellar_size", Text: fmt.Sprintf("%v", csize)},
 	}
 }
 
