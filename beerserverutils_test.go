@@ -39,7 +39,7 @@ func TestCellarOrderSort(t *testing.T) {
 		&pb.Beer{Id: 123, DrinkDate: 5, Index: 1},
 		&pb.Beer{Id: 123, DrinkDate: 10, Index: 2},
 	}}
-	s.reorderCellar(context.Background(), slot)
+	s.reorderCellar(context.Background(), slot, int32(0))
 	if s.cellarOutOfOrder(context.Background(), slot) {
 		t.Errorf("Problem in ordering")
 	}
@@ -64,7 +64,7 @@ func TestCellarOrderBadSort(t *testing.T) {
 		&pb.Beer{Id: 123, DrinkDate: 10, Index: 10},
 		&pb.Beer{Id: 124, DrinkDate: 5, Index: 25},
 	}}
-	s.reorderCellar(context.Background(), slot)
+	s.reorderCellar(context.Background(), slot, int32(0))
 	if s.cellarOutOfOrder(context.Background(), slot) {
 		t.Errorf("Problem in ordering")
 	}
