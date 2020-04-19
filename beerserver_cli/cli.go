@@ -36,6 +36,11 @@ func main() {
 	defer cancel2()
 
 	switch os.Args[1] {
+	case "consolidate":
+		ctx, cancel := utils.BuildContext("beerserver-cli", "beerserver-cli")
+		defer cancel()
+		_, err := client.Consolidate(ctx, &pb.ConsolidateRequest{})
+		fmt.Printf("Consolidated: %v\n", err)
 	case "list":
 		listFlags := flag.NewFlagSet("List", flag.ExitOnError)
 		var ondeck = listFlags.Bool("deck", false, "View on deck")
@@ -68,7 +73,7 @@ func main() {
 						}
 						for _, b := range list.Beers {
 							if int(b.Index) == i && int(b.InCellar) == *cellar {
-								fmt.Printf("%v. %v (%v) - %v\n", i, b.Name, time.Unix(b.DrinkDate, 0), b.Uid)
+								fmt.Printf("%v. %v (%v) - %v [%v]\n", i, b.Name, time.Unix(b.DrinkDate, 0), b.Uid, b.Size)
 							}
 						}
 					}
