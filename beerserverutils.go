@@ -19,6 +19,11 @@ var (
 		Name: "beerserver_stash",
 		Help: "The size of the beer stash",
 	})
+	//Backlog - the print queue
+	psmallSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "beerserver_small",
+		Help: "The size of the small beers",
+	})
 )
 
 func (s *Server) refreshStash(ctx context.Context) error {
@@ -39,6 +44,9 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	opCount := 0
 	stashSize := 100
 	for sn, c := range s.config.GetCellar().GetSlots() {
+		if c.Accepts == "small" {
+			psmallSize.Set(float64(len(c.Beers)))
+		}
 		if c.Accepts == "stash" {
 
 			//Raise an issue on the stash size
