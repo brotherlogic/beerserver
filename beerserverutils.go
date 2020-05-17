@@ -9,6 +9,16 @@ import (
 	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/beerserver/proto"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+var (
+	//Backlog - the print queue
+	pstashSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "beerserver_stash",
+		Help: "The size of the beer stash",
+	})
 )
 
 func (s *Server) refreshStash(ctx context.Context) error {
@@ -33,6 +43,7 @@ func (s *Server) refreshStash(ctx context.Context) error {
 
 			//Raise an issue on the stash size
 			stashSize = len(c.Beers)
+			pstashSize.Set(float64(stashSize))
 
 			// Randomize the stash for the pull
 			rand.Shuffle(len(c.Beers), func(i, j int) { c.Beers[i], c.Beers[j] = c.Beers[j], c.Beers[i] })
