@@ -10,6 +10,8 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
@@ -17,6 +19,36 @@ import (
 	pbgs "github.com/brotherlogic/goserver/proto"
 	pbp "github.com/brotherlogic/printer/proto"
 )
+
+var (
+	pstashSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "beerserver_stash",
+		Help: "The size of the beer stash",
+	})
+	psmallSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "beerserver_small",
+		Help: "The size of the small beers",
+	})
+	pbomberSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "beerserver_bombers",
+		Help: "The size of the bomber beers",
+	})
+)
+
+func (s *Server) monitor(ctx context.Context) error {
+	for _, c := range s.config.GetCellar().GetSlots() {
+		if c.Accepts == "small" {
+			psmallSize.Set(float64(len(c.Beers)))
+		}
+		if c.Accepts == "bomber" {
+			pbomberSize.Set(float64(len(c.Beers)))
+		}
+		if c.Accepts == "stash" {
+			pstashSize.Set(float64(len(c.Beers)))
+		}
+	}
+	return nil
+}
 
 type printer interface {
 	print(ctx context.Context, lines []string) error
@@ -325,6 +357,7 @@ func main() {
 	server.RegisterRepeatingTask(server.clearDeck, "clear_deck", time.Minute*5)
 	server.RegisterRepeatingTask(server.checkSync, "check_sync", time.Hour)
 	server.RegisterRepeatingTask(server.refreshStash, "refresh_stash", time.Hour)
+	server.RegisterRepeatingTask(server.monitor, "monitor", time.Minute)
 
 	server.Serve()
 }
