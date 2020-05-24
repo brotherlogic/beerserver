@@ -132,6 +132,7 @@ func (s *Server) syncDrunk(ctx context.Context, f httpResponseFetcher) {
 		}
 	}
 	ndrinks, err := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
+	s.Log(fmt.Sprintf("SYNC %v -> %v", ndrinks, err))
 	s.lastErr = fmt.Sprintf("%v", err)
 	s.addDrunks(ctx, err, ndrinks)
 }
