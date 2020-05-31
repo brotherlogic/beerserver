@@ -304,6 +304,22 @@ func (s *Server) checkCellars(ctx context.Context) error {
 	return nil
 }
 
+func (s *Server) refreshBreweryID(ctx context.Context) error {
+	for _, cellar := range s.config.GetCellar().GetSlots() {
+		for _, b := range cellar.GetBeers() {
+			if b.GetBreweryId() == 0 {
+				tb := s.ut.GetBeerDetails(b.Id)
+				if tb.GetBreweryId() > 0 {
+					b.BreweryId = tb.GetBreweryId()
+					s.Log(fmt.Sprintf("%v -> %v has no brewery id", tb.GetBreweryId(), b))
+				}
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("This can be deleted now")
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	var updateDrunk = flag.Bool("update", false, "Update the drunk")
@@ -357,6 +373,7 @@ func main() {
 	server.RegisterRepeatingTask(server.checkSync, "check_sync", time.Hour)
 	server.RegisterRepeatingTask(server.refreshStash, "refresh_stash", time.Hour)
 	server.RegisterRepeatingTask(server.monitor, "monitor", time.Minute)
+	server.RegisterRepeatingTask(server.refreshBreweryID, "refresh_brewery_id", time.Minute)
 
 	server.Serve()
 }
