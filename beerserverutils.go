@@ -52,7 +52,7 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	}
 
 	if opCount < 4 {
-		s.RaiseIssue(ctx, "Buy Original Pattern", fmt.Sprintf("Stocks are low, go buy some Original Patter"), false)
+		s.RaiseIssue(ctx, "Buy Original Pattern", fmt.Sprintf("Stocks are low (%v), go buy some Original Patter", opCount), false)
 	}
 
 	if stashSize < 20 {
