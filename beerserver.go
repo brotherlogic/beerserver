@@ -312,12 +312,13 @@ func (s *Server) refreshBreweryID(ctx context.Context) error {
 				if tb.GetBreweryId() > 0 {
 					b.BreweryId = tb.GetBreweryId()
 					s.Log(fmt.Sprintf("%v -> %v has no brewery id", tb.GetBreweryId(), b))
+					s.RaiseIssue(ctx, "Brewery ID is missing", fmt.Sprintf("%v is missing the brewery ID", b), false)
 				}
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("This can be deleted now")
+	return nil
 }
 
 func main() {
