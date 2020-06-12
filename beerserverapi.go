@@ -37,6 +37,7 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 		newBeer.DrinkDate = minDate.Unix()
 		newBeer.Name = b.Name
 		newBeer.Uid = time.Now().UnixNano()
+		newBeer.BreweryId = b.BreweryId
 		s.addBeerToCellar(newBeer)
 		minDate = minDate.AddDate(1, 0, 0)
 	}
