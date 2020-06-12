@@ -251,6 +251,7 @@ func (u *Untappd) GetBeerDetails(id int64) *pb.Beer {
 	text := u.getBeerPage(u.f, u.c, int(id))
 	name, breweryID := convertPageToName(text, u.u)
 	abv := convertPageToABV(text, u.u)
+	u.l(fmt.Sprintf("Found %v, %v, %v for %v", name, breweryID, abv, id))
 	return &pb.Beer{Name: name, Abv: abv, Id: id, BreweryId: int32(breweryID)}
 }
 
