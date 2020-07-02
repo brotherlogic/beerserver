@@ -52,15 +52,15 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	}
 
 	if opCount < 4 {
-		s.RaiseIssue(ctx, "Buy Original Pattern", fmt.Sprintf("Stocks are low (%v), go buy some Original Patter", opCount), false)
+		s.RaiseIssue("Buy Original Pattern", fmt.Sprintf("Stocks are low (%v), go buy some Original Patter", opCount))
 	}
 
 	if stashSize < 20 {
-		s.RaiseIssue(ctx, "Buy some beer!", fmt.Sprintf("The current size of the stash is %v", stashSize), false)
+		s.RaiseIssue("Buy some beer!", fmt.Sprintf("The current size of the stash is %v", stashSize))
 	}
 
 	if !found {
-		s.RaiseIssue(ctx, "Adding to stash", fmt.Sprintf("Adding because %v", onDeck), false)
+		s.RaiseIssue("Adding to stash", fmt.Sprintf("Adding because %v", onDeck))
 		err := s.printer.print(ctx, []string{fmt.Sprintf("%v\n", chosenBeer.Name)})
 		if err == nil {
 			chosenBeer.DrinkDate = time.Now().Unix()

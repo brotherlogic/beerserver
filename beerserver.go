@@ -257,7 +257,7 @@ func (s *Server) loadDrunk(filestr string) {
 
 func (s *Server) checkSync(ctx context.Context) error {
 	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
-		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v (%v)", time.Unix(s.config.LastSync, 0), s.lastErr), false)
+		s.RaiseIssue("BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v (%v)", time.Unix(s.config.LastSync, 0), s.lastErr))
 	}
 
 	drunkDate := int64(0)
@@ -270,7 +270,7 @@ func (s *Server) checkSync(ctx context.Context) error {
 	}
 
 	if time.Now().Sub(time.Unix(drunkDate, 0)) > time.Hour*24*7 {
-		s.RaiseIssue(ctx, "BeerServer Sync Issue", fmt.Sprintf("Last Syncd beer was %v", time.Unix(drunkDate, 0)), false)
+		s.RaiseIssue("BeerServer Sync Issue", fmt.Sprintf("Last Syncd beer was %v", time.Unix(drunkDate, 0)))
 	}
 
 	return nil
@@ -297,7 +297,7 @@ func (s *Server) doMove(ctx context.Context) error {
 func (s *Server) checkCellars(ctx context.Context) error {
 	for i, slot := range s.config.GetCellar().GetSlots() {
 		if s.cellarOutOfOrder(ctx, slot) {
-			s.RaiseIssue(ctx, "Cellar not ordered", fmt.Sprintf("Cellar %v is not ordered correctly", i), false)
+			s.RaiseIssue("Cellar not ordered", fmt.Sprintf("Cellar %v is not ordered correctly", i))
 		}
 	}
 	return nil
@@ -311,7 +311,7 @@ func (s *Server) refreshBreweryID(ctx context.Context) error {
 				if tb.GetBreweryId() > 0 {
 					b.BreweryId = tb.GetBreweryId()
 					s.Log(fmt.Sprintf("%v -> %v has no brewery id", tb.GetBreweryId(), b))
-					s.RaiseIssue(ctx, "Brewery ID is missing", fmt.Sprintf("%v is missing the brewery ID", b), false)
+					s.RaiseIssue("Brewery ID is missing", fmt.Sprintf("%v is missing the brewery ID", b))
 				}
 				return nil
 			}
@@ -336,7 +336,7 @@ func main() {
 	server.PrepServer()
 
 	server.Register = server
-	err := server.RegisterServerV2("beerserver", false, false)
+	err := server.RegisterServerV2("beerserver", false, true)
 	if err != nil {
 		return
 	}
@@ -364,15 +364,6 @@ func main() {
 		server.save(context.Background())
 		log.Fatalf("UPDATED: %v", server.config.Drunk)
 	}
-
-	server.RegisterRepeatingTask(server.checkCellars, "check_cellars", time.Minute)
-	server.RegisterRepeatingTask(server.doSync, "do_sync", time.Hour)
-	server.RegisterRepeatingTask(server.doMove, "do_move", time.Hour)
-	server.RegisterRepeatingTask(server.clearDeck, "clear_deck", time.Minute*5)
-	server.RegisterRepeatingTask(server.checkSync, "check_sync", time.Hour)
-	server.RegisterRepeatingTask(server.refreshStash, "refresh_stash", time.Hour)
-	server.RegisterRepeatingTask(server.monitor, "monitor", time.Minute)
-	server.RegisterRepeatingTask(server.refreshBreweryID, "refresh_brewery_id", time.Minute)
 
 	server.Serve()
 }
