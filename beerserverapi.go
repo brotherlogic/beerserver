@@ -161,5 +161,10 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		return nil, err
 	}
 
+	err = s.refreshStash(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, s.syncDrunk(ctx, config)
 }

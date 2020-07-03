@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"testing"
-	"time"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 )
@@ -64,12 +63,7 @@ func TestConsolidate(t *testing.T) {
 }
 
 func TestAddMultipleRetrieveMultiple(t *testing.T) {
-	tm := time.Now()
-
 	s := InitTestServer(".testaddmultipleretrievemulitple", true)
-	config := &pb.Config{}
-	config.Drunk = append(config.Drunk, &pb.Beer{Id: 1234, DrinkDate: tm.Unix() - 10, Size: "bomber"})
-	s.save(context.Background(), config)
 
 	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 1234, Size: "bomber"}, Quantity: 3})
 
@@ -85,74 +79,6 @@ func TestAddMultipleRetrieveMultiple(t *testing.T) {
 
 	if len(list.Beers) != 3 {
 		t.Errorf("Wrong number of beers added: %v", list)
-	}
-
-}
-
-func TestAddJR(t *testing.T) {
-	s := InitTestServer(".testaddjr", true)
-
-	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2407538, Size: "bomber"}, Quantity: 2})
-	if err != nil {
-		t.Fatalf("Error adding beer: %v", err)
-	}
-
-	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{})
-	for _, b := range list.Beers {
-		d := time.Unix(b.DrinkDate, 0)
-		if d.Year() == 2018 {
-			t.Errorf("Beer placement is wrong %v -> %v", b, d)
-		}
-
-		if b.Name != "Drake's Brewing Company - Barrel Aged Jolly Rodger (2017)" {
-			t.Errorf("Beer name is wrong: %v", b.Name)
-		}
-	}
-}
-
-func TestAddMultipleWithCorrectDates(t *testing.T) {
-	s := InitTestServer(".testaddmultiple", true)
-
-	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 2324956, Size: "bomber"}, Quantity: 1})
-
-	if err != nil {
-		t.Fatalf("Error when adding a beer: %v", err)
-	}
-
-	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{})
-
-	if err != nil {
-		t.Fatalf("Error when listing beers: %v", err)
-	}
-
-	if len(list.Beers) != 1 || list.Beers[0].DrinkDate != 1553982990 {
-		t.Errorf("Beer added has errors: %v", list)
-	}
-
-	if len(list.Beers) != 1 {
-		t.Errorf("Wrong number of beers added: %v", list)
-	}
-
-}
-
-func TestBeerDateLatest(t *testing.T) {
-	s := InitTestServer(".testbeerdatelatest", true)
-
-	_, err := s.AddBeer(context.Background(), &pb.AddBeerRequest{Beer: &pb.Beer{Id: 5771, Size: "bomber"}, Quantity: 1})
-	if err != nil {
-		t.Fatalf("Error addding beer: %v", err)
-	}
-
-	//New beer should have drink date of 16th November 2018
-	list, err := s.ListBeers(context.Background(), &pb.ListBeerRequest{})
-
-	if len(list.Beers) != 1 {
-		t.Fatalf("Wrong number of beers: %v", list)
-	}
-
-	date := time.Unix(list.Beers[0].DrinkDate, 0)
-	if date.Year() != 2019 || date.Month() != time.April || date.Day() != 15 {
-		t.Errorf("Wrong date returned: %v", date)
 	}
 
 }

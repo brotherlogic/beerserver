@@ -20,12 +20,13 @@ func InitTestServer(dir string, delete bool) *Server {
 		os.RemoveAll(dir)
 	}
 	s.KSclient = *keystoreclient.GetTestClient(dir)
-	s.GoServer.KSclient.Save(context.Background(), TOKEN, &pb.Config{Token: &pb.Token{}})
 	s.SkipLog = true
 	s.SkipIssue = true
 	s.printer = &prodPrinter{testing: true}
 	s.ut = GetTestUntappd()
 	s.ut.l = doLog
+
+	s.validateCellars(context.Background(), &pb.Config{Token: &pb.Token{}})
 
 	return s
 }

@@ -160,8 +160,6 @@ func (s *Server) validateCellars(ctx context.Context, config *pb.Config) error {
 	if len(config.GetCellar().GetSlots()) == 0 {
 		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
 		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
 		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "stash", NumSlots: 9999})
 		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "wedding", NumSlots: 24})
 	}
