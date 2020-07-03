@@ -9,22 +9,19 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
-	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/beerserver/proto"
 
 	//Needed to pull in gzip encoding init
 	_ "google.golang.org/grpc/encoding/gzip"
-	"google.golang.org/grpc/resolver"
 )
 
-func init() {
-	resolver.Register(&utils.DiscoveryClientResolverBuilder{})
-}
-
 func main() {
-	conn, err := grpc.Dial("discovery:///beerserver", grpc.WithInsecure(),
-		grpc.WithBalancerName("my_pick_first"))
+	ctx, cancel := utils.ManualContext("buildserver-"+os.Args[1], "buildserver", time.Second*10, true)
+	defer cancel()
+
+	conn, err := utils.LFDialServer(ctx, "beerserver")
+
 	defer conn.Close()
 
 	if err != nil {
@@ -36,6 +33,9 @@ func main() {
 	defer cancel2()
 
 	switch os.Args[1] {
+	case "update":
+		_, err := client.Update(ctx, &pb.UpdateRequest{})
+		fmt.Printf("Updated: %v\n", err)
 	case "consolidate":
 		ctx, cancel := utils.BuildContext("beerserver-cli", "beerserver-cli")
 		defer cancel()
