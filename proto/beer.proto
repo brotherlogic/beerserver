@@ -67,11 +67,17 @@ message DeleteBeerRequest {
 message DeleteBeerResponse {}
 
 message ConsolidateRequest{}
-message ConsolidateResponse{}
+message ConsolidateResponse{
+  Config config = 1;
+}
+
+message UpdateRequest{}
+message UpdateResponse{}
 
 service BeerCellarService {
   rpc AddBeer(AddBeerRequest) returns (AddBeerResponse) {};
   rpc DeleteBeer(DeleteBeerRequest) returns (DeleteBeerResponse) {};
   rpc ListBeers(ListBeerRequest) returns (ListBeerResponse) {};
   rpc Consolidate(ConsolidateRequest) returns (ConsolidateResponse) {};
+  rpc Update(UpdateRequest) returns (UpdateResponse) {};
 }

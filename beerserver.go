@@ -34,8 +34,8 @@ var (
 	})
 )
 
-func (s *Server) monitor(ctx context.Context) error {
-	for _, c := range s.config.GetCellar().GetSlots() {
+func (s *Server) monitor(ctx context.Context, config *pb.Config) error {
+	for _, c := range config.GetCellar().GetSlots() {
 		if c.Accepts == "small" {
 			psmallSize.Set(float64(len(c.Beers)))
 		}
@@ -87,7 +87,6 @@ func (p *prodPrinter) print(ctx context.Context, lines []string) error {
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	config    *pb.Config
 	ut        *Untappd
 	lastClean time.Time
 	printer   printer
@@ -98,7 +97,6 @@ type Server struct {
 func Init() *Server {
 	s := &Server{
 		&goserver.GoServer{},
-		&pb.Config{},
 		&Untappd{},
 		time.Unix(1, 0),
 		&prodPrinter{},
@@ -137,8 +135,8 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) validateCellars(ctx context.Context) {
-	for _, c := range s.config.GetCellar().GetSlots() {
+func (s *Server) validateCellars(ctx context.Context, config *pb.Config) error {
+	for _, c := range config.GetCellar().GetSlots() {
 		for _, b := range c.Beers {
 			if b.Uid == 0 {
 				b.Uid = time.Now().UnixNano()
@@ -148,7 +146,7 @@ func (s *Server) validateCellars(ctx context.Context) {
 		}
 	}
 
-	for _, b := range s.config.GetCellar().GetOnDeck() {
+	for _, b := range config.GetCellar().GetOnDeck() {
 		if b.Uid == 0 {
 			b.Uid = time.Now().UnixNano()
 			time.Sleep(time.Millisecond * 10)
@@ -156,112 +154,70 @@ func (s *Server) validateCellars(ctx context.Context) {
 	}
 
 	//Create the cellars if we need to
-	if s.config.GetCellar() == nil {
-		s.config.Cellar = &pb.Cellar{Slots: []*pb.CellarSlot{}, OnDeck: []*pb.Beer{}}
+	if config.GetCellar() == nil {
+		config.Cellar = &pb.Cellar{Slots: []*pb.CellarSlot{}, OnDeck: []*pb.Beer{}}
 	}
-	if len(s.config.GetCellar().GetSlots()) == 0 {
-		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
-		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
-		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "stash", NumSlots: 9999})
-		s.config.GetCellar().Slots = append(s.config.GetCellar().Slots, &pb.CellarSlot{Accepts: "wedding", NumSlots: 24})
+	if len(config.GetCellar().GetSlots()) == 0 {
+		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "small", NumSlots: 30})
+		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "bomber", NumSlots: 20})
+		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "stash", NumSlots: 9999})
+		config.GetCellar().Slots = append(config.GetCellar().Slots, &pb.CellarSlot{Accepts: "wedding", NumSlots: 24})
 	}
+
+	return s.save(ctx, config)
 }
 
 // Mote promotes this server
 func (s *Server) Mote(ctx context.Context, master bool) error {
-	if master {
-		// Read the cellar
-		bType := &pb.Config{}
-		bResp, _, err := s.KSclient.Read(ctx, TOKEN, bType)
+	return nil
+}
 
-		if err != nil {
-			return err
-		}
+func (s *Server) load(ctx context.Context) (*pb.Config, error) {
+	bType := &pb.Config{}
+	bResp, _, err := s.KSclient.Read(ctx, TOKEN, bType)
 
-		s.config = bResp.(*pb.Config)
-		s.ut = GetUntappd(s.config.Token.Id, s.config.Token.Secret)
-		s.ut.l = s.Log
-		s.validateCellars(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	config := bResp.(*pb.Config)
+	s.ut = GetUntappd(config.GetToken().GetId(), config.GetToken().GetSecret())
+	s.ut.l = s.Log
+
+	return config, nil
 }
 
 //GetState gets the state of the server
 func (s *Server) GetState() []*pbgs.State {
-	drunkDate := int64(0)
-	lastDrunk := ""
-	missing := int64(0)
-	for _, drunk := range s.config.Drunk {
-		if drunk.GetDrinkDate() > drunkDate {
-			if drunk.CheckinId > 0 {
-				drunkDate = drunk.GetDrinkDate()
-				lastDrunk = fmt.Sprintf("%v", drunk.CheckinId)
-			} else {
-				missing++
-			}
-		}
-	}
-	missingUID := int64(0)
-	if s.config != nil && s.config.Cellar != nil {
-		for _, c := range s.config.Cellar.Slots {
-			for _, b := range c.Beers {
-				if b.Uid == 0 {
-					missingUID++
-				}
-			}
-		}
-	}
-
-	csize := make(map[int]int32)
-	if s.config != nil && s.config.Cellar != nil {
-		for i, c := range s.config.Cellar.Slots {
-			csize[i] = c.NumSlots
-		}
-	}
-
-	return []*pbgs.State{
-		&pbgs.State{Key: "cellars", Value: int64(len(s.config.GetCellar().GetSlots()))},
-		&pbgs.State{Key: "token", Text: fmt.Sprintf("%v", s.config.Token)},
-		&pbgs.State{Key: "lastddate", TimeValue: drunkDate},
-		&pbgs.State{Key: "missing_uid", Value: missingUID},
-		&pbgs.State{Key: "lastdrunk", Text: lastDrunk},
-		&pbgs.State{Key: "lastsync", TimeValue: s.config.LastSync},
-		&pbgs.State{Key: "lastsyncerr", Text: s.lastErr},
-		&pbgs.State{Key: "last_clean", TimeValue: s.lastClean.Unix()},
-		&pbgs.State{Key: "druuuunk", Value: int64(len(s.config.Drunk))},
-		&pbgs.State{Key: "drnnnnnk", Value: missing},
-		&pbgs.State{Key: "prints", Value: s.printer.(*prodPrinter).count},
-		&pbgs.State{Key: "cellar_size", Text: fmt.Sprintf("%v", csize)},
-	}
+	return []*pbgs.State{}
 }
 
-func (s *Server) loadDrunk(filestr string) {
+func (s *Server) loadDrunk(filestr string, config *pb.Config) {
 	data, _ := ioutil.ReadFile(filestr)
 	b, _ := s.ut.convertDrinkListToBeers(string(data), mainUnmarshaller{})
 	for _, beer := range b {
 		found := false
-		for _, d := range s.config.Drunk {
+		for _, d := range config.Drunk {
 			if d.CheckinId == beer.CheckinId {
 				found = true
 			}
 		}
 
 		if !found {
-			s.config.Drunk = append(s.config.Drunk, beer)
+			config.Drunk = append(config.Drunk, beer)
 		}
 	}
 }
 
-func (s *Server) checkSync(ctx context.Context) error {
-	if time.Now().Sub(time.Unix(s.config.LastSync, 0)) > time.Hour*24*7 {
-		s.RaiseIssue("BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v (%v)", time.Unix(s.config.LastSync, 0), s.lastErr))
+func (s *Server) checkSync(ctx context.Context, config *pb.Config) error {
+	if time.Now().Sub(time.Unix(config.LastSync, 0)) > time.Hour*24*7 {
+		s.RaiseIssue("BeerServer Sync Issue", fmt.Sprintf("Last Sync was %v (%v)", time.Unix(config.LastSync, 0), s.lastErr))
 	}
 
 	drunkDate := int64(0)
-	for _, drunk := range s.config.Drunk {
+	for _, drunk := range config.Drunk {
 		if drunk.GetDrinkDate() > drunkDate {
 			if drunk.CheckinId > 0 {
 				drunkDate = drunk.GetDrinkDate()
@@ -276,8 +232,8 @@ func (s *Server) checkSync(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) save(ctx context.Context) error {
-	return s.KSclient.Save(ctx, TOKEN, s.config)
+func (s *Server) save(ctx context.Context, config *pb.Config) error {
+	return s.KSclient.Save(ctx, TOKEN, config)
 }
 
 //GetUntappd builds a untappd retriever
@@ -285,26 +241,12 @@ func GetUntappd(id, secret string) *Untappd {
 	return &Untappd{untappdID: id, untappdSecret: secret, u: mainUnmarshaller{}, f: mainFetcher{}, c: mainConverter{}}
 }
 
-func (s *Server) doSync(ctx context.Context) error {
-	s.syncDrunk(ctx, mainFetcher{})
-	return nil
+func (s *Server) doMove(ctx context.Context, config *pb.Config) error {
+	return s.moveToOnDeck(ctx, time.Now(), config)
 }
 
-func (s *Server) doMove(ctx context.Context) error {
-	return s.moveToOnDeck(ctx, time.Now())
-}
-
-func (s *Server) checkCellars(ctx context.Context) error {
-	for i, slot := range s.config.GetCellar().GetSlots() {
-		if s.cellarOutOfOrder(ctx, slot) {
-			s.RaiseIssue("Cellar not ordered", fmt.Sprintf("Cellar %v is not ordered correctly", i))
-		}
-	}
-	return nil
-}
-
-func (s *Server) refreshBreweryID(ctx context.Context) error {
-	for _, cellar := range s.config.GetCellar().GetSlots() {
+func (s *Server) refreshBreweryID(ctx context.Context, config *pb.Config) error {
+	for _, cellar := range config.GetCellar().GetSlots() {
 		for _, b := range cellar.GetBeers() {
 			if b.GetBreweryId() == 0 {
 				tb := s.ut.GetBeerDetails(b.Id)
@@ -313,18 +255,14 @@ func (s *Server) refreshBreweryID(ctx context.Context) error {
 					s.Log(fmt.Sprintf("%v -> %v has no brewery id", tb.GetBreweryId(), b))
 					s.RaiseIssue("Brewery ID is missing", fmt.Sprintf("%v is missing the brewery ID", b))
 				}
-				return nil
 			}
 		}
 	}
-	return nil
+	return s.save(ctx, config)
 }
 
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
-	var updateDrunk = flag.Bool("update", false, "Update the drunk")
-	var id = flag.String("id", "", "token id")
-	var secret = flag.String("secret", "", "token secret")
 	flag.Parse()
 
 	if *quiet {
@@ -339,30 +277,6 @@ func main() {
 	err := server.RegisterServerV2("beerserver", false, true)
 	if err != nil {
 		return
-	}
-
-	if len(*secret) > 0 {
-
-		err := server.Mote(context.Background(), true)
-		if err != nil {
-			log.Fatalf("Mote %v", err)
-		}
-
-		server.config.Token = &pb.Token{}
-		server.config.Token.Id = *id
-		server.config.Token.Secret = *secret
-
-		server.save(context.Background())
-		return
-	}
-
-	if *updateDrunk {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		defer cancel()
-		server.Mote(ctx, true)
-		server.loadDrunk("loaddata/brotherlogic.json")
-		server.save(context.Background())
-		log.Fatalf("UPDATED: %v", server.config.Drunk)
 	}
 
 	server.Serve()
