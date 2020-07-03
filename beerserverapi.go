@@ -155,6 +155,7 @@ func (s *Server) Consolidate(ctx context.Context, req *pb.ConsolidateRequest) (*
 	return &pb.ConsolidateResponse{}, s.save(ctx, config)
 }
 
+// Update runs a full update
 func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
 	config, err := s.load(ctx)
 	if err != nil {
