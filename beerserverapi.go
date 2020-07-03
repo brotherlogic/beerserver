@@ -167,5 +167,5 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		return nil, err
 	}
 
-	return nil, s.syncDrunk(ctx, config)
+	return &pb.UpdateResponse{}, s.syncDrunk(ctx, config)
 }
