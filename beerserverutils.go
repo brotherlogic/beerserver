@@ -11,13 +11,13 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
-func (s *Server) refreshStash(ctx context.Context) error {
+func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 	onDeck := make(map[int64]bool)
 
 	rand.Seed(time.Now().UnixNano())
 
 	found := false
-	for _, beer := range s.config.GetCellar().GetOnDeck() {
+	for _, beer := range config.GetCellar().GetOnDeck() {
 		found = found || beer.GetSize() == "stash"
 		onDeck[beer.Id] = true
 	}
@@ -28,7 +28,7 @@ func (s *Server) refreshStash(ctx context.Context) error {
 	slot := 0
 	opCount := 0
 	stashSize := 100
-	for sn, c := range s.config.GetCellar().GetSlots() {
+	for sn, c := range config.GetCellar().GetSlots() {
 		if c.Accepts == "stash" {
 
 			//Raise an issue on the stash size
@@ -65,8 +65,8 @@ func (s *Server) refreshStash(ctx context.Context) error {
 		if err == nil {
 			chosenBeer.DrinkDate = time.Now().Unix()
 			chosenBeer.OnDeck = true
-			s.config.GetCellar().OnDeck = append(s.config.GetCellar().GetOnDeck(), chosenBeer)
-			s.config.GetCellar().GetSlots()[slot].Beers = append(s.config.GetCellar().GetSlots()[slot].Beers[:chosenIndex], s.config.GetCellar().GetSlots()[slot].Beers[chosenIndex+1:]...)
+			config.GetCellar().OnDeck = append(config.GetCellar().GetOnDeck(), chosenBeer)
+			config.GetCellar().GetSlots()[slot].Beers = append(config.GetCellar().GetSlots()[slot].Beers[:chosenIndex], config.GetCellar().GetSlots()[slot].Beers[chosenIndex+1:]...)
 		}
 	}
 	return nil
@@ -82,11 +82,11 @@ func findIndex(slot *pb.CellarSlot, date int64) int32 {
 	return bestIndex
 }
 
-func (s *Server) addBeerToCellar(b *pb.Beer) error {
+func (s *Server) addBeerToCellar(b *pb.Beer, config *pb.Config) error {
 	bestIndex := int32(99)
 	bestCellar := -1
 	//Do we have room for this beer
-	for i, c := range s.config.GetCellar().GetSlots() {
+	for i, c := range config.GetCellar().GetSlots() {
 		if c.Accepts == b.Size {
 			if len(c.Beers) == 0 {
 				bestCellar = i
@@ -107,7 +107,7 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 		if bestIndex == 99 {
 			bestIndex = 0
 		}
-		c := s.config.Cellar.Slots[bestCellar]
+		c := config.Cellar.Slots[bestCellar]
 		for _, beer := range c.Beers {
 			if beer.Index >= bestIndex {
 				beer.Index++
@@ -124,31 +124,29 @@ func (s *Server) addBeerToCellar(b *pb.Beer) error {
 	return fmt.Errorf("Unable to find space for this beer")
 }
 
-func (s *Server) syncDrunk(ctx context.Context, f httpResponseFetcher) {
+func (s *Server) syncDrunk(ctx context.Context, config *pb.Config) error {
 	lastID := int32(0)
-	for _, drunk := range s.config.GetDrunk() {
+	for _, drunk := range config.GetDrunk() {
 		if drunk.CheckinId > lastID {
 			lastID = drunk.CheckinId
 		}
 	}
-	ndrinks, err := s.ut.getLastBeers(f, mainConverter{}, mainUnmarshaller{}, lastID)
+	ndrinks, err := s.ut.getLastBeers(mainFetcher{}, mainConverter{}, mainUnmarshaller{}, lastID)
 	s.Log(fmt.Sprintf("SYNC %v -> %v", ndrinks, err))
 	s.lastErr = fmt.Sprintf("%v", err)
-	s.addDrunks(ctx, err, ndrinks)
+	return s.addDrunks(ctx, config, ndrinks)
 }
 
-func (s *Server) addDrunks(ctx context.Context, err error, ndrinks []*pb.Beer) {
-	if err == nil {
-		s.config.Drunk = append(s.config.Drunk, ndrinks...)
-		s.config.LastSync = time.Now().Unix()
-		s.save(ctx)
-	}
+func (s *Server) addDrunks(ctx context.Context, config *pb.Config, ndrinks []*pb.Beer) error {
+	config.Drunk = append(config.GetDrunk(), ndrinks...)
+	config.LastSync = time.Now().Unix()
+	return s.save(ctx, config)
 }
 
-func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) error {
+func (s *Server) moveToOnDeck(ctx context.Context, t time.Time, config *pb.Config) error {
 	moved := []*pb.Beer{}
 
-	for _, cellar := range s.config.GetCellar().GetSlots() {
+	for _, cellar := range config.GetCellar().GetSlots() {
 		if cellar.Accepts != "stash" {
 			for _, b := range cellar.Beers {
 				if b.DrinkDate < t.Unix() {
@@ -169,14 +167,14 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) error {
 		}
 	}
 
-	for _, cellar := range s.config.GetCellar().GetSlots() {
+	for _, cellar := range config.GetCellar().GetSlots() {
 		if cellar.Accepts != "stash" {
 			i := 0
 			for i < len(cellar.Beers) {
 				if cellar.Beers[i].DrinkDate < t.Unix() {
 					cellar.Beers[i].OnDeck = true
 					moved = append(moved, cellar.Beers[i])
-					s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck, cellar.Beers[i])
+					config.Cellar.OnDeck = append(config.Cellar.OnDeck, cellar.Beers[i])
 					cellar.Beers = append(cellar.Beers[:i], cellar.Beers[i+1:]...)
 				} else {
 					i++
@@ -185,20 +183,7 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time) error {
 		}
 	}
 
-	return s.save(ctx)
-}
-
-func (s *Server) clearDeck(ctx context.Context) error {
-	s.lastClean = time.Now()
-
-	for _, bdr := range s.config.GetDrunk() {
-		for i, bde := range s.config.GetCellar().GetOnDeck() {
-			if bdr.Id == bde.Id && bdr.DrinkDate > bde.DrinkDate {
-				s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck[:i], s.config.Cellar.OnDeck[i+1:]...)
-			}
-		}
-	}
-	return nil
+	return s.save(ctx, config)
 }
 
 func (s *Server) cellarOutOfOrder(ctx context.Context, cellar *pb.CellarSlot) bool {

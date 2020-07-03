@@ -1,12 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
-	"github.com/brotherlogic/keystore/client"
-
 	pb "github.com/brotherlogic/beerserver/proto"
+	"github.com/brotherlogic/keystore/client"
 )
 
 func doLog(str string) {
@@ -15,7 +15,7 @@ func doLog(str string) {
 
 func InitTestServer(dir string, delete bool) *Server {
 	s := Init()
-	s.config.Cellar = &pb.Cellar{Slots: []*pb.CellarSlot{&pb.CellarSlot{Accepts: "bomber", NumSlots: 10}, &pb.CellarSlot{Accepts: "small", NumSlots: 10}, &pb.CellarSlot{Accepts: "stash", NumSlots: 1000}}}
+
 	if delete {
 		os.RemoveAll(dir)
 	}
@@ -25,6 +25,8 @@ func InitTestServer(dir string, delete bool) *Server {
 	s.printer = &prodPrinter{testing: true}
 	s.ut = GetTestUntappd()
 	s.ut.l = doLog
+
+	s.validateCellars(context.Background(), &pb.Config{Token: &pb.Token{}})
 
 	return s
 }

@@ -12,12 +12,16 @@ import (
 
 //AddBeer adds a beer to the server
 func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBeerResponse, error) {
+	config, err := s.load(ctx)
+	if err != nil {
+		return nil, err
+	}
 	b := s.ut.GetBeerDetails(req.Beer.Id)
 	b.Size = req.Beer.Size
 
 	minTime := int64(0)
 	before := false
-	for _, b := range s.config.Drunk {
+	for _, b := range config.Drunk {
 		if b.Id == req.Beer.Id && b.DrinkDate > minTime {
 			minTime = b.DrinkDate
 			before = true
@@ -38,42 +42,44 @@ func (s *Server) AddBeer(ctx context.Context, req *pb.AddBeerRequest) (*pb.AddBe
 		newBeer.Name = b.Name
 		newBeer.Uid = time.Now().UnixNano()
 		newBeer.BreweryId = b.BreweryId
-		s.addBeerToCellar(newBeer)
+		s.addBeerToCellar(newBeer, config)
 		minDate = minDate.AddDate(1, 0, 0)
 	}
 
 	// Reorder all the cellars
-	for i, cellar := range s.config.Cellar.Slots {
+	for i, cellar := range config.GetCellar().GetSlots() {
 		s.reorderCellar(ctx, cellar, int32(i))
 	}
 
-	s.save(ctx)
-	return &pb.AddBeerResponse{}, nil
+	return &pb.AddBeerResponse{}, s.save(ctx, config)
 }
 
 //DeleteBeer deletes a beer
 func (s *Server) DeleteBeer(ctx context.Context, req *pb.DeleteBeerRequest) (*pb.DeleteBeerResponse, error) {
+	config, err := s.load(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if (req.Uid) == 0 {
 		return nil, fmt.Errorf("Cannot specify zero id for delete request")
 	}
 
-	for _, c := range s.config.Cellar.Slots {
+	for _, c := range config.GetCellar().GetSlots() {
 		for i, b := range c.Beers {
 			if b.Uid == req.Uid {
 				s.Log(fmt.Sprintf("Deleteing beer %v", b))
 				c.Beers = append(c.Beers[:i], c.Beers[i+1:]...)
-				s.save(ctx)
-				return &pb.DeleteBeerResponse{}, nil
+				return &pb.DeleteBeerResponse{}, s.save(ctx, config)
 			}
 		}
 	}
 
-	for i, b := range s.config.Cellar.OnDeck {
+	for i, b := range config.GetCellar().GetOnDeck() {
 		if b.Uid == req.Uid {
 			s.Log(fmt.Sprintf("Deleteing beer %v", b))
-			s.config.Cellar.OnDeck = append(s.config.Cellar.OnDeck[:i], s.config.Cellar.OnDeck[i+1:]...)
-			s.save(ctx)
-			return &pb.DeleteBeerResponse{}, nil
+			config.Cellar.OnDeck = append(config.Cellar.OnDeck[:i], config.Cellar.OnDeck[i+1:]...)
+			return &pb.DeleteBeerResponse{}, s.save(ctx, config)
 		}
 	}
 
@@ -82,15 +88,20 @@ func (s *Server) DeleteBeer(ctx context.Context, req *pb.DeleteBeerRequest) (*pb
 
 //ListBeers gets the beers in the cellar
 func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.ListBeerResponse, error) {
+	config, err := s.load(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	beers := make([]*pb.Beer, 0)
 
 	if req.OnDeck {
-		for _, b := range s.config.Cellar.OnDeck {
+		for _, b := range config.GetCellar().GetOnDeck() {
 			beers = append(beers, b)
 		}
 	} else {
 
-		for _, c := range s.config.Cellar.Slots {
+		for _, c := range config.GetCellar().GetSlots() {
 			for _, b := range c.Beers {
 				beers = append(beers, b)
 			}
@@ -100,10 +111,10 @@ func (s *Server) ListBeers(ctx context.Context, req *pb.ListBeerRequest) (*pb.Li
 	return &pb.ListBeerResponse{Beers: beers}, nil
 }
 
-func (s *Server) singleConsolidate(ctx context.Context) error {
-	for i, co := range s.config.Cellar.Slots {
+func (s *Server) singleConsolidate(ctx context.Context, config *pb.Config) error {
+	for i, co := range config.Cellar.Slots {
 		if int(co.NumSlots) > len(co.Beers) {
-			for j, cs := range s.config.Cellar.Slots {
+			for j, cs := range config.Cellar.Slots {
 				if j > i && cs.Accepts == co.Accepts && len(cs.Beers) > 0 {
 					beer := cs.Beers[0]
 					cs.Beers = cs.Beers[1:]
@@ -121,20 +132,40 @@ func (s *Server) singleConsolidate(ctx context.Context) error {
 
 // Consolidate the cellars into a smaller number
 func (s *Server) Consolidate(ctx context.Context, req *pb.ConsolidateRequest) (*pb.ConsolidateResponse, error) {
+	config, err := s.load(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	//Move beers around until we can move no more
-	for s.singleConsolidate(ctx) == nil {
+	for s.singleConsolidate(ctx, config) == nil {
 		// pass
 	}
 
 	//Clean out the existing cellars
 	newCellarSlots := make([]*pb.CellarSlot, 0)
-	for _, c := range s.config.Cellar.Slots {
+	for _, c := range config.Cellar.Slots {
 		if len(c.Beers) > 0 {
 			newCellarSlots = append(newCellarSlots, c)
 		}
 	}
 
-	s.config.Cellar.Slots = newCellarSlots
+	config.Cellar.Slots = newCellarSlots
 
-	return &pb.ConsolidateResponse{}, nil
+	return &pb.ConsolidateResponse{}, s.save(ctx, config)
+}
+
+// Update runs a full update
+func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+	config, err := s.load(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.refreshStash(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, s.syncDrunk(ctx, config)
 }
