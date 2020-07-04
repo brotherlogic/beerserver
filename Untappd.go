@@ -212,7 +212,8 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 	}
 
 	response := mapper["response"].(map[string]interface{})
-	items := response["items"].([]interface{})
+	checkins := response["checkins"].(map[string]interface{})
+	items := checkins["items"].([]interface{})
 
 	for _, v := range items {
 		beer := v.(map[string]interface{})["beer"].(map[string]interface{})
