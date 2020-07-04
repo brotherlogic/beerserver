@@ -233,7 +233,7 @@ func TestGetVenuePageConvertHttpFail(t *testing.T) {
 func TestGetUserPage(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
 	u.l = doLog
-	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 579454692)
+	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic")
 
 	if !strings.Contains(text, "Simon") {
 		t.Errorf("User page retrieve failed: %v", text)
@@ -253,7 +253,7 @@ func TestGetUserPage(t *testing.T) {
 func TestBadUserPage(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
 	u.l = doLog
-	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "blahdyblah", 0)
+	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "blahdyblah")
 	_, err := u.convertUserPageToDrinks(text, mainUnmarshaller{})
 
 	if err == nil {
@@ -264,7 +264,7 @@ func TestBadUserPage(t *testing.T) {
 func TestBadUserPageUnmarshal(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
 	u.l = doLog
-	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic", 0)
+	text, _ := u.getUserPage(fileFetcher{}, mainConverter{}, "brotherlogic")
 	_, err := u.convertUserPageToDrinks(text, stubFailUnmarshaller{})
 
 	if err == nil {
@@ -275,7 +275,7 @@ func TestBadUserPageUnmarshal(t *testing.T) {
 func TestBadUserPageUnmarshalFail(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
 	u.l = doLog
-	_, err := u.getUserPage(fileFetcher{fail: true}, mainConverter{}, "brotherlogic", 0)
+	_, err := u.getUserPage(fileFetcher{fail: true}, mainConverter{}, "brotherlogic")
 
 	if err == nil {
 		t.Errorf("Did not error")
@@ -285,7 +285,7 @@ func TestBadUserPageUnmarshalFail(t *testing.T) {
 func TestGetLastBeersFail(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
 	u.l = doLog
-	beers, _ := u.getLastBeers(fileFetcher{fail: true}, mainConverter{}, mainUnmarshaller{}, 123)
+	beers, _ := u.getLastBeers(fileFetcher{fail: true}, mainConverter{}, mainUnmarshaller{})
 
 	if len(beers) != 0 {
 		t.Errorf("Did not error")
@@ -295,7 +295,7 @@ func TestGetLastBeersFail(t *testing.T) {
 func TestGetLastBeers(t *testing.T) {
 	u := &Untappd{untappdID: "testid", untappdSecret: "testsecret"}
 	u.l = doLog
-	beers, _ := u.getLastBeers(fileFetcher{}, mainConverter{}, mainUnmarshaller{}, 579454692)
+	beers, _ := u.getLastBeers(fileFetcher{}, mainConverter{}, mainUnmarshaller{})
 
 	if len(beers) == 0 {
 		t.Errorf("Did not ru")

@@ -125,13 +125,7 @@ func (s *Server) addBeerToCellar(b *pb.Beer, config *pb.Config) error {
 }
 
 func (s *Server) syncDrunk(ctx context.Context, config *pb.Config) error {
-	lastID := int32(0)
-	for _, drunk := range config.GetDrunk() {
-		if drunk.CheckinId > lastID {
-			lastID = drunk.CheckinId
-		}
-	}
-	ndrinks, err := s.ut.getLastBeers(mainFetcher{}, mainConverter{}, mainUnmarshaller{}, lastID)
+	ndrinks, err := s.ut.getLastBeers(mainFetcher{}, mainConverter{}, mainUnmarshaller{})
 	if err != nil {
 		return err
 	}
