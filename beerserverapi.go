@@ -162,10 +162,21 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		return nil, err
 	}
 
+	err = s.syncDrunk(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+
+	s.clearDeck(config)
+	err = s.moveToOnDeck(ctx, config, time.Now())
+	if err != nil {
+		return nil, err
+	}
+
 	err = s.refreshStash(ctx, config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.UpdateResponse{}, s.syncDrunk(ctx, config)
+	return &pb.UpdateResponse{}, s.save(ctx, config)
 }

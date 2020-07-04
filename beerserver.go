@@ -239,10 +239,6 @@ func GetUntappd(id, secret string) *Untappd {
 	return &Untappd{untappdID: id, untappdSecret: secret, u: mainUnmarshaller{}, f: mainFetcher{}, c: mainConverter{}}
 }
 
-func (s *Server) doMove(ctx context.Context, config *pb.Config) error {
-	return s.moveToOnDeck(ctx, time.Now(), config)
-}
-
 func (s *Server) refreshBreweryID(ctx context.Context, config *pb.Config) error {
 	for _, cellar := range config.GetCellar().GetSlots() {
 		for _, b := range cellar.GetBeers() {
