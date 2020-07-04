@@ -116,7 +116,6 @@ func (u *Untappd) getUserPage(fetcher httpResponseFetcher, converter responseCon
 	url = strings.Replace(url, "CLIENTID", u.untappdID, 1)
 	url = strings.Replace(url, "CLIENTSECRET", u.untappdSecret, 1)
 
-	u.l(fmt.Sprintf("FETCH %v", url))
 	response, err := fetcher.Fetch(url)
 	if err != nil {
 		return "", err
@@ -201,6 +200,7 @@ func (u *Untappd) convertUserPageToDrinks(page string, unmarshaller unmarshaller
 	var values []*pb.Beer
 	err := unmarshaller.Unmarshal([]byte(page), &mapper)
 	if err != nil {
+		u.l(fmt.Sprintf("Error in unmarshal: %v- > %v", page, err))
 		return values, err
 	}
 
