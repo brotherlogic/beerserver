@@ -140,7 +140,7 @@ func (s *Server) addDrunks(ctx context.Context, config *pb.Config, ndrinks []*pb
 	return s.save(ctx, config)
 }
 
-func (s *Server) moveToOnDeck(ctx context.Context, t time.Time, config *pb.Config) error {
+func (s *Server) moveToOnDeck(ctx context.Context, config *pb.Config, t time.Time) error {
 	moved := []*pb.Beer{}
 
 	for _, cellar := range config.GetCellar().GetSlots() {
@@ -180,7 +180,7 @@ func (s *Server) moveToOnDeck(ctx context.Context, t time.Time, config *pb.Confi
 		}
 	}
 
-	return s.save(ctx, config)
+	return nil
 }
 
 func (s *Server) cellarOutOfOrder(ctx context.Context, cellar *pb.CellarSlot) bool {
@@ -205,5 +205,17 @@ func (s *Server) reorderCellar(ctx context.Context, cellar *pb.CellarSlot, cella
 	for i, beer := range cellar.Beers {
 		beer.Index = int32(i)
 		beer.InCellar = cellarNumber
+	}
+}
+
+func (s *Server) clearDeck(config *pb.Config) {
+	s.lastClean = time.Now()
+
+	for _, bdr := range config.GetDrunk() {
+		for i, bde := range config.GetCellar().GetOnDeck() {
+			if bdr.Id == bde.Id && bdr.DrinkDate > bde.DrinkDate {
+				config.Cellar.OnDeck = append(config.Cellar.OnDeck[:i], config.Cellar.OnDeck[i+1:]...)
+			}
+		}
 	}
 }
