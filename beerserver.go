@@ -57,7 +57,7 @@ type prodPrinter struct {
 	testing bool
 	fail    bool
 	count   int64
-	dial    func(server string) (*grpc.ClientConn, error)
+	dial    func(ctx context.Context, server string) (*grpc.ClientConn, error)
 }
 
 func (p *prodPrinter) print(ctx context.Context, lines []string) error {
@@ -67,7 +67,7 @@ func (p *prodPrinter) print(ctx context.Context, lines []string) error {
 	if p.testing {
 		return nil
 	}
-	conn, err := p.dial("printer")
+	conn, err := p.dial(ctx, "printer")
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func Init() *Server {
 		&prodPrinter{},
 		"",
 	}
-	s.printer = &prodPrinter{dial: s.DialMaster}
+	s.printer = &prodPrinter{dial: s.FDialServer}
 	return s
 }
 
