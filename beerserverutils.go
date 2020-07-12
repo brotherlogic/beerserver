@@ -60,7 +60,6 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 	}
 
 	if !found {
-		s.RaiseIssue("Adding to stash", fmt.Sprintf("Adding because %v", onDeck))
 		err := s.printer.print(ctx, []string{fmt.Sprintf("%v\n", chosenBeer.Name)})
 		if err == nil {
 			chosenBeer.DrinkDate = time.Now().Unix()
