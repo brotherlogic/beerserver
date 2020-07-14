@@ -22,6 +22,10 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 		onDeck[beer.Id] = true
 	}
 
+	if !found {
+		s.Log(fmt.Sprintf("Not adding to stash because: %v", onDeck))
+	}
+
 	var chosenBeer *pb.Beer
 	chosenIndex := 0
 	count := 0
