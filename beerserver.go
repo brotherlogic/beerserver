@@ -17,6 +17,7 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 	pbgs "github.com/brotherlogic/goserver/proto"
 	pbp "github.com/brotherlogic/printer/proto"
+	rpb "github.com/brotherlogic/reminders/proto"
 )
 
 var (
@@ -123,6 +124,7 @@ func (fetcher mainFetcher) Fetch(url string) (*http.Response, error) {
 // DoRegister Registers this server
 func (s *Server) DoRegister(server *grpc.Server) {
 	pb.RegisterBeerCellarServiceServer(server, s)
+	rpb.RegisterReminderReceiverServer(server, s)
 }
 
 // ReportHealth Determines if the server is healthy
