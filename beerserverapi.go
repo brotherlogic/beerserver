@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/beerserver/proto"
+	rpb "github.com/brotherlogic/reminders/proto"
 )
 
 //AddBeer adds a beer to the server
@@ -179,4 +180,10 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 	}
 
 	return &pb.UpdateResponse{}, s.save(ctx, config)
+}
+
+// Receive a request ot update
+func (s *Server) Receive(ctx context.Context, req *rpb.ReceiveRequest) (*rpb.ReceiveResponse, error) {
+	_, err := s.Update(ctx, &pb.UpdateRequest{})
+	return &rpb.ReceiveResponse{}, err
 }
