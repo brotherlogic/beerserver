@@ -31,6 +31,7 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 	count := 0
 	slot := 0
 	opCount := 0
+	gtCount := 0
 	stashSize := 100
 	for sn, c := range config.GetCellar().GetSlots() {
 		if c.Accepts == "stash" {
@@ -43,6 +44,9 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 			for i, b := range c.Beers {
 				if b.GetBreweryId() == 333511 {
 					opCount++
+				}
+				if b.GetBreweryId() == 36950 {
+					gtCount++
 				}
 				if !onDeck[b.Id] {
 					chosenBeer = b
@@ -57,6 +61,9 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 
 	if opCount < 4 {
 		s.RaiseIssue("Buy Original Pattern", fmt.Sprintf("Stocks are low (%v), go buy some Original Patter", opCount))
+	}
+	if gtCount < 4 {
+		s.RaiseIssue("Buy Ghost Town", fmt.Sprintf("Stocks are low (%v), go buy some Ghost Town", opCount))
 	}
 
 	if stashSize < 20 {
