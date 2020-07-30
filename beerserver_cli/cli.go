@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -19,7 +18,6 @@ import (
 func main() {
 	ctx, cancel := utils.ManualContext("buildserver-"+os.Args[1], "buildserver", time.Second*10, true)
 	defer cancel()
-
 	conn, err := utils.LFDialServer(ctx, "beerserver")
 
 	defer conn.Close()
@@ -29,8 +27,6 @@ func main() {
 	}
 
 	client := pb.NewBeerCellarServiceClient(conn)
-	ctx2, cancel2 := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel2()
 
 	switch os.Args[1] {
 	case "update":
@@ -47,8 +43,6 @@ func main() {
 		var cellar = listFlags.Int("cellar", 1, "Cellar to view")
 		var summarise = listFlags.Bool("sum", false, "Summarize the view")
 		if err := listFlags.Parse(os.Args[2:]); err == nil {
-			ctx, cancel := utils.BuildContext("beerserver-cli", "beerserver-cli")
-			defer cancel()
 			list, err := client.ListBeers(ctx, &pb.ListBeerRequest{OnDeck: *ondeck})
 			if err == nil {
 				if *summarise {
@@ -89,7 +83,7 @@ func main() {
 		var size = addFlags.String("size", "", "Size of beer")
 		if err := addFlags.Parse(os.Args[2:]); err == nil {
 			if len(*size) != 0 {
-				_, err := client.AddBeer(ctx2, &pb.AddBeerRequest{Beer: &pb.Beer{Id: int64(*id), Size: *size}, Quantity: int32(*quantity)})
+				_, err := client.AddBeer(ctx, &pb.AddBeerRequest{Beer: &pb.Beer{Id: int64(*id), Size: *size}, Quantity: int32(*quantity)})
 				if err != nil {
 					fmt.Printf("Error adding beer: %v\n", err)
 				}
@@ -100,7 +94,7 @@ func main() {
 		var id = deleteFlags.Int("id", -1, "Id of beer to delete")
 		if err := deleteFlags.Parse(os.Args[2:]); err == nil {
 			if *id != -1 {
-				_, err := client.DeleteBeer(ctx2, &pb.DeleteBeerRequest{Uid: int64(*id)})
+				_, err := client.DeleteBeer(ctx, &pb.DeleteBeerRequest{Uid: int64(*id)})
 				if err != nil {
 					fmt.Printf("%v\n", err)
 				}

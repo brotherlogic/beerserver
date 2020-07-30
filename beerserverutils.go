@@ -19,6 +19,7 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 	found := false
 	for _, beer := range config.GetCellar().GetOnDeck() {
 		found = found || beer.GetSize() == "stash"
+		s.Log(fmt.Sprintf("Found %v in the stash", beer))
 		onDeck[beer.Id] = true
 	}
 
