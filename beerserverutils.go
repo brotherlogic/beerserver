@@ -140,7 +140,6 @@ func (s *Server) syncDrunk(ctx context.Context, config *pb.Config) error {
 	if err != nil {
 		return err
 	}
-	s.Log(fmt.Sprintf("SYNC %v -> %v", ndrinks, err))
 	s.lastErr = fmt.Sprintf("%v", err)
 	return s.addDrunks(ctx, config, ndrinks)
 }
