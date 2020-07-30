@@ -79,6 +79,7 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 			config.GetCellar().OnDeck = append(config.GetCellar().GetOnDeck(), chosenBeer)
 			config.GetCellar().GetSlots()[slot].Beers = append(config.GetCellar().GetSlots()[slot].Beers[:chosenIndex], config.GetCellar().GetSlots()[slot].Beers[chosenIndex+1:]...)
 		}
+		return err
 	}
 	return nil
 }
