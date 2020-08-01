@@ -174,9 +174,11 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		return nil, err
 	}
 
-	err = s.refreshStash(ctx, config)
-	if err != nil {
-		return nil, err
+	if time.Now().YearDay()%2 == 0 {
+		err = s.refreshStash(ctx, config)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &pb.UpdateResponse{}, s.save(ctx, config)
