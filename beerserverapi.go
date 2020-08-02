@@ -174,7 +174,7 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		return nil, err
 	}
 
-	if time.Now().YearDay()%2 == 0 {
+	if time.Now().Weekday() == time.Monday || time.Now().Weekday() == time.Wednesday {
 		err = s.refreshStash(ctx, config)
 		if err != nil {
 			return nil, err
