@@ -179,6 +179,8 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		s.Log(fmt.Sprintf("Skipping refresh due to time constraints"))
 	}
 
 	return &pb.UpdateResponse{}, s.save(ctx, config)
