@@ -33,6 +33,10 @@ var (
 		Name: "beerserver_bombers",
 		Help: "The size of the bomber beers",
 	})
+	pdrunk = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "beerserver_drunk",
+		Help: "The number of beers drunk",
+	})
 )
 
 func (s *Server) monitor(ctx context.Context, config *pb.Config) error {
@@ -185,6 +189,8 @@ func (s *Server) load(ctx context.Context) (*pb.Config, error) {
 	config := bResp.(*pb.Config)
 	s.ut = GetUntappd(config.GetToken().GetId(), config.GetToken().GetSecret())
 	s.ut.l = s.Log
+
+	pdrunk.Set(float64(len(config.GetDrunk())))
 
 	return config, nil
 }
