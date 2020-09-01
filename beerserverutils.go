@@ -146,7 +146,19 @@ func (s *Server) syncDrunk(ctx context.Context, config *pb.Config) error {
 }
 
 func (s *Server) addDrunks(ctx context.Context, config *pb.Config, ndrinks []*pb.Beer) error {
-	config.Drunk = append(config.GetDrunk(), ndrinks...)
+	for _, toadd := range ndrinks {
+		found := false
+		for _, drunk := range config.Drunk {
+			if drunk.GetDrinkDate() == toadd.GetDrinkDate() {
+				found = true
+			}
+		}
+
+		if !found {
+			config.Drunk = append(config.Drunk, toadd)
+		}
+	}
+
 	config.LastSync = time.Now().Unix()
 	return s.save(ctx, config)
 }
