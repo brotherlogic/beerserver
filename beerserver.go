@@ -191,18 +191,22 @@ func (s *Server) load(ctx context.Context) (*pb.Config, error) {
 	s.ut.l = s.Log
 
 	pdrunk.Set(float64(len(config.GetDrunk())))
-	counts := make(map[int64]int)
-	maxI := 0
-	maxV := int64(0)
-	for _, beer := range config.GetDrunk() {
-		counts[beer.GetId()]++
-		if counts[beer.GetId()] > maxI {
-			maxV = beer.GetId()
-			maxI = counts[beer.GetId()]
+
+	ndrunk := make([]*pb.Beer, 0)
+	seen := make(map[int64]bool)
+	for _, b := range config.GetDrunk() {
+		if !seen[b.GetDrinkDate()] {
+			seen[b.GetDrinkDate()] = true
+			ndrunk = append(ndrunk, b)
 		}
 	}
 
-	s.Log(fmt.Sprintf("FOUND THIS: %v, %v", maxV, maxI))
+	if len(ndrunk) != len(config.GetDrunk()) {
+		s.RaiseIssue("Cleaning drunk list!", fmt.Sprintf("Removing %v beers from the drunk list, there are %v remaining", len(config.GetDrunk())-len(ndrunk), len(ndrunk)))
+		if len(ndrunk) > 0 {
+			config.Drunk = ndrunk
+		}
+	}
 
 	return config, nil
 }
