@@ -191,6 +191,18 @@ func (s *Server) load(ctx context.Context) (*pb.Config, error) {
 	s.ut.l = s.Log
 
 	pdrunk.Set(float64(len(config.GetDrunk())))
+	counts := make(map[int64]int)
+	maxI := 0
+	maxV := int64(0)
+	for _, beer := range config.GetDrunk() {
+		counts[beer.GetId()]++
+		if counts[beer.GetId()] > maxI {
+			maxV = beer.GetId()
+			maxI = counts[beer.GetId()]
+		}
+	}
+
+	s.Log(fmt.Sprintf("FOUND THIS: %v, %v", maxV, maxI))
 
 	return config, nil
 }
