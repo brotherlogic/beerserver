@@ -16,6 +16,7 @@ import (
 
 	pb "github.com/brotherlogic/beerserver/proto"
 	pbgs "github.com/brotherlogic/goserver/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pbp "github.com/brotherlogic/printer/proto"
 	rpb "github.com/brotherlogic/reminders/proto"
 )
@@ -208,6 +209,8 @@ func (s *Server) load(ctx context.Context) (*pb.Config, error) {
 		}
 	}
 
+	s.monitor(ctx, config)
+
 	return config, nil
 }
 
@@ -255,6 +258,7 @@ func (s *Server) checkSync(ctx context.Context, config *pb.Config) error {
 }
 
 func (s *Server) save(ctx context.Context, config *pb.Config) error {
+	s.monitor(ctx, config)
 	return s.KSclient.Save(ctx, TOKEN, config)
 }
 
@@ -296,6 +300,11 @@ func main() {
 	if err != nil {
 		return
 	}
+
+	// Prep the stats
+	ctx, cancel := utils.ManualContext("bsinit", "bsinit", time.Minute, false)
+	server.load(ctx)
+	cancel()
 
 	server.Serve()
 }
