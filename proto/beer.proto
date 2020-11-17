@@ -7,6 +7,13 @@ option go_package = "github.com/brotherlogic/beerserver";
 
 message Empty {}
 
+enum Extraction  {
+    UNKNOWN  = 0;
+    ON_DATE = 1;
+    STASH_REMOVE = 2;
+    HOMEBREW_REMOVE = 3;
+  }
+
 message Token {
   string id = 1;
   string secret = 2;
@@ -38,6 +45,12 @@ message CellarSlot {
   string accepts = 1;
   int32 num_slots = 2;
   repeated Beer beers = 3;
+
+  // The cellar to move to on extraction - empty means deck
+  string move_to = 4;
+
+  // How do we choose which beer to extract
+  Extraction extraction_algorithm = 5;
 }
 
 message Cellar {

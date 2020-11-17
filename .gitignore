@@ -38,5 +38,4 @@ src/
 beerserver
 testcellar
 
-.*
 beerserver_cli/beerserver_cli

@@ -6,11 +6,11 @@ import (
 	"os"
 
 	pb "github.com/brotherlogic/beerserver/proto"
-	"github.com/brotherlogic/keystore/client"
+	keystoreclient "github.com/brotherlogic/keystore/client"
 )
 
 func doLog(str string) {
-	log.Printf(str)
+	log.Printf("STR " + str)
 }
 
 func InitTestServer(dir string, delete bool) *Server {
@@ -24,7 +24,7 @@ func InitTestServer(dir string, delete bool) *Server {
 	s.SkipIssue = true
 	s.printer = &prodPrinter{testing: true}
 	s.ut = GetTestUntappd()
-	s.ut.l = doLog
+	//s.ut.l = doLog
 
 	s.validateCellars(context.Background(), &pb.Config{Token: &pb.Token{}})
 
