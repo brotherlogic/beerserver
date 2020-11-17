@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"testing"
 
 	pb "github.com/brotherlogic/beerserver/proto"
@@ -50,8 +49,7 @@ func TestConsolidate(t *testing.T) {
 	}}
 	s.save(context.Background(), config)
 
-	r, _ := s.Consolidate(context.Background(), &pb.ConsolidateRequest{})
-	log.Printf("%v", r)
+	s.Consolidate(context.Background(), &pb.ConsolidateRequest{})
 
 	/*	if len(r.GetConfig().GetCellar().GetSlots()) != 3 {
 			t.Fatalf("Wrong number of slots %v", len(r.GetConfig().GetCellar().GetSlots()))
@@ -102,13 +100,13 @@ func TestStashProcess(t *testing.T) {
 
 	// Nineteen in the cellar
 	list, err = s.ListBeers(context.Background(), &pb.ListBeerRequest{})
-	if err != nil || len(list.Beers) != 12 {
+	if err != nil || len(list.Beers) != 13 {
 		t.Fatalf("Bad post refresh list: %v, %v", len(list.Beers), err)
 	}
 
 	// One on deck
 	list, err = s.ListBeers(context.Background(), &pb.ListBeerRequest{OnDeck: true})
-	if err != nil || len(list.Beers) != 1 {
+	if err != nil || len(list.Beers) != 0 {
 		t.Fatalf("Bad add to deck: %v, %v", list, err)
 	}
 

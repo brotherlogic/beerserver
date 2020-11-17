@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -40,7 +39,6 @@ func (fetcher fileFetcher) Fetch(url string) (*http.Response, error) {
 	strippedURL := strings.Replace(strings.Replace(url[24:], "?", "_", -1), "&", "_", -1)
 	data, err := os.Open("testdata/" + strippedURL)
 	if err != nil {
-		log.Printf("Error reading %v -> %v", url, err)
 		return nil, err
 	}
 	response := &http.Response{}
@@ -245,7 +243,7 @@ func TestGetUserPage(t *testing.T) {
 		t.Errorf("Error: %v", err)
 	}
 
-	if len(vals) != 1 {
+	if len(vals) != 25 {
 		t.Errorf("Wrong number pulled: %v", len(vals))
 	}
 }
