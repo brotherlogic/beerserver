@@ -11,6 +11,56 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+func (s *Server) extractBeer(cellar *pb.CellarSlot, ti time.Time) *pb.Beer {
+	switch cellar.GetExtractionAlgorithm() {
+	case pb.Extraction_ON_DATE:
+		for _, b := range cellar.GetBeers() {
+			if b.GetDrinkDate() < ti.Unix() {
+				return b
+			}
+		}
+	case pb.Extraction_STASH_REMOVE, pb.Extraction_HOMEBREW_REMOVE:
+		rand.Shuffle(len(cellar.Beers), func(i, j int) { cellar.Beers[i], cellar.Beers[j] = cellar.Beers[j], cellar.Beers[i] })
+		if len(cellar.GetBeers()) > 0 {
+			return cellar.GetBeers()[0]
+		}
+	}
+
+	return nil
+}
+
+func (s *Server) canExtractBeer(cellar *pb.CellarSlot, deck []*pb.Beer, ti time.Time) bool {
+	switch cellar.GetExtractionAlgorithm() {
+	case pb.Extraction_ON_DATE:
+		return true
+	case pb.Extraction_STASH_REMOVE:
+		if ti.Weekday() == time.Monday || ti.Weekday() == time.Wednesday || ti.Weekday() == time.Friday {
+			if ti.Hour() < 12 {
+				for _, b := range deck {
+					if b.GetSize() == "stash" {
+						return false
+					}
+				}
+				return true
+			}
+		}
+	case pb.Extraction_HOMEBREW_REMOVE:
+		if ti.Weekday() == time.Saturday {
+			if ti.Hour() < 12 {
+				count := 0
+				for _, b := range deck {
+					if b.GetSize() == "homebrew" {
+						count++
+					}
+				}
+				return count < 2
+			}
+		}
+	}
+
+	return false
+}
+
 func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 	onDeck := make(map[int64]bool)
 
