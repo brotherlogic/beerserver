@@ -169,6 +169,10 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 	}
 
 	s.clearDeck(config)
+
+	// Run the extraction process
+	s.runExtract(config.GetCellar(), time.Now())
+
 	err = s.moveToOnDeck(ctx, config, time.Now())
 	if err != nil {
 		return nil, err

@@ -11,6 +11,38 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+func (s *Server) runExtract(cellar *pb.Cellar, ti time.Time) {
+	for _, cellarSlot := range cellar.GetSlots() {
+		for s.canExtractBeer(cellarSlot, cellar.GetOnDeck(), ti) {
+			beer := s.extractBeer(cellarSlot, ti)
+
+			//There's actually nothing extractable
+			if beer == nil {
+				break
+			}
+
+			//Remove the beer
+			nbeers := []*pb.Beer{}
+			for _, b := range cellarSlot.GetBeers() {
+				if b.GetUid() != beer.GetUid() {
+					nbeers = append(nbeers, b)
+				}
+			}
+			cellarSlot.Beers = nbeers
+
+			if cellarSlot.GetMoveTo() == "" {
+				cellar.OnDeck = append(cellar.OnDeck, beer)
+			} else {
+				for _, cs := range cellar.GetSlots() {
+					if cs.GetAccepts() == cellarSlot.GetMoveTo() {
+						cs.Beers = append(cs.Beers, beer)
+					}
+				}
+			}
+		}
+	}
+}
+
 func (s *Server) extractBeer(cellar *pb.CellarSlot, ti time.Time) *pb.Beer {
 	switch cellar.GetExtractionAlgorithm() {
 	case pb.Extraction_ON_DATE:
