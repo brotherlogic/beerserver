@@ -1,5 +1,7 @@
 module github.com/brotherlogic/beerserver
 
+go 1.15
+
 require (
 	github.com/brotherlogic/buildserver v0.0.0-20201019183109-5b9d0c13b530 // indirect
 	github.com/brotherlogic/datastore v0.0.0-20201116152557-1a9915463b93 // indirect
