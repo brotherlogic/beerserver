@@ -146,14 +146,16 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 		}
 	}
 
-	if opCount < 4 {
-		s.RaiseIssue("Buy Original Pattern", fmt.Sprintf("Stocks are low (%v), go buy some Original Patter", opCount))
-	}
-	if gtCount < 4 {
-		s.RaiseIssue("Buy Ghost Town", fmt.Sprintf("Stocks are low (%v), go buy some Ghost Town", opCount))
-	}
-	if hsCount < 4 {
-		s.RaiseIssue("Buy Humble Sea", fmt.Sprintf("Stocks are low (%v), go buy some Humble Sea", opCount))
+	if stashSize < 30 {
+		if opCount < 4 {
+			s.RaiseIssue("Buy Original Pattern", fmt.Sprintf("Stocks are low (%v), go buy some Original Patter", opCount))
+		}
+		if gtCount < 4 {
+			s.RaiseIssue("Buy Ghost Town", fmt.Sprintf("Stocks are low (%v), go buy some Ghost Town", opCount))
+		}
+		if hsCount < 4 {
+			s.RaiseIssue("Buy Humble Sea", fmt.Sprintf("Stocks are low (%v), go buy some Humble Sea", opCount))
+		}
 	}
 
 	if stashSize < 20 {

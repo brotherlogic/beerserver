@@ -18,11 +18,9 @@ require (
 	github.com/brotherlogic/versionserver v0.0.0-20200424225322-e02615d8678f // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/mitchellh/go-ps v1.0.0 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/prometheus/client_golang v1.8.0
 	github.com/struCoder/pidusage v0.1.3 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	google.golang.org/grpc v1.33.2
 	google.golang.org/protobuf v1.25.0
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
