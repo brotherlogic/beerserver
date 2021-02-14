@@ -11,9 +11,23 @@ import (
 	pb "github.com/brotherlogic/beerserver/proto"
 )
 
+func (s *Server) reshuffle(cellar *pb.CellarSlot) {
+	rand.Shuffle(len(cellar.Beers), func(i, j int) { cellar.Beers[i], cellar.Beers[j] = cellar.Beers[j], cellar.Beers[i] })
+
+	for i, beer := range cellar.GetBeers() {
+		beer.Order = int32(i)
+	}
+}
+
 func (s *Server) runExtract(cellar *pb.Cellar, ti time.Time) {
 	for _, cellarSlot := range cellar.GetSlots() {
+		if cellarSlot.GetAccepts() == "stash" {
+			if ti.Sub(time.Unix(cellarSlot.GetLastShuffleDate(), 0)) > time.Hour*24*30 {
+				s.reshuffle(cellarSlot)
+			}
+		}
 		for s.canExtractBeer(cellarSlot, cellar.GetOnDeck(), ti) {
+
 			beer := s.extractBeer(cellarSlot, ti)
 
 			//There's actually nothing extractable
@@ -52,10 +66,15 @@ func (s *Server) extractBeer(cellar *pb.CellarSlot, ti time.Time) *pb.Beer {
 			}
 		}
 	case pb.Extraction_STASH_REMOVE, pb.Extraction_HOMEBREW_REMOVE:
-		rand.Shuffle(len(cellar.Beers), func(i, j int) { cellar.Beers[i], cellar.Beers[j] = cellar.Beers[j], cellar.Beers[i] })
-		if len(cellar.GetBeers()) > 0 {
-			return cellar.GetBeers()[0]
+		lowest := int32(900)
+		lb := &pb.Beer{}
+		for _, b := range cellar.GetBeers() {
+			if b.GetOrder() < lowest {
+				lowest = b.GetOrder()
+				lb = b
+			}
 		}
+		return lb
 	}
 
 	return nil

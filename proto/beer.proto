@@ -39,6 +39,7 @@ message Beer {
   int32 in_cellar = 9;
   int64 uid = 10;
   int32 brewery_id = 11;
+  int32 order = 12;
 }
 
 message CellarSlot {
@@ -51,6 +52,8 @@ message CellarSlot {
 
   // How do we choose which beer to extract
   Extraction extraction_algorithm = 5;
+
+  int64 last_shuffle_date = 6;
 }
 
 message Cellar {
