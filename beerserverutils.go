@@ -18,6 +18,7 @@ func (s *Server) reshuffle(cellar *pb.CellarSlot) {
 		beer.Order = int32(i)
 	}
 	cellar.LastShuffleDate = time.Now().Unix()
+	s.RaiseIssue("Stash Shuffle", "Stash has been shuffled")
 }
 
 func (s *Server) runExtract(cellar *pb.Cellar, ti time.Time) {
