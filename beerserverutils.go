@@ -237,6 +237,7 @@ func (s *Server) addBeerToCellar(b *pb.Beer, config *pb.Config) error {
 		}
 		b.Index = bestIndex
 		b.InCellar = int32(bestCellar)
+		b.Order = int32(len(c.Beers) + 1)
 		c.Beers = append(c.Beers, b)
 
 		return nil
