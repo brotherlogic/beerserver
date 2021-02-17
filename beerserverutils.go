@@ -145,8 +145,9 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 			stashSize = len(c.Beers)
 
 			// Randomize the stash for the pull
-			rand.Shuffle(len(c.Beers), func(i, j int) { c.Beers[i], c.Beers[j] = c.Beers[j], c.Beers[i] })
-			for i, b := range c.Beers {
+			lowest := int32(900)
+
+			for ci, b := range c.Beers {
 				if b.GetBreweryId() == 333511 {
 					opCount++
 				}
@@ -157,9 +158,12 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 					hsCount++
 				}
 				if !onDeck[b.Id] {
-					chosenBeer = b
-					chosenIndex = i
-					slot = sn
+					if b.GetOrder() < lowest {
+						lowest = b.GetOrder()
+						chosenBeer = b
+						chosenIndex = ci
+						slot = sn
+					}
 				} else {
 					count++
 				}
