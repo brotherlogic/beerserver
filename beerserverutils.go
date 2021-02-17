@@ -132,7 +132,6 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 
 	var chosenBeer *pb.Beer
 	chosenIndex := 0
-	count := 0
 	slot := 0
 	opCount := 0
 	gtCount := 0
@@ -157,15 +156,11 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 				if b.GetBreweryId() == 233405 {
 					hsCount++
 				}
-				if !onDeck[b.Id] {
-					if b.GetOrder() < lowest {
-						lowest = b.GetOrder()
-						chosenBeer = b
-						chosenIndex = ci
-						slot = sn
-					}
-				} else {
-					count++
+				if b.GetOrder() < lowest {
+					lowest = b.GetOrder()
+					chosenBeer = b
+					chosenIndex = ci
+					slot = sn
 				}
 			}
 		}
