@@ -87,7 +87,7 @@ func (s *Server) canExtractBeer(cellar *pb.CellarSlot, deck []*pb.Beer, ti time.
 	case pb.Extraction_ON_DATE:
 		return true
 	case pb.Extraction_STASH_REMOVE:
-		if ti.Weekday() == time.Monday || ti.Weekday() == time.Wednesday || ti.Weekday() == time.Friday {
+		if (len(cellar.GetBeers()) > 40) || (ti.Weekday() == time.Monday || ti.Weekday() == time.Wednesday || ti.Weekday() == time.Friday) {
 			if ti.Hour() < 12 {
 				for _, b := range deck {
 					if b.GetSize() == "stash" {
@@ -166,7 +166,7 @@ func (s *Server) refreshStash(ctx context.Context, config *pb.Config) error {
 		}
 	}
 
-	if stashSize < 30 {
+	if stashSize < 24 {
 		if opCount < 4 {
 			s.RaiseIssue("Buy Original Pattern", fmt.Sprintf("Stocks are low (%v), go buy some Original Patter", opCount))
 		}
