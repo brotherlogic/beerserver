@@ -178,7 +178,14 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		return nil, err
 	}
 
-	if time.Now().Hour() < 14 && (time.Now().Weekday() == time.Monday || time.Now().Weekday() == time.Wednesday || time.Now().Weekday() == time.Friday) {
+	stashSize := 0
+	for _, cellar := range config.GetCellar().GetSlots() {
+		if cellar.Accepts == "stash" {
+			stashSize = len(cellar.GetBeers())
+		}
+	}
+
+	if time.Now().Hour() < 14 && (stashSize > 40 || (time.Now().Weekday() == time.Monday || time.Now().Weekday() == time.Wednesday || time.Now().Weekday() == time.Friday)) {
 		err = s.refreshStash(ctx, config)
 		if err != nil {
 			return nil, err
