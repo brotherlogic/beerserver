@@ -185,7 +185,7 @@ func (s *Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateR
 		}
 	}
 
-	if time.Now().Hour() < 14 && (stashSize > 40 || (time.Now().Weekday() == time.Monday || time.Now().Weekday() == time.Wednesday || time.Now().Weekday() == time.Friday)) {
+	if time.Now().Hour() < 14 && (stashSize > 50 || (time.Now().Weekday() == time.Monday || time.Now().Weekday() == time.Friday)) {
 		err = s.refreshStash(ctx, config)
 		if err != nil {
 			return nil, err
