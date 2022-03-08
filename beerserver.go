@@ -302,7 +302,7 @@ func main() {
 	}
 
 	// Prep the stats
-	ctx, cancel := utils.ManualContext("bsinit", "bsinit", time.Minute, false)
+	ctx, cancel := utils.ManualContext("bsinit", time.Minute)
 	server.load(ctx)
 	cancel()
 

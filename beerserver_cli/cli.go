@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	ctx, cancel := utils.ManualContext("buildserver-"+os.Args[1], "buildserver", time.Second*10, true)
+	ctx, cancel := utils.ManualContext("buildserver-"+os.Args[1], time.Second*10)
 	defer cancel()
 	conn, err := utils.LFDialServer(ctx, "beerserver")
 
